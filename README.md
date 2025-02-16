@@ -231,3 +231,27 @@ Si vous avez des questions, contactez-nous à **contact@hostolink.com** ou ouvre
             > flutter clean 
             > flutter pub get 
             > flutter run (Chrome)
+
+
+#                       TEST DES ENPOINT AVEC POSTMAN
+
+        - Installer et se connecter à son compte 
+        -inviter les collab
+        - créer une colection 
+            > POST 
+            > URL http://localhost:3000/users
+            >Header : Key: Content-Type Value: application/json
+            > Body cocher row 
+                {
+                    "nom": "nouvelle",
+                    "prenom": "donnee ",
+                    "email": "nouvelldonne@gmail.com",
+                    "telephone": "07089100",
+                    "pays": "Côte d'ivoire"
+                    }
+            > Send 
+
+        - Pour récuperer tous 
+            > GET 
+            > URL http://localhost:3000/users
+            > send
