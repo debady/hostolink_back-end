@@ -255,3 +255,34 @@ Si vous avez des questions, contactez-nous à **contact@hostolink.com** ou ouvre
             > GET 
             > URL http://localhost:3000/users
             > send
+
+
+
+*------------------------------------*
+PROJET NAME hostolink_bd
+MDP SUPABASE mdp_dev_sohapigroup
+pays france 
+
+public eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jcm9vd3VrZWR6ZnN4b2Nrd2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MTEwNTcsImV4cCI6MjA1NTM4NzA1N30.3OqLcL5E_Lg17sMxtoRFwyg7F14VwLBuXiAoi_B_RNo
+
+projet url https://ocroowukedzfsxockwjf.supabase.co
+API Key eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jcm9vd3VrZWR6ZnN4b2Nrd2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MTEwNTcsImV4cCI6MjA1NTM4NzA1N30.3OqLcL5E_Lg17sMxtoRFwyg7F14VwLBuXiAoi_B_RNo
+
+
+Javascript
+Dart
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = 'https://ocroowukedzfsxockwjf.supabase.co'
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+
+
+Project name
+hostolink_bd
+Project ID
+ocroowukedzfsxockwjf
+
+Copy
+

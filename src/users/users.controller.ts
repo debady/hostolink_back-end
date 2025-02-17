@@ -13,6 +13,7 @@ export class UsersController {
 
   @Post()
   async create(@Body() userData: Partial<User>): Promise<User> {
+    console.log("Données reçues :", userData);
     return this.usersService.create(userData);
   }
 }

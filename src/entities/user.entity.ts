@@ -29,6 +29,6 @@ export class User {
   @Column({ nullable: true })
   mdp: string;  
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp',  default: () => 'CURRENT_TIMESTAMP',nullable: true })
   derniere_connexion: Date;
 }
