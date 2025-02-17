@@ -11,7 +11,7 @@ import { UsersModule } from './users/users.module';
       // host: 'localhost', // Change si tu es sur un autre serveur
       port: 5432, // Par défaut, PostgreSQL utilise ce port
       username: 'postgres', // Ton utilisateur PostgreSQL
-      password: 'NGUESSAN', // Mets ton vrai mot de passe
+      password: 'some', // Mets ton vrai mot de passe
       database: 'hostolink_bd', // Ta base de données
       autoLoadEntities: true,
       entities: [User], // On ajoute l'entité `User`
