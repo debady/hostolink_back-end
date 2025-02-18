@@ -90,3 +90,17 @@
     "mdp": "mdpfatima"
   }
 ]
+
+
+ d'accord voici le principe de mon application l'utilisateur a 
+ le choix de saisir son numéro de télephone avec le choix de son 
+ pays ou saisir son adresse email dans le formualire flutter et 
+ si les données saisir n'existe pas dans la base de donnée alors 
+ on insert ces données puis on lui redirige sur une page ou il 
+ definir un mot de passe a 4 chiffre puis une autre page ou il 
+ confirme puis si les mot de passe corespond on le redirige sur
+  une autre page ou il saisir le code qu'il a recu soit par sms 
+  ou par email en fonctionne de son choix et si le code est bon 
+  il est connecter et est rediriger sur le dashboard explique 
+  comment implementer avec flutter , back-end netjs et la base 
+  de données postgres dans les moindre details sans ecrire de code 
