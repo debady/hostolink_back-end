@@ -286,3 +286,13 @@ ocroowukedzfsxockwjf
 
 Copy
 
+
+
+* pour la connexion en local*
+cmd                   : npm run start:dev
+postman | naviagteur :http://localhost:3000/auth/check-user
+
+
+POUR AFFICHER QUE LE SERVER TOURNE BIEN : http://localhost:3000/auth/
+
+AFFICHER TOUT LES USERS ajouter get dans postman et navigateur : http://localhost:3000/auth/users
