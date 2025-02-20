@@ -8,7 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule, // ✅ Charge `.env`
+    ConfigModule.forRoot(), // ✅ Assure que `.env` est bien chargé
     TypeOrmModule.forFeature([Utilisateur]), // ✅ Charge l'entité Utilisateur pour l'authentification
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -21,6 +21,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule], // ✅ Exporte JwtModule pour être utilisé ailleurs
 })
 export class AuthModule {}

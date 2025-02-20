@@ -1,51 +1,38 @@
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import { Repository, In } from 'typeorm'; // ✅ Ajout de In pour la recherche
 import { Utilisateur } from './entities/utilisateur.entity';
 import { CheckUserDto } from './dto/check-user.dto';
-import { RegisterUserDto } from './dto/register-user.dto';
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { LoginUserDto } from './dto/login-user.dto';
+import { RegisterUserDto, RegisterUsersDto } from './dto/register-user.dto';
+import { LoginUserDto } from './dto/login-user.dto'; 
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt'; 
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Utilisateur)
     private utilisateurRepository: Repository<Utilisateur>,
-    private jwtService: JwtService, 
+    private jwtService: JwtService,
   ) {}
 
-  // ✅ Vérifier si un utilisateur existe
+  // ✅ Vérifier si un utilisateur existe (email ou téléphone)
   async checkUserExists(checkUserDto: CheckUserDto): Promise<boolean> {
     const { identifier } = checkUserDto;
-
-    console.log("🔍 Vérification de l'existence de l'utilisateur :", identifier);
-
+    
     const user = await this.utilisateurRepository.findOne({
       where: [{ email: identifier }, { telephone: identifier }],
     });
 
-    console.log("✅ Utilisateur trouvé :", user ? user.email : "Aucun utilisateur trouvé");
-
     return !!user;
   }
 
-  // ✅ Récupérer tous les utilisateurs sans afficher le mot de passe
-  async getAllUsers(): Promise<Omit<Utilisateur, 'mdp'>[]> {
-    console.log("📥 Récupération de tous les utilisateurs");
-    const users = await this.utilisateurRepository.find();
-    console.log("✅ Nombre d'utilisateurs trouvés :", users.length);
-    return users.map(({ mdp, ...user }) => user as Omit<Utilisateur, 'mdp'>);
-  }
-
-  // ✅ Inscription d'un nouvel utilisateur
-  async registerUser(registerUserDto: RegisterUserDto) {
+  // ✅ Inscription d'un **seul** utilisateur
+  async registerUser(registerUserDto: RegisterUserDto, photo?: Express.Multer.File) {
     const { email, telephone, mdp } = registerUserDto;
 
     console.log("📝 Tentative d'inscription avec :", { email, telephone });
 
-    // 🔍 Vérifier si l'utilisateur existe déjà
     const existingUser = await this.utilisateurRepository.findOne({
       where: [{ email }, { telephone }],
     });
@@ -55,33 +42,68 @@ export class AuthService {
       throw new BadRequestException('Un utilisateur avec cet email ou téléphone existe déjà.');
     }
 
-    // 🔐 Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(mdp.trim(), 10);
+    const hashedPassword = await bcrypt.hash(mdp, 10);
 
-    // 📝 Créer un nouvel utilisateur
     const newUser = this.utilisateurRepository.create({
       ...registerUserDto,
-      mdp: hashedPassword, // ✅ Sauvegarde du mot de passe hashé
+      mdp: hashedPassword,
+      photo_profile: photo ? photo.filename : 'image_default.png',
     });
 
-    // 📥 Sauvegarder l'utilisateur dans la base de données
     await this.utilisateurRepository.save(newUser);
 
     console.log("✅ Utilisateur créé avec succès !");
     return { message: 'Utilisateur créé avec succès !' };
   }
 
-  // ✅ Connexion d'un utilisateur
+  // ✅ Récupérer tous les utilisateurs
+  async getAllUsers(): Promise<Omit<Utilisateur, 'mdp'>[]> {
+    return await this.utilisateurRepository.find({
+      select: ['id_user', 'nom', 'prenom', 'email', 'telephone', 'pays'],
+    });
+  }
+  
+  // ✅ Inscription **de plusieurs utilisateurs en une seule requête**
+  async registerMultiple(users: RegisterUserDto[]) {
+    console.log(`📥 Tentative d'inscription multiple (${users.length} utilisateurs)`);
+
+    const emails = users.map(user => user.email);
+    const telephones = users.map(user => user.telephone);
+
+    // 🔍 Vérifier si certains emails/téléphones existent déjà
+    const existingUsers = await this.utilisateurRepository.find({
+      where: [
+        { email: In(emails) }, 
+        { telephone: In(telephones) }
+      ]
+    });
+
+    if (existingUsers.length > 0) {
+      console.log("❌ Certains utilisateurs existent déjà !");
+      throw new BadRequestException("Un ou plusieurs utilisateurs existent déjà.");
+    }
+
+    const hashedUsers = users.map(user => ({
+      ...user,
+      mdp: bcrypt.hashSync(user.mdp, 10), 
+      photo_profile: 'image_default.png',
+    }));
+
+    await this.utilisateurRepository.save(hashedUsers);
+
+    console.log(`✅ ${users.length} utilisateurs créés avec succès !`);
+    return { message: `${users.length} utilisateurs créés avec succès !` };
+  }
+
+  // ✅ Connexion d'un utilisateur et génération du token JWT
   async loginUser(loginUserDto: LoginUserDto) {
     let { identifier, mdp } = loginUserDto;
     
-    // ✅ Supprimer les espaces invisibles
     identifier = identifier.trim();
     mdp = mdp.trim();
 
     console.log("📤 Tentative de connexion avec :", identifier);
 
-    // 🔍 Vérifier si l'utilisateur existe (email ou téléphone)
     const user = await this.utilisateurRepository.findOne({
       where: [{ email: identifier }, { telephone: identifier }],
     });
@@ -92,10 +114,7 @@ export class AuthService {
     }
 
     console.log("✅ Utilisateur trouvé :", user.email);
-    console.log("🔐 Mot de passe stocké :", user.mdp);
-    console.log("🔑 Mot de passe reçu :", mdp);
 
-    // 🔐 Vérifier le mot de passe
     const isPasswordValid = await bcrypt.compare(mdp, user.mdp);
     console.log("🔍 Vérification du mot de passe :", isPasswordValid ? "✅ Valide" : "❌ Invalide");
 
@@ -104,12 +123,29 @@ export class AuthService {
       throw new UnauthorizedException('Identifiants incorrects.');
     }
 
-    // ✅ Générer le token JWT
     const payload = { id: user.id_user, email: user.email };
     const accessToken = this.jwtService.sign(payload);
 
     console.log("✅ Connexion réussie ! Token généré :", accessToken);
 
     return { accessToken };
+  }
+
+  // ✅ Récupérer les informations du profil de l'utilisateur
+  async getUserProfile(userId: number) {
+    console.log("📥 Récupération du profil de l'utilisateur avec ID :", userId);
+
+    const user = await this.utilisateurRepository.findOne({
+      where: { id_user: userId },
+      select: ['id_user', 'nom', 'prenom', 'email', 'telephone', 'pays'],
+    });
+
+    if (!user) {
+      console.log("❌ Utilisateur non trouvé !");
+      throw new UnauthorizedException('Utilisateur introuvable.');
+    }
+
+    console.log("✅ Profil utilisateur récupéré :", user);
+    return user;
   }
 }
