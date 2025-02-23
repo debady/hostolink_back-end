@@ -27,8 +27,13 @@ export class User {
   photo_profile: string;
 
   @Column({ nullable: true })
+  code_confirmation: string;  // ✅ Cette colonne doit exister
+
+  @Column({ nullable: true })
   mdp: string;  
 
   @Column({ type: 'timestamp',  default: () => 'CURRENT_TIMESTAMP',nullable: true })
   derniere_connexion: Date;
+
+
 }

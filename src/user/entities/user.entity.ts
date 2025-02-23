@@ -28,4 +28,7 @@ export class User {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   date_inscription: Date; // ✅ On garde cette colonne car elle existe dans la BD
+
+  @Column({ nullable: true })
+  code_confirmation: string;
 }
