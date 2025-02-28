@@ -21,7 +21,9 @@ export class UserService {
     });
   }
   
-  
+  async getUserById(id_user: number) {
+    return await this.userRepository.findOne({ where: { id_user } });
+  }
 
   // ✅ Vérifie si un utilisateur existe (email ou téléphone)
   async checkUserExistence(identifier: string): Promise<boolean> {

@@ -256,9 +256,56 @@ Si vous avez des questions, contactez-nous à **contact@hostolink.com** ou ouvre
             > URL http://localhost:3000/users
             > send
 
+-----------------------------VENDREDI 28 fEVRIER 2024 ----------------------------------------------------
+    📌 Récapitulatif du projet et des étapes accomplies 🚀
+    🎯 Objectif initial :
+    Tu voulais mettre en place un système d’authentification sécurisé dans ton back-end NestJS avec :
+
+    🔑 Inscription & Gestion du mot de passe
+    📲 Génération et vérification de l’OTP
+    🔒 Connexion sécurisée avec JWT
+    🔍 Récupération des données utilisateur après authentification
+    ✅ Ce qu’on a fait jusqu’à présent :
+    1️⃣ Gestion des utilisateurs
+    ✔ Vérification de l'existence d’un utilisateur → /api/check-user
+    ✔ Création d’un compte sans mot de passe → /api/register-user
+    ✔ Définition d’un mot de passe → /api/define-password
+
+    2️⃣ OTP (One-Time Password)
+    ✔ Génération d’un OTP → /api/generate-otp
+    ✔ Vérification d’un OTP → /api/verify-otp
+
+    3️⃣ Authentification avec JWT
+    ✔ Mise en place de JWT (@nestjs/jwt et passport-jwt)
+    ✔ Connexion et génération d’un Token JWT → /api/auth/login
+    ✔ Création d’un JwtStrategy et JwtAuthGuard
+    ✔ Vérification du Token JWT pour récupérer les infos utilisateur → /api/user/me
+
+    🛠 Ce qu'on a mis en place au niveau du code :
+    📁 Fichiers créés/modifiés :
+
+    user.controller.ts → Routes utilisateur
+    user.service.ts → Gestion des utilisateurs
+    otp.service.ts → Gestion des OTPs
+    jwt.strategy.ts → Vérification des tokens JWT
+    auth.module.ts → Configuration JWT et Passport
+    auth.service.ts → Validation des identifiants et génération du token
+    jwt-auth.guard.ts → Protection des routes avec JWT
+    auth.controller.ts → Connexion utilisateur
+    📌 Où en sommes-nous ?
+    🔵 Tout fonctionne bien ! 🔥
+
+    📲 Tu peux inscrire un utilisateur, définir son mot de passe et gérer son OTP.
+    🔐 Il peut ensuite se connecter avec son email/téléphone et obtenir un JWT.
+    👤 Grâce à ce JWT, il peut accéder aux routes protégées et récupérer ses informations.
+    ⏭️ Quelle est la prochaine étape ?
+    1️⃣ Gestion des rôles et permissions (Admin, utilisateur, etc.)
+    2️⃣ Ajout d'une expiration et d’un rafraîchissement du token JWT
+    3️⃣ Intégration des fonctionnalités avancées de l’application
 
 
-*------------------------------------*
+
+*-----------------------------------------------------------------------------------------------------*
 PROJET NAME hostolink_bd
 MDP SUPABASE mdp_dev_sohapigroup
 pays france 
@@ -272,7 +319,6 @@ API Key eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9
 Javascript
 Dart
 import { createClient } from '@supabase/supabase-js'
-
 const supabaseUrl = 'https://ocroowukedzfsxockwjf.supabase.co'
 const supabaseKey = process.env.SUPABASE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
@@ -283,22 +329,11 @@ Project name
 hostolink_bd
 Project ID
 ocroowukedzfsxockwjf
-
 Copy
-
-
-
 * pour la connexion en local*
 cmd                   : npm run start:dev
 postman | naviagteur :http://localhost:3000/auth/check-user
-
-
 POUR AFFICHER QUE LE SERVER TOURNE BIEN : http://localhost:3000/auth/
-
 AFFICHER TOUT LES USERS ajouter get dans postman et navigateur : http://localhost:3000/auth/users
-
-
 images uploader accessible via http://localhost:3000/uploads/nom_du_fichier.jpg
-
-
 EXPORTER LA BD : pg_dump -U postgres hostolink_bd > C:/Users/NGUESSAN.DESKTOP-38E6PIP/Desktop/SohapiGroup/hostolink_back-end/bd/hostolink_bd.sql

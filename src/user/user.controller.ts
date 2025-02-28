@@ -4,12 +4,20 @@ import {
   Body, 
   BadRequestException, 
   InternalServerErrorException, 
-  Get 
+  Get, 
+  UseGuards,
+  Req
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CheckUserDto } from './dto/check-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { OtpService } from '../otp/otp.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Request } from 'express';
+
+interface AuthenticatedRequest extends Request {
+  user: { id_user: number };
+}
 
 @Controller('api')
 export class UserController {
@@ -36,22 +44,6 @@ export class UserController {
     }
     return await this.userService.registerUser(checkUserDto.identifier.trim());
   }
-
-  // // ✅ Définition du mot de passe après inscription
-  // @Post('define-password')
-  // async definePassword(@Body() registerUserDto: RegisterUserDto) {
-  //   if (!registerUserDto.identifier || !registerUserDto.password) {
-  //     throw new BadRequestException('Identifiant et mot de passe sont obligatoires');
-  //   }
-  //   const success = await this.userService.setUserPassword(
-  //     registerUserDto.identifier.trim(),
-  //     registerUserDto.password.trim()
-  //   );
-  //   if (!success) {
-  //     throw new BadRequestException("L'utilisateur n'existe pas");
-  //   }
-  //   return { success: true, message: 'Mot de passe défini avec succès' };
-  // }
 
   // ✅ Définition du mot de passe après inscription
   @Post('define-password')
@@ -132,4 +124,12 @@ export class UserController {
   async getAllUsers() {
     return await this.userService.getAllUsers();
   }
+
+  // ✅ Récupérer les infos de l'utilisateur connecté
+  @Get('user/me')
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Req() req: AuthenticatedRequest) {
+    return this.userService.getUserById(req.user.id_user);
+  }
+  
 }
