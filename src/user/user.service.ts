@@ -11,6 +11,18 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  async findUserById(id: number): Promise<User | null> {
+    return this.userRepository.findOne({ where: { id_user: id } });
+  }
+
+  async findUserByIdentifier(identifier: string): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: [{ email: identifier }, { telephone: identifier }],
+    });
+  }
+  
+  
+
   // ✅ Vérifie si un utilisateur existe (email ou téléphone)
   async checkUserExistence(identifier: string): Promise<boolean> {
     identifier = identifier.trim();

@@ -246,8 +246,7 @@ les Endpoints
         "password": "MonMotDePasse123"
         }
 
--------------------------------------
-    4-MISSION : Générer un OTP
+    ok - 4-MISSION : Générer un OTP
     Méthode : POST
     URL : http://localhost:3000/api/generate-otp
     BODY 
@@ -255,13 +254,8 @@ les Endpoints
         "identifier": "testemail@gmail.com"
         }
 
-    {
-    "message": "Erreur lors de la génération de l'OTP",
-    "error": "Internal Server Error",
-        "statusCode": 500
-    }
 
-    5-MISSION :  Vérifier un OTP
+    ok - 5-MISSION :  Vérifier un OTP
     Méthode : POST
     URL : http://localhost:3000/api/verify-otp
     BODY 
@@ -271,13 +265,6 @@ les Endpoints
         }
 
 
-{
-    "message": "Erreur lors de la vérification de l'OTP",
-    "error": "Internal Server Error",
-    "statusCode": 500
-}
-
----------------------------------------
 
     ok - 6-MISSION :   Vérifier le PIN (mot de passe)
     Méthode : POST
