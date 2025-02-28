@@ -37,21 +37,49 @@ export class UserController {
     return await this.userService.registerUser(checkUserDto.identifier.trim());
   }
 
+  // // ✅ Définition du mot de passe après inscription
+  // @Post('define-password')
+  // async definePassword(@Body() registerUserDto: RegisterUserDto) {
+  //   if (!registerUserDto.identifier || !registerUserDto.password) {
+  //     throw new BadRequestException('Identifiant et mot de passe sont obligatoires');
+  //   }
+  //   const success = await this.userService.setUserPassword(
+  //     registerUserDto.identifier.trim(),
+  //     registerUserDto.password.trim()
+  //   );
+  //   if (!success) {
+  //     throw new BadRequestException("L'utilisateur n'existe pas");
+  //   }
+  //   return { success: true, message: 'Mot de passe défini avec succès' };
+  // }
+
   // ✅ Définition du mot de passe après inscription
   @Post('define-password')
   async definePassword(@Body() registerUserDto: RegisterUserDto) {
     if (!registerUserDto.identifier || !registerUserDto.password) {
       throw new BadRequestException('Identifiant et mot de passe sont obligatoires');
     }
+
+    // Vérifier si l'utilisateur existe
+    const userExists = await this.userService.checkUserExistence(registerUserDto.identifier.trim());
+
+    if (!userExists) {
+      throw new BadRequestException("L'utilisateur n'existe pas");
+    }
+
+    // Définir le mot de passe
     const success = await this.userService.setUserPassword(
       registerUserDto.identifier.trim(),
       registerUserDto.password.trim()
     );
+
     if (!success) {
-      throw new BadRequestException("L'utilisateur n'existe pas");
+      throw new InternalServerErrorException("Échec de la mise à jour du mot de passe.");
     }
+
     return { success: true, message: 'Mot de passe défini avec succès' };
   }
+
 
   // ✅ Vérification du PIN de connexion
   @Post('verify-pin')
