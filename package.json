@@ -6,8 +6,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "typeorm": "typeorm-ts-node-commonjs -d src/data-source.ts",
-
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "npm run typeorm migration:generate -- -d src/data-source",
+    "migration:run": "npm run typeorm migration:run -- -d src/data-source",
+    "migration:revert": "npm run typeorm migration:revert -- -d src/data-source",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

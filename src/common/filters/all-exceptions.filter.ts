@@ -7,7 +7,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    console.error('Erreur détectée :', exception); // Affiche l'erreur complète dans la console
+    console.error('Erreur détectée :', exception); 
 
     if (exception instanceof HttpException) {
       const status = exception.getStatus();

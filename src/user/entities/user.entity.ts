@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Otp } from 'src/otp/entities/otp.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
-@Entity('utilisateur') // Correspond au nom exact de la table PostgreSQL
+@Entity('utilisateur')
 export class User {
   @PrimaryGeneratedColumn()
-  id_user: number; // Correspond exactement à la colonne "id_user"
+  id_user: number; 
 
   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
   email?: string;
@@ -27,8 +28,11 @@ export class User {
   photo_profile?: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  date_inscription: Date; // ✅ On garde cette colonne car elle existe dans la BD
+  date_inscription: Date; 
 
-  @Column({ nullable: true })
-  code_confirmation: string;
+  @Column({ type: 'varchar', length: 10, nullable: true, default: null })
+  code_confirmation: string | null;
+
+  @OneToMany(() => Otp, otp => otp.user, { cascade: true, nullable: true }) // ✅ Ajout de nullable: true
+  otps?: Otp[];
 }
