@@ -285,4 +285,29 @@ les Endpoints
         }
 
     
-    
+    --------------------.env fonctionnelle -------------------------------------
+    # # ⚙️ Configuration de PostgreSQL
+    # DB_HOST=localhost
+    # DB_PORT=5432
+    # DB_USER=postgres
+    # DB_PASSWORD=NGUESSAN
+    # DB_NAME=hostolink_bd
+
+    # # Clé secrète pour JWT
+    # JWT_SECRET=MY_SECRET_KEY
+
+
+    ---------------------------------------------------------
+
+API Secret 
+        HEEz2vCv7MyxBRjCZScbXeUKgEw
+API KEY 
+        197881586145143
+API environment variable 
+        CLOUDINARY_URL=cloudinary://<your_api_key>:<your_api_secret>@dhrrk7vsd
+
+
+curl -X POST "https://api.cloudinary.com/v1_1/dhrrk7vsd/image/upload" -F "file=@C:\Users\NGUESSAN.DESKTOP-38E6PIP\Desktop\SohapiGroup\hostolink_back-end\src\images\imgtes.PNG" -F "upload_preset=hostolink_preset"
+
+
+installer  : npm install @nestjs/platform-express multer multer-storage-cloudinary cloudinary uuid
