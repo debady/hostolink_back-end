@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
@@ -77,7 +77,23 @@ export class ImageService {
   async getAllImages(): Promise<Image[]> {
     return await this.imageRepository.find(); // 🔥 Récupère toutes les images
   }
-  
-  
+
+  // ✅ Suppression d'une image (BD + Cloudinary)
+  async deleteImage(id: string): Promise<{ success: boolean; message: string }> {
+    const image = await this.imageRepository.findOneBy({ id_image: id });
+
+    if (!image) {
+      throw new NotFoundException('Image non trouvée');
+    }
+
+    // ✅ Suppression de l'image sur Cloudinary
+    const publicId = image.url_image.split('/').pop()?.split('.')[0];
+    await cloudinary.uploader.destroy(`dossier_hostolink_preset/${publicId}`);
+
+    // ✅ Suppression de l'image dans PostgreSQL
+    await this.imageRepository.delete(id);
+
+    return { success: true, message: 'Image supprimée avec succès' };
+  }
   
 }

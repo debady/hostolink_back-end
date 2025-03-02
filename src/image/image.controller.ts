@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Get, Param, UploadedFile, UseInterceptors, Delete } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageService } from './image.service';
 
@@ -23,6 +23,11 @@ export class ImageController {
     return await this.imageService.getAllImages();
   }
 
-
+  // ✅ Endpoint pour supprimer une image
+  @Delete(':id')
+  async deleteImage(@Param('id') id: string) {
+    console.log("🟡 Suppression de l'image ID :", id); // ✅ Vérification côté serveur
+    return await this.imageService.deleteImage(id);
+  }
 
 }
