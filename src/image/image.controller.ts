@@ -18,5 +18,11 @@ export class ImageController {
     return await this.imageService.getImageById(id);
   }
 
+  @Get()
+  async getAllImages() {
+    return await this.imageService.getAllImages();
+  }
+
+
 
 }

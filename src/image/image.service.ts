@@ -73,6 +73,11 @@ export class ImageService {
   
     return { success: true, image };
   }
+
+  async getAllImages(): Promise<Image[]> {
+    return await this.imageRepository.find(); // 🔥 Récupère toutes les images
+  }
+  
   
   
 }
