@@ -1,2 +1,2 @@
 Exporter  : pg_dump -U postgres -d hostolink_bd -F p -f "------------\SohapiGroup\hostolink_back-end\bd\hostolink_bd.sql"
-Importer  :  psql -U postgres -d hostolink_bd -f "-----------------\SohapiGroup\hostolink_back-end\bd\hostolink_bd.sql"
+Importer  :  psql -U postgres -d hostolink_bd -f "C:\Users\SOHAPI\Desktop\SohapiGroup\hostolink_back-end\bd\hostolink_bd.sql"
