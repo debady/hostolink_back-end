@@ -17,6 +17,34 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
+--
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -30,7 +58,8 @@ CREATE TABLE public.annonce (
     titre_annonce character varying(255) NOT NULL,
     description_annonce text,
     date date NOT NULL,
-    id_role_permission integer
+    id_role_permission integer,
+    image character varying(255) DEFAULT 'https://res.cloudinary.com/dhrrk7vsd/image/upload/v1740240611/hostolink/eka2tnnq53o4bk7acvmg.jpg'::character varying
 );
 
 
@@ -253,6 +282,19 @@ ALTER SEQUENCE public.etablissement_sante_id_etablissement_seq OWNED BY public.e
 
 
 --
+-- Name: images; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.images (
+    id_image uuid DEFAULT gen_random_uuid() NOT NULL,
+    url_image text NOT NULL,
+    date timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.images OWNER TO postgres;
+
+--
 -- Name: liker; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -401,6 +443,41 @@ ALTER SEQUENCE public.message_id_message_seq OWNED BY public.message.id_message;
 
 
 --
+-- Name: migrations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.migrations (
+    id integer NOT NULL,
+    "timestamp" bigint NOT NULL,
+    name character varying NOT NULL
+);
+
+
+ALTER TABLE public.migrations OWNER TO postgres;
+
+--
+-- Name: migrations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.migrations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.migrations_id_seq OWNER TO postgres;
+
+--
+-- Name: migrations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.migrations_id_seq OWNED BY public.migrations.id;
+
+
+--
 -- Name: notification; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -437,6 +514,43 @@ ALTER SEQUENCE public.notification_id_notification_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.notification_id_notification_seq OWNED BY public.notification.id_notification;
+
+
+--
+-- Name: otp; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.otp (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    otp_code character varying(6) NOT NULL,
+    expires_at timestamp without time zone NOT NULL,
+    is_valid boolean DEFAULT true
+);
+
+
+ALTER TABLE public.otp OWNER TO postgres;
+
+--
+-- Name: otp_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.otp_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.otp_id_seq OWNER TO postgres;
+
+--
+-- Name: otp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.otp_id_seq OWNED BY public.otp.id;
 
 
 --
@@ -722,7 +836,9 @@ CREATE TABLE public.utilisateur (
     telephone character varying,
     pays character varying,
     photo_profile character varying,
-    mdp character varying
+    mdp character varying,
+    date_inscription timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    code_confirmation character varying(10)
 );
 
 
@@ -897,10 +1013,24 @@ ALTER TABLE ONLY public.message ALTER COLUMN id_message SET DEFAULT nextval('pub
 
 
 --
+-- Name: migrations id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.migrations ALTER COLUMN id SET DEFAULT nextval('public.migrations_id_seq'::regclass);
+
+
+--
 -- Name: notification id_notification; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.notification ALTER COLUMN id_notification SET DEFAULT nextval('public.notification_id_notification_seq'::regclass);
+
+
+--
+-- Name: otp id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.otp ALTER COLUMN id SET DEFAULT nextval('public.otp_id_seq'::regclass);
 
 
 --
@@ -977,7 +1107,7 @@ ALTER TABLE ONLY public.verification_identite ALTER COLUMN id_verification SET D
 -- Data for Name: annonce; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.annonce (id_annonce, titre_annonce, description_annonce, date, id_role_permission) FROM stdin;
+COPY public.annonce (id_annonce, titre_annonce, description_annonce, date, id_role_permission, image) FROM stdin;
 \.
 
 
@@ -1022,6 +1152,16 @@ COPY public.etablissement_sante (id_etablissement, telephone_etablissement_sante
 
 
 --
+-- Data for Name: images; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.images (id_image, url_image, date) FROM stdin;
+7d19b1b5-44c1-4ff0-97d6-d7f8177cb53b	https://res.cloudinary.com/dhrrk7vsd/image/upload/v1741013285/dossier_hostolink_preset/hwpdrvzkgzi8bngdljhc.jpg	2025-03-03 15:48:06.207747
+01774c9e-3f5d-4947-a4f1-822356bd51d7	https://res.cloudinary.com/dhrrk7vsd/image/upload/v1741013302/dossier_hostolink_preset/uierlnjjgvzofghhm3zi.jpg	2025-03-03 15:48:23.03559
+\.
+
+
+--
 -- Data for Name: liker; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1054,10 +1194,31 @@ COPY public.message (id_message, id_user, id_thematique, contenu_message, date) 
 
 
 --
+-- Data for Name: migrations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.migrations (id, "timestamp", name) FROM stdin;
+\.
+
+
+--
 -- Data for Name: notification; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.notification (id_notification, id_transaction, id_role_permission, contenu, montant, date_envoi, statut) FROM stdin;
+\.
+
+
+--
+-- Data for Name: otp; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.otp (id, user_id, otp_code, expires_at, is_valid) FROM stdin;
+4	106	160557	2025-02-28 16:33:21.503	f
+5	107	548086	2025-02-28 17:17:46.333	f
+7	108	252776	2025-03-01 11:28:41.484	f
+8	109	302965	2025-03-02 11:57:44.051	f
+9	110	342196	2025-03-03 15:45:51.705	f
 \.
 
 
@@ -1121,24 +1282,15 @@ COPY public.transaction (id_transaction, id_compte_recepteur, id_compte_expedite
 -- Data for Name: utilisateur; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.utilisateur (id_user, nom, prenom, email, telephone, pays, photo_profile, mdp) FROM stdin;
-30	kone	fatou	fatou.kone@gmail.com	+22501020305	Mali	image_default.png	$2b$10$RD19sF0xdnGGFDPzGzXyLuS7cPiAFJwOX0uaOHtXiyxAtnP8daDre
-31	traore	souleymane	souleymane.traore@gmail.com	+22501020306	Burkina Faso	image_default.png	$2b$10$5cQHqI4FzLCwiGnPeQZn/.IeMyOWpJa8Xd901awxFlbYjRUT4QpgK
-32	diarra	mariam	mariam.diarra@gmail.com	+22501020307	Guinée	image_default.png	$2b$10$0IiHVVCKY/Jy7Whe.tt/YuIRLYhbN1E2pZd0fSsLgoHlr8gyfpFDi
-33	yao	serge	serge.yao@gmail.com	+22501020308	Togo	image_default.png	$2b$10$nBj82r0UWD1.ojpogNO7oeHw8UJML5c4YjZtXcgLyTDzB9tNkpqeC
-34	koffi	michel	michel.koffi@gmail.com	+22501020309	Bénin	image_default.png	$2b$10$H2Z2YPeet9A.KVktEdTNF.nL/TsxCOuW4xwEAm/COqA4qgc5qN7mW
-35	zongo	fatou	fatou.zongo@gmail.com	+22501020310	Sénégal	image_default.png	$2b$10$Hr4dPX14Xd98JK8Ok8Bk7OKiOvcn45U8w48Dbtvk5wzU9V.Xt5yGK
-36	sylla	ibrahima	ibrahima.sylla@gmail.com	+22501020311	Mali	image_default.png	$2b$10$JrIz52coIeBCX3qP554pT.xkFiQQkt9lQOz0P1W7rhRye6g2lgeNO
-37	cisse	adama	adama.cisse@gmail.com	+22501020312	Burkina Faso	image_default.png	$2b$10$wd2F..47kjF.T6nO2iuiSOymu/yj.GXkTiZbtGgLFCAnyMPrLA1.u
-38	sanogo	hawa	hawa.sanogo@gmail.com	+22501020313	Guinée	image_default.png	$2b$10$BQXN27pDalxOUkUXIDGST.Gvdb7PRzfempQoGnkVKXSoru7YNS91i
-39	ouedraogo	mohamed	mohamed.ouedraogo@gmail.com	+22501020314	Togo	image_default.png	$2b$10$YO64KUY8vvVg07lTRF2W5OiOIIlBWuOkbuZ9cTFS9053IvmLkwhxm
-40	tall	aicha	aicha.tall@gmail.com	+22501020315	Bénin	image_default.png	$2b$10$0QS/k07ghyLbqGM0YnJ5o.mVc7hCgnZZz1eOpo3dYJpmLKNKo1A6W
-41	diallo	mamadou	mamadou.diallo@gmail.com	+22501020316	Sénégal	image_default.png	$2b$10$7Tq/o0QmFu.Ts7.P3KzlXuJre79AxQiJLLHtjU7fprnMXTbtA9X1y
-42	camara	fatimata	fatimata.camara@gmail.com	+22501020317	Mali	image_default.png	$2b$10$vjQuuuwhmv4blIlrwfXPxuGjNVQRccKyJpX0IZeLXJX6peTCe0AuS
-43	sangare	ibou	ibou.sangare@gmail.com	+22501020318	Burkina Faso	image_default.png	$2b$10$j7XD9SEDQmTqn6h0DP6bg.rCct3VaOza4gBP6/pqi/yo7fMyl1NKC
-44	kouakou	florence	florence.kouakou@gmail.com	+22501020319	Guinée	image_default.png	$2b$10$XLhW7sv57wObgcCetV/WROtDyR8VPsnL6rV9v8jHfEuFuujOC8uzO
-45	okou	patrick	patrick.okou@gmail.com	+22501020320	Togo	image_default.png	$2b$10$CCtrmPcJuTNTv2LGp071..tQ98R.GGHYdjHKi8gJytw9JVnt6R.zK
-46	nguessan	kouadio david debady	debadychatue@gmail.com	+2250544704854	Côte d'Ivoire	image_default.png	$2b$10$d0CcfDuPzwXAJKdNyu3nAewNCKrdvYOvpS5s8DEJn.OUxSeJPhb2.
+COPY public.utilisateur (id_user, nom, prenom, email, telephone, pays, photo_profile, mdp, date_inscription, code_confirmation) FROM stdin;
+106	\N	\N	debadychatue@gmail.com	\N	\N	\N	$2b$10$K8Sc91hr2G5ScnHPU4oWVetfYnOpY1SQihJkTbtFAFV9xM8nDTAy6	2025-02-28 16:26:27.284	4037
+108	\N	\N	\N	+2250502556104	\N	\N	$2b$10$20oo03BfUpeXL57SmDzK.uo/2es645RZGCXzcgoshdqADtA1dTuFG	2025-03-01 11:13:27.129	4285
+111	\N	\N	\N	+123451687	\N	\N	\N	2025-03-03 16:08:47.37	1491
+113	\N	\N	444444444444444444@l.com	\N	\N	\N	\N	2025-03-03 16:30:21.87	8145
+107	\N	\N	codingcity.nk2d@gmail.com	\N	\N	\N	$2b$10$lsG2T5lt6MlyCgivzmfQa.eMPsshHelIoP/l42DWy84IpG.3wHuyy	2025-02-28 17:11:21.483	7049
+109	\N	\N	\N	+22505025256104	\N	\N	$2b$10$lWQWdEyiAfVHNU4fGZWrU.6AtjJttQLeRkGMybmNRqcSQ/.HR59ry	2025-03-02 11:51:24.476	1386
+110	\N	\N	\N	+12345687	\N	\N	$2b$10$V3RAcYU.a9CLoqyln3PgD.DrB9vxbVsZoEc9LLmnvx9LMqQ6/aaHW	2025-03-03 15:37:49.625	7607
+112	\N	\N	ddddgmao@l.com	\N	\N	\N	\N	2025-03-03 16:29:45.194	4195
 \.
 
 
@@ -1229,10 +1381,24 @@ SELECT pg_catalog.setval('public.message_id_message_seq', 1, false);
 
 
 --
+-- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.migrations_id_seq', 1, false);
+
+
+--
 -- Name: notification_id_notification_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.notification_id_notification_seq', 1, false);
+
+
+--
+-- Name: otp_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.otp_id_seq', 9, true);
 
 
 --
@@ -1288,7 +1454,7 @@ SELECT pg_catalog.setval('public.transaction_id_transaction_seq', 1, false);
 -- Name: utilisateur_id_user_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.utilisateur_id_user_seq', 46, true);
+SELECT pg_catalog.setval('public.utilisateur_id_user_seq', 113, true);
 
 
 --
@@ -1303,6 +1469,14 @@ SELECT pg_catalog.setval('public.verification_compte_id_verif_compte_seq', 1, fa
 --
 
 SELECT pg_catalog.setval('public.verification_identite_id_verification_seq', 1, false);
+
+
+--
+-- Name: migrations PK_8c82d7f526340ab734260ea46be; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.migrations
+    ADD CONSTRAINT "PK_8c82d7f526340ab734260ea46be" PRIMARY KEY (id);
 
 
 --
@@ -1394,6 +1568,14 @@ ALTER TABLE ONLY public.etablissement_sante
 
 
 --
+-- Name: images images_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.images
+    ADD CONSTRAINT images_pkey PRIMARY KEY (id_image);
+
+
+--
 -- Name: liker liker_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1431,6 +1613,14 @@ ALTER TABLE ONLY public.message
 
 ALTER TABLE ONLY public.notification
     ADD CONSTRAINT notification_pkey PRIMARY KEY (id_notification);
+
+
+--
+-- Name: otp otp_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.otp
+    ADD CONSTRAINT otp_pkey PRIMARY KEY (id);
 
 
 --
@@ -1583,6 +1773,14 @@ ALTER TABLE ONLY public.transaction
 
 ALTER TABLE ONLY public.etablissement_sante
     ADD CONSTRAINT fk_localisation FOREIGN KEY (id_localisation) REFERENCES public.localisation(id_localisation);
+
+
+--
+-- Name: otp fk_otp_user; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.otp
+    ADD CONSTRAINT fk_otp_user FOREIGN KEY (user_id) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE;
 
 
 --
