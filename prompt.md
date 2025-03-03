@@ -311,3 +311,35 @@ curl -X POST "https://api.cloudinary.com/v1_1/dhrrk7vsd/image/upload" -F "file=@
 
 
 installer  : npm install @nestjs/platform-express multer multer-storage-cloudinary cloudinary uuid
+
+
+
+
+------------------------
+projet name = hostolink
+mdp : mdp_dev_sohapigroup
+
+
+
+Project URL
+    https://skwupmsitzsxukbmnkwv.supabase.co
+
+API Key
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68
+
+
+postgresql://postgres:[YOUR-PASSWORD]@db.skwupmsitzsxukbmnkwv.supabase.co:5432/postgres
+
+
+host:
+db.skwupmsitzsxukbmnkwv.supabase.co
+
+port:
+5432
+
+database:
+postgres
+
+user:
+postgres
+
