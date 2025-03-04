@@ -14,14 +14,12 @@ import { ImageModule } from './image/image.module';
       type: 'postgres',
       url: process.env.DATABASE_URL,
       autoLoadEntities: true,
-      synchronize: false,  // ❌ NE PAS METTRE À TRUE EN PRODUCTION
+      synchronize: false, // Ne pas activer en production
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: true,
-      logging: process.env.NODE_ENV !== 'production', // ✅ Activer logs seulement en développement
+      logging: process.env.NODE_ENV !== 'production',
       extra: {
-        ssl: {
-          rejectUnauthorized: false, // ✅ Accepte les certificats auto-signés
-        },
+        ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
       },
     }),
     UserModule,
@@ -30,9 +28,7 @@ import { ImageModule } from './image/image.module';
   ],
 })
 export class AppModule {}
-
 console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DATABASE_URL);
-
 
 
 
