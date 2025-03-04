@@ -297,7 +297,7 @@ les Endpoints
     # JWT_SECRET=MY_SECRET_KEY
 
 
-    ---------------------------------------------------------
+------------- CLOUDINARY --------------------------------------------
 
 API Secret 
         HEEz2vCv7MyxBRjCZScbXeUKgEw
@@ -315,10 +315,29 @@ installer  : npm install @nestjs/platform-express multer multer-storage-cloudina
 
 
 
-------------------------
+----------SUPABASE--------------
+
+*prompt*
+    J'ai développé mon application flutter base de données postgres et back-end netjs comment héberger pour tester en attendant Je suis sur Windows je sais que je peux utilisé supabase donc montre explique tout
+
+
 projet name = hostolink
 mdp : mdp_dev_sohapigroup
 
+Direct connection
+    postgresql://postgres:[YOUR-PASSWORD]@db.skwupmsitzsxukbmnkwv.supabase.co:5432/postgres
+
+host:
+    db.skwupmsitzsxukbmnkwv.supabase.co
+
+port:
+    5432
+
+database:
+    postgres
+
+user:
+    postgres
 
 
 Project URL
@@ -328,18 +347,10 @@ API Key
     eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68
 
 
-postgresql://postgres:[YOUR-PASSWORD]@db.skwupmsitzsxukbmnkwv.supabase.co:5432/postgres
+TEST API 
+    curl -X GET "https://skwupmsitzsxukbmnkwv.supabase.co/rest/v1/" -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68"
 
 
-host:
-db.skwupmsitzsxukbmnkwv.supabase.co
-
-port:
-5432
-
-database:
-postgres
-
-user:
-postgres
-
+VERIF TABLE DE LA BD 
+    curl -X GET "https://skwupmsitzsxukbmnkwv.supabase.co/rest/v1/" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68"
