@@ -95,6 +95,19 @@ export class UserService {
     if (!user) throw new BadRequestException("Utilisateur introuvable");
     return user;
   }
+
+  async findUserByIdentifier(identifier: string): Promise<User | null> {
+    return await this.userRepository.findOneBy([
+      { email: identifier },
+      { telephone: identifier }
+    ]);
+  }
+
+  async findUserById(id_user: number): Promise<User | null> {
+    return await this.userRepository.findOneBy({ id_user });
+  }
+  
+  
   
   
   

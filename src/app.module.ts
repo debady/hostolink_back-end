@@ -8,23 +8,21 @@ import { ImageModule } from './image/image.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Permet d'utiliser process.env partout sans recharger ConfigModule
+      isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
-      useFactory: async () => ({
-        type: 'postgres',
-        url: process.env.DATABASE_URL,
-        autoLoadEntities: true,
-        synchronize: false, // ❌ Ne jamais activer `true` en production (risque de perte de données)
-        migrations: [__dirname + '/migrations/*{.ts,.js}'],
-        migrationsRun: true, // ✅ Exécuter automatiquement les migrations
-        logging: process.env.NODE_ENV !== 'production', // ✅ Active les logs en développement uniquement
-        extra: {
-          ssl: process.env.DATABASE_SSL === 'true'
-            ? { rejectUnauthorized: false }
-            : undefined,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      autoLoadEntities: true,
+      synchronize: false,  // ❌ NE PAS METTRE À TRUE EN PRODUCTION
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrationsRun: true,
+      logging: process.env.NODE_ENV !== 'production', // ✅ Activer logs seulement en développement
+      extra: {
+        ssl: {
+          rejectUnauthorized: false, // ✅ Accepte les certificats auto-signés
         },
-      }),
+      },
     }),
     UserModule,
     AuthModule,
@@ -34,7 +32,6 @@ import { ImageModule } from './image/image.module';
 export class AppModule {}
 
 console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DATABASE_URL);
-
 
 
 
