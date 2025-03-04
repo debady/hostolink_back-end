@@ -18,9 +18,9 @@ import { ImageModule } from './image/image.module';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: true,
       logging: process.env.NODE_ENV !== 'production',
-      extra: {
-        ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
-      },
+      extra: process.env.DATABASE_SSL === 'true' ? {
+        ssl: { rejectUnauthorized: false },
+      } : {},
     }),
     UserModule,
     AuthModule,
@@ -28,6 +28,7 @@ import { ImageModule } from './image/image.module';
   ],
 })
 export class AppModule {}
+
 console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DATABASE_URL);
 
 
