@@ -289,8 +289,8 @@ les Endpoints
     # # ⚙️ Configuration de PostgreSQL
     # DB_HOST=localhost
     # DB_PORT=5432
-    # DB_USER=postgres
-    # DB_PASSWORD=NGUESSAN
+    # DB_USER=dev_sohapigroup
+    # DB_PASSWORD=mdp_dev_sohapigroup
     # DB_NAME=hostolink_bd
 
     # # Clé secrète pour JWT

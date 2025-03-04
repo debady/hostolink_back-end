@@ -1,8 +1,10 @@
 import { Otp } from 'src/otp/entities/otp.entity';
+import { Publication } from 'src/publication/entities/publication.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity('utilisateur')
 export class User {
+  [x: string]: any;
   @PrimaryGeneratedColumn()
   id_user: number; 
 
@@ -35,4 +37,11 @@ export class User {
 
   @OneToMany(() => Otp, otp => otp.user, { cascade: true, nullable: true }) // ✅ Ajout de nullable: true
   otps?: Otp[];
+  
+  @OneToMany(() => Publication, (publication) => publication.user)
+  publications: Publication[];
+
+  // Relation avec les commentaires
+//   @OneToMany(() => Commentaire, commentaire => commentaire.user)
+//   commentaires: Commentaire[];
 }
