@@ -1,23 +1,37 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/user.entity'; // Assurez-vous du bon chemin
-import { UsersModule } from './users/users.module';
+import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/user.module';
+import { User } from './user/entities/user.entity';
+import { AuthModule } from './auth/auth.module';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,  // ✅ Charge `.env` pour toute l'application
+      envFilePath: '.env',  // ✅ Spécifie où est `.env`
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost', // Change si tu es sur un autre serveur
-      // host: 'localhost', // Change si tu es sur un autre serveur
-      port: 5432, // Par défaut, PostgreSQL utilise ce port
-      username: 'postgres', // Ton utilisateur PostgreSQL
-      password: 'some', // Mets ton vrai mot de passe
-      database: 'hostolink_bd', // Ta base de données
+      host: process.env.DATABASE_HOST ?? 'localhost',
+      port: parseInt(process.env.DATABASE_PORT ?? '5432', 10),
+      username: process.env.DATABASE_USER ?? 'postgres',
+      password: process.env.DATABASE_PASSWORD ?? 'NGUESSAN',
+      database: process.env.DATABASE_NAME ?? 'hostolink_bd',
+      entities: [User],
       autoLoadEntities: true,
-      entities: [User], // On ajoute l'entité `User`
-      synchronize: true, // Mettre à `false` en production
+      synchronize: false,
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrationsRun: true,
+      logging: true,
     }),
-    UsersModule, // Ajoute le module des utilisateurs
+    UserModule,
+    AuthModule,
+    ImageModule,
   ],
 })
 export class AppModule {}
+
+// ✅ Vérifie si `.env` est bien chargé
+console.log('Cloudinary API Key:', process.env.CLOUDINARY_API_KEY);
