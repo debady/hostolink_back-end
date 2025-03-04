@@ -27,7 +27,7 @@ export class User {
   photo_profile: string;
 
   @Column({ nullable: true })
-  mdp: string;  // Remplace `password` par `mdp`
+  mdp: string;  
 
   @Column({ type: 'timestamp', nullable: true })
   derniere_connexion: Date;
