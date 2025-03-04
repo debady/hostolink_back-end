@@ -1,10 +1,11 @@
+
 import { Otp } from 'src/otp/entities/otp.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
-@Entity('utilisateur')
+@Entity('utilisateur')  // ✅ Correspond à la table "utilisateur" dans Supabase
 export class User {
-  @PrimaryGeneratedColumn()
-  id_user: number; 
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id_user' })  // ✅ Assure l'incrémentation automatique
+  id_user: number;
 
   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
   email?: string;
@@ -24,15 +25,55 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: true })
   pays?: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true})
+  @Column({ type: 'varchar', length: 255, nullable: true })
   photo_profile?: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  date_inscription: Date; 
+  date_inscription: Date;
 
   @Column({ type: 'varchar', length: 10, nullable: true, default: null })
   code_confirmation: string | null;
 
-  @OneToMany(() => Otp, otp => otp.user, { cascade: true, nullable: true }) // ✅ Ajout de nullable: true
+  @OneToMany(() => Otp, otp => otp.user, { cascade: true, nullable: true }) // ✅ Relation ajustée
   otps?: Otp[];
 }
+
+
+// import { Otp } from 'src/otp/entities/otp.entity';
+// import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+
+// @Entity('utilisateur')
+// export class User {
+//   @PrimaryGeneratedColumn()
+//   id_user: number; 
+
+//   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+//   email?: string;
+
+//   @Column({ type: 'varchar', length: 20, nullable: true, unique: true })
+//   telephone?: string;
+
+//   @Column({ type: 'varchar', length: 255, nullable: true })
+//   mdp?: string;
+
+//   @Column({ type: 'varchar', length: 255, nullable: true })
+//   nom?: string;
+
+//   @Column({ type: 'varchar', length: 255, nullable: true })
+//   prenom?: string;
+
+//   @Column({ type: 'varchar', length: 100, nullable: true })
+//   pays?: string;
+
+//   @Column({ type: 'varchar', length: 255, nullable: true})
+//   photo_profile?: string;
+
+//   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+//   date_inscription: Date; 
+
+//   @Column({ type: 'varchar', length: 10, nullable: true, default: null })
+//   code_confirmation: string | null;
+
+//   @OneToMany(() => Otp, otp => otp.user, { cascade: true, nullable: true }) // ✅ Ajout de nullable: true
+//   otps?: Otp[];
+// }

@@ -346,7 +346,32 @@ Project URL
 API Key
     eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68
 
+------
+    Session pooler
+    Supavisor
+    Uniquement recommandé comme alternative à la connexion directe, lors de la connexion via un réseau IPv4.
 
+    postgresql://postgres.skwupmsitzsxukbmnkwv:[YOUR-PASSWORD]@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
+
+
+    View parameters
+    host:
+    aws-0-eu-west-3.pooler.supabase.com
+
+    port:
+    5432
+
+    database: 
+    postgres
+
+    user:
+    postgres.skwupmsitzsxukbmnkwv
+
+    pool_mode:
+    session
+
+
+-----
 TEST API 
     curl -X GET "https://skwupmsitzsxukbmnkwv.supabase.co/rest/v1/" -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68"
 
@@ -354,3 +379,24 @@ TEST API
 VERIF TABLE DE LA BD 
     curl -X GET "https://skwupmsitzsxukbmnkwv.supabase.co/rest/v1/" \
   -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68"
+
+
+
+  ---.env avant -------
+
+
+  # Configuration de la base de données PostgreSQL
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=NGUESSAN
+DATABASE_NAME=hostolink_bd
+
+# Configuration de Cloudinary
+CLOUDINARY_CLOUD_NAME=dhrrk7vsd
+CLOUDINARY_API_KEY=197881586145143
+CLOUDINARY_API_SECRET=HEEz2vCv7MyxBRjCZScbXeUKgEw
+
+# Clé secrète pour JWT
+JWT_SECRET=MY_SECRET_KEY
+
