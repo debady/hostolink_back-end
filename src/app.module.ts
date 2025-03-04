@@ -5,6 +5,9 @@ import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ImageModule } from './image/image.module';
+import { EtablissementModule } from './etalissement/etablissement.module';
+
+
 
 @Module({
   imports: [
@@ -29,8 +32,10 @@ import { ImageModule } from './image/image.module';
     UserModule,
     AuthModule,
     ImageModule,
+    EtablissementModule,
   ],
 })
+
 export class AppModule {}
 
 // ✅ Vérifie si `.env` est bien chargé
