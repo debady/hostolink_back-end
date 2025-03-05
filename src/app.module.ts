@@ -18,9 +18,9 @@ import { ImageModule } from './image/image.module';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: true,
       logging: process.env.NODE_ENV !== 'production',
-      extra: process.env.DATABASE_SSL === 'true'
-        ? { ssl: { rejectUnauthorized: false } }
-        : {},  // ✅ Remplace `undefined` par `{}` pour éviter les erreurs
+      extra: process.env.DATABASE_SSL === 'true' 
+      ? { ssl: { rejectUnauthorized: false } } 
+      : undefined,
     }),
     UserModule,
     AuthModule,
