@@ -32,7 +32,6 @@ import { ImageModule } from './image/image.module';
   ],
 })
 export class AppModule {}
-
 console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
 
 
