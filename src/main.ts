@@ -20,7 +20,8 @@ async function bootstrap() {
     });
 
     // ✅ Utilisation du PORT depuis Railway ou 3000 en local
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 10000; 
+    // const PORT = process.env.PORT || 3000;
     await app.listen(PORT, '0.0.0.0');
 
     console.log(`🚀 Server is running on: http://localhost:${PORT}`);
