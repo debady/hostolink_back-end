@@ -1,0 +1,8 @@
+COMMANDE DE CONNEXION A LA BAD SUR SUPABASE CMD
+    psql "postgresql://postgres.skwupmsitzsxukbmnkwv:mdp_dev_sohapigroup@aws-0-eu-west-3.pooler.supabase.com:5432/postgres?sslmode=require"
+
+Exporter  
+    pg_dump -U postgres -d hostolink_bd -F p -f "------------\SohapiGroup\hostolink_back-end\bd\hostolink_bd.sql"
+    
+Importer 
+    psql -U postgres -d hostolink_bd -f "-----------------\SohapiGroup\hostolink_back-end\bd\hostolink_bd.sql"
