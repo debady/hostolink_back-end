@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ImageModule } from './image/image.module';
+import * as fs from 'fs';
 
 @Module({
   imports: [
@@ -23,7 +24,10 @@ import { ImageModule } from './image/image.module';
       migrationsRun: true,
       logging: process.env.NODE_ENV !== 'production',
       extra: process.env.DB_SSL === 'true'
-        ? { ssl: { rejectUnauthorized: false } }
+        ? { ssl: { 
+            rejectUnauthorized: true,
+            ca: fs.readFileSync('./supabase-ca.pem').toString(),
+          } }
         : undefined,
     }),
     UserModule,
@@ -34,6 +38,7 @@ import { ImageModule } from './image/image.module';
 export class AppModule {}
 
 console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
+
 
 
 

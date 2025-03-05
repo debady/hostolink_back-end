@@ -311,7 +311,8 @@ curl -X POST "https://api.cloudinary.com/v1_1/dhrrk7vsd/image/upload" -F "file=@
 
 
 installer  : npm install @nestjs/platform-express multer multer-storage-cloudinary cloudinary uuid
-
+commande d'installation du certificat supabase 
+    curl -o supabase-ca.pem https://curl.se/ca/cacert.pem
 
 
 
