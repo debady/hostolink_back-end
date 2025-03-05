@@ -1,42 +1,34 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
-import { AuthModule } from './auth/auth.module';
-import { ImageModule } from './image/image.module';
-import { EtablissementModule } from './etalissement/etablissement.module';
-
-
+import { EtablissementSante } from './etablissement/entities/etablissement_sante.entity';
+import { Localisation } from './etablissement/entities/localisation.entity';
+import { EtablissementTelephone } from './etablissement/entities/etablissement_telephone.entity';
+import { EtablissementService } from './etablissement/services/etablissement.service';
+import { EtablissementController } from './etablissement/controllers/etablissement.controller';
+import { TypeEtablissementController } from './etablissement/controllers/type-etablissement.controller';
+import { TypeEtablissementService } from './etablissement/services/type-etablissement.service';
+import { TypeEtablissement } from './etablissement/entities/type-etablissement.entity';
+import { EtablissementTelephoneModule } from './etablissement/etablissement_telephone.module';
+import { EtablissementSanteModule } from './etablissement/etablissement-sante.module';
+ // Module ajouté ici
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,  // ✅ Charge `.env` pour toute l'application
-      envFilePath: '.env',  // ✅ Spécifie où est `.env`
-    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DATABASE_HOST ?? 'localhost',
-      port: parseInt(process.env.DATABASE_PORT ?? '5432', 10),
-      username: process.env.DATABASE_USER ?? 'postgres',
-      password: process.env.DATABASE_PASSWORD ?? 'NGUESSAN',
-      database: process.env.DATABASE_NAME ?? 'hostolink_bd',
-      entities: [User],
-      autoLoadEntities: true,
-      synchronize: false,
-      migrations: [__dirname + '/migrations/*{.ts,.js}'],
-      migrationsRun: true,
-      logging: true,
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'NGUESSAN',
+      database: 'hostolink_bd',
+      entities: [EtablissementSante, TypeEtablissement, Localisation, EtablissementTelephone], 
+      synchronize: true,
     }),
-    UserModule,
-    AuthModule,
-    ImageModule,
-    EtablissementModule,
+    TypeOrmModule.forFeature([EtablissementSante, TypeEtablissement, Localisation, EtablissementTelephone]),
+    EtablissementTelephoneModule,  // Module pour les téléphones
+    EtablissementSanteModule, // Correctement importé ici
   ],
+  controllers: [EtablissementController, TypeEtablissementController],  // Contrôleurs ici
+  providers: [EtablissementService, TypeEtablissementService],
 })
-
 export class AppModule {}
-
-// ✅ Vérifie si `.env` est bien chargé
-console.log('Cloudinary API Key:', process.env.CLOUDINARY_API_KEY);

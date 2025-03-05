@@ -1,16 +1,11 @@
- 
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class SearchEtablissementDto {
+export class CreateLocalisationDto {
   @IsNotEmpty()
   @IsNumber()
-  lat: number;
+  latitude: number;
 
   @IsNotEmpty()
   @IsNumber()
-  lon: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  radius: number;
+  longitude: number;
 }
