@@ -12,17 +12,18 @@ import { ImageModule } from './image/image.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL, 
+      url: process.env.DATABASE_URL,
       autoLoadEntities: true,
-      synchronize: false,  
+      synchronize: false,  // ⚠ Ne pas mettre true en production
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: true,
       logging: process.env.NODE_ENV !== 'production',
       extra: {
         ssl: {
-          rejectUnauthorized: false, // ✅ Évite les erreurs SSL
+          rejectUnauthorized: false, // ✅ Ignore les certificats auto-signés
         },
       },
+      
     }),
     UserModule,
     AuthModule,

@@ -347,28 +347,29 @@ API Key
     eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68
 
 ------
-    Session pooler
-    Supavisor
-    Uniquement recommandé comme alternative à la connexion directe, lors de la connexion via un réseau IPv4.
+Session pooler
+Supavisor
+Only recommended as an alternative to Direct Connection, when connecting via an IPv4 network.
 
-    postgresql://postgres.skwupmsitzsxukbmnkwv:[YOUR-PASSWORD]@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
+postgresql://postgres.skwupmsitzsxukbmnkwv:[YOUR-PASSWORD]@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
 
 
-    View parameters
-    host:
-    aws-0-eu-west-3.pooler.supabase.com
+View parameters
+host:
+aws-0-eu-west-3.pooler.supabase.com
 
-    port:
-    5432
+port:
+5432
 
-    database: 
-    postgres
+database:
+postgres
 
-    user:
-    postgres.skwupmsitzsxukbmnkwv
+user:
+postgres.skwupmsitzsxukbmnkwv
 
-    pool_mode:
-    session
+pool_mode:
+session
+
 
 
 -----
