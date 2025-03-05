@@ -12,9 +12,9 @@ import { ImageModule } from './image/image.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: `${process.env.DATABASE_URL}?sslmode=require`, // ✅ Ajout de sslmode=require
+      url: process.env.DATABASE_URL, 
       autoLoadEntities: true,
-      synchronize: false,  // Ne pas activer en production
+      synchronize: false,  
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: true,
       logging: process.env.NODE_ENV !== 'production',
