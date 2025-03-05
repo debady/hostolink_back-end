@@ -1,19 +1,3 @@
-// import { Module } from '@nestjs/common';
-// import { PublicationService } from './publication.service';
-// import { PublicationController } from './publication.controller';
-// import { Publication } from './entities/publication.entity';
-// import { TypeOrmModule } from '@nestjs/typeorm';
-
-// @Module({
-//   imports: [
-//     TypeOrmModule.forFeature([Publication]), // Ajoutez l'entité ici
-//   ],
-//   controllers: [PublicationController],
-//   providers: [PublicationService],
-//   // exports: [PublicationService],
-// })
-// export class PublicationModule {}
-
 
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';

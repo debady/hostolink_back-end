@@ -1,5 +1,7 @@
+import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
+import { Partage } from 'src/partage/entities/partage.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class Publication { // Utiliser une majuscule pour le nom de classe
@@ -25,9 +27,13 @@ export class Publication { // Utiliser une majuscule pour le nom de classe
   @ManyToOne(() => User, { nullable: false }) // Rendre la relation obligatoire
   @JoinColumn({ name: 'id_user' })
   user: User;
-    commentaires: any;
+    // commentaire: any;
 
   // Relation avec les commentaires
-  // @OneToMany(() => Commentaire, commentaire => commentaire.publication)
-  // commentaires: Commentaire[];
+  @OneToMany(() => Commentaire, commentaire => commentaire.publication)
+  commentaires: Commentaire[];
+
+  // Relation avec les commentaires
+  @OneToMany(() => Partage, Partage => Partage.publication)
+  Partages: Partage[];
 }

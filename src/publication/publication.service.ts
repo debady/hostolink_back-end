@@ -1,67 +1,4 @@
-
-// import { Injectable } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { CreatePublicationDto } from './dto/create-publication.dto';
-// import { Publication } from './entities/publication.entity';
-// import { User } from 'src/user/entities/user.entity';
-
-// @Injectable()
-// export class PublicationService {
-//   constructor(
-//     @InjectRepository(Publication)
-//     private readonly publicationRepository: Repository<Publication>,
-//   ) {}
-
-//   async create(createPublicationDto: CreatePublicationDto, id_user: number): Promise<Publication> {
-//     // Créez un nouvel objet publication avec les données fournies
-//     const publication = this.publicationRepository.create({
-//         ...createPublicationDto,
-//         date_publication: new Date(), // Assurez-vous que le champ est correct
-//         compteur_like: 0,
-//         user: { id_user }  // Assurez-vous que 'user' est typé correctement
-//     });
-//     return this.publicationRepository.save(publication);
-// }
-
-//   async findAll(): Promise<Publication[]> {
-//     return this.publicationRepository.find({ relations: ['user'] }); // Ajoutez des relations si nécessaire
-//   }
-
-//   async likePost(id_publication: number): Promise<Publication> {
-//     const publication = await this.publicationRepository.findOne({ where: { id_publication } });
-
-//     if (!publication) {
-//       throw new Error('Publication not found');
-//     }
-
-//     publication.compteur_like += 1; // Incrémente le compteur de likes
-//     return this.publicationRepository.save(publication);
-//   }
-
-//   async dislikePost(id_publication: number): Promise<Publication> {
-//     const publication = await this.publicationRepository.findOne({ where: { id_publication } });
-
-//     if (!publication) {
-//       throw new Error('Publication not found');
-//     }
-
-//     if (publication.compteur_like > 0) {
-//       publication.compteur_like -= 1; // Décrémente le compteur de likes
-//     }
-//     return this.publicationRepository.save(publication);
-//   }
-
-//   async findByUserId(id_user: number): Promise<Publication[]> {
-//     return this.publicationRepository.find({
-//       where: { user: { id_user: id_user } },
-//       relations: ['user'],
-//       order: { date_publication: 'DESC' } // Pour avoir les plus récentes d'abord
-//     });
-//   }
-// }
-
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePublicationDto } from './dto/create-publication.dto';
@@ -71,6 +8,7 @@ import { CreateCommentaireDto } from 'src/commentaire/dto/create-commentaire.dto
 
 @Injectable()
 export class PublicationService {
+  partageService: any;
   constructor(
     @InjectRepository(Publication)
     private readonly publicationRepository: Repository<Publication>,
@@ -91,12 +29,57 @@ export class PublicationService {
     return this.publicationRepository.save(publication);
   }
 
+  async findOne(id_publication: number): Promise<Publication> {
+    const publication = await this.publicationRepository.findOne({
+      where: { id_publication },
+      relations: ['user', 'commentaires', 'commentaires.user'],
+    });
+    
+    if (!publication) {
+      throw new NotFoundException(`Publication avec l'ID ${id_publication} non trouvée`);
+    }
+    
+    return publication;
+  }
+
+
+  // Méthode pour ajouter un like à une publication
+    async likePost(id_publication: number): Promise<Publication> {
+      const publication = await this.publicationRepository.findOne({ 
+        where: { id_publication } 
+      });
+
+      if (!publication) {
+        throw new Error('Publication not found');
+      }
+
+      publication.compteur_like += 1; // Incrémente le compteur de likes
+      return this.publicationRepository.save(publication);
+    }
+
+    // Méthode pour retirer un like d'une publication
+    async dislikePost(id_publication: number): Promise<Publication> {
+      const publication = await this.publicationRepository.findOne({ 
+        where: { id_publication } 
+      });
+
+      if (!publication) {
+        throw new Error('Publication not found');
+      }
+
+      if (publication.compteur_like > 0) {
+        publication.compteur_like -= 1; // Décrémente le compteur de likes
+      }
+      return this.publicationRepository.save(publication);
+    }
+
   async findAll(): Promise<Publication[]> {
     return this.publicationRepository.find({ 
       relations: ['user', 'commentaires', 'commentaires.user'],
       order: { date_publication: 'DESC' }
     });
   }
+
 
   async findByUserId(userId: number): Promise<Publication[]> {
     return this.publicationRepository.find({
@@ -137,5 +120,8 @@ export class PublicationService {
     });
   }
 
+
+
+  
   // Autres méthodes existantes...
 }

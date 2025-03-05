@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ImageModule } from './image/image.module';
 import { PublicationModule } from './publication/publication.module';
 import { CommentaireModule } from './commentaire/commentaire.module';
+import { PartageModule } from './partage/partage.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CommentaireModule } from './commentaire/commentaire.module';
     ImageModule,
     PublicationModule,
     CommentaireModule,
+    PartageModule,
   ],
 })
 export class AppModule {}

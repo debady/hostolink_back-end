@@ -8,7 +8,7 @@ export class Commentaire {
   @PrimaryGeneratedColumn()
   id_commentaire: number;
 
-  @Column()
+  @Column({ type: 'text' })  //j'ai mis le type ici car dans la BD le type de "contenu" est 'text';
   contenu: string;
 
   @CreateDateColumn()
@@ -16,7 +16,7 @@ export class Commentaire {
 
   @ManyToOne(() => Publication, publication => publication.commentaires, {
     nullable: false,
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE' 
   })
   @JoinColumn({ name: 'id_publication' })
   publication: Publication;

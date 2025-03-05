@@ -1,8 +1,4 @@
-// export class CreatePublicationDto {
-//     titre_publication: string;
-//     contenu: string;
-//     image?: string;
-//   }
+
 import { IsString, IsOptional } from 'class-validator';
 
 export class CreatePublicationDto {

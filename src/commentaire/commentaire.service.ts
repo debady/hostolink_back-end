@@ -1,3 +1,4 @@
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -23,9 +24,22 @@ export class CommentaireService {
     return this.commentaireRepository.save(commentaire);
   }
 
+  // Modifiée pour n'accepter qu'un seul paramètre
   async findByPublicationId(id_publication: number): Promise<Commentaire[]> {
     return this.commentaireRepository.find({
       where: { publication: { id_publication } },
+      relations: ['user'],
+      order: { date_commentaire: 'DESC' }
+    });
+  }
+
+  // Nouvelle méthode pour filtrer par publication ET utilisateur
+  async findByPublicationIdAndUserId(id_publication: number, id_user: number): Promise<Commentaire[]> {
+    return this.commentaireRepository.find({
+      where: {
+        publication: { id_publication },
+        user: { id_user }
+      },
       relations: ['user'],
       order: { date_commentaire: 'DESC' }
     });

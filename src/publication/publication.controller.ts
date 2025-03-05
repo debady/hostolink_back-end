@@ -1,27 +1,3 @@
-// import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
-// import { PublicationService } from './publication.service';
-// import { CreatePublicationDto } from './dto/create-publication.dto';
-// import { Publication } from './entities/publication.entity'; // Utiliser le nom correct
-
-// @Controller('publication')
-// export class PublicationController {
-//   constructor(private readonly postsService: PublicationService) {}
-
-//   @Post()
-//   create(@Body() createPostDto: CreatePublicationDto, @Body('id_user') id_user: number): Promise<Publication> {
-//     return this.postsService.create(createPostDto, id_user); // Appeler la méthode correctement
-//   }
-
-//   @Get()
-//   findAll(): Promise<Publication[]> {
-//     return this.postsService.findAll();
-//   }
-
-//   @Get('user/:id_user')
-//   findByUserId(@Param('id_user', ParseIntPipe) userId: number): Promise<Publication[]> {
-//   return this.postsService.findByUserId(userId);
-// }
-// }
 
 import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { PublicationService } from './publication.service';
@@ -42,6 +18,12 @@ export class PublicationController {
   @Get()
   findAll(): Promise<Publication[]> {
     return this.publicationService.findAll();
+  }
+
+  // récupérer une publication spécifique | QUI NOUS PERMETTRA DE PATARGER UNE PUBLICATION
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<Publication> {
+    return this.publicationService.findOne(id);
   }
 
   @Get('user/:userId')
@@ -69,5 +51,17 @@ export class PublicationController {
     @Param('id_publication', ParseIntPipe) id_publication: number
   ): Promise<Commentaire[]> {
     return this.publicationService.getCommentsByPublicationId(id_publication);
+  }
+
+
+// gestion des like et dislike
+  @Post(':id/like')
+  likePost(@Param('id', ParseIntPipe) id: number): Promise<Publication> {
+    return this.publicationService.likePost(id);
+  }
+
+  @Post(':id/dislike')
+  dislikePost(@Param('id', ParseIntPipe) id: number): Promise<Publication> {
+    return this.publicationService.dislikePost(id);
   }
 }
