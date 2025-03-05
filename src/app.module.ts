@@ -12,15 +12,17 @@ import { ImageModule } from './image/image.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      url: `${process.env.DATABASE_URL}?sslmode=require`, // ✅ Ajout de sslmode=require
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: false,  // Ne pas activer en production
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: true,
       logging: process.env.NODE_ENV !== 'production',
-      extra: process.env.DATABASE_SSL === 'true' 
-      ? { ssl: { rejectUnauthorized: false } } 
-      : undefined,
+      extra: {
+        ssl: {
+          rejectUnauthorized: false, // ✅ Évite les erreurs SSL
+        },
+      },
     }),
     UserModule,
     AuthModule,
@@ -30,7 +32,6 @@ import { ImageModule } from './image/image.module';
 export class AppModule {}
 
 console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DATABASE_URL);
-
 
 
 
