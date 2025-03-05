@@ -12,18 +12,19 @@ import { ImageModule } from './image/image.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       autoLoadEntities: true,
-      synchronize: false,  // ⚠ Ne pas mettre true en production
+      synchronize: false,
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: true,
       logging: process.env.NODE_ENV !== 'production',
-      extra: {
-        ssl: {
-          rejectUnauthorized: false, // ✅ Ignore les certificats auto-signés
-        },
-      },
-      
+      extra: process.env.DB_SSL === 'true'
+        ? { ssl: { rejectUnauthorized: false } }
+        : undefined,
     }),
     UserModule,
     AuthModule,
@@ -32,7 +33,7 @@ import { ImageModule } from './image/image.module';
 })
 export class AppModule {}
 
-console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DATABASE_URL);
+console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
 
 
 
