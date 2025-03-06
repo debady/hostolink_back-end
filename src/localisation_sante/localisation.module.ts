@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LocalisationService } from './localisation.service';
+import { LocalisationController } from './localisation.controller';
 import { Localisation } from './entities/localisation.entity';
-import { LocalisationController } from './controllers/localisation.controller';
-import { LocalisationService } from './services/localisation.service';
-
 
 @Module({
   imports: [TypeOrmModule.forFeature([Localisation])],
-  controllers: [LocalisationController], // ✅ Vérifie que le contrôleur est bien ajouté ici
+  controllers: [LocalisationController],
   providers: [LocalisationService],
+  exports: [LocalisationService],  // Permet d'utiliser LocalisationService dans d'autres modules
 })
 export class LocalisationModule {}

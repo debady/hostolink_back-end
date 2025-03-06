@@ -1,27 +1,38 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';  // Ajout de NestExpressApplication
-import { join } from 'path';  // Si tu veux ajouter une fonctionnalité comme gérer des fichiers statiques
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { json, urlencoded } from 'express';  // Ajout pour gérer le JSON et les données encodées
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);  // Utilisation de NestExpressApplication
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Active la validation globale dans toute l'application
-  app.useGlobalPipes(new ValidationPipe());
+  // Active la validation globale et filtre les champs non définis dans les DTOs
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,  // Supprime les champs non définis dans les DTOs
+      forbidNonWhitelisted: true,  // Rejette les champs non autorisés
+      transform: true,  // Convertit automatiquement les types (ex: string -> number)
+    }),
+  );
 
-  // Configuration CORS pour autoriser les requêtes provenant de n'importe quelle origine
+  // Middleware pour s'assurer que les requêtes JSON sont bien traitées
+  app.use(json());  // Active le parsing du JSON
+  app.use(urlencoded({ extended: true }));  // Active le parsing des URL encodées
+
+  // Configuration CORS
   app.enableCors({
-    origin: '*',  // Permet toutes les origines
+    origin: '*',  // Autorise toutes les origines
     methods: ['GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'DELETE'],  // Méthodes autorisées
     allowedHeaders: ['Content-Type', 'Authorization'],  // En-têtes autorisés
   });
 
-  // Si tu veux servir des fichiers statiques, tu peux ajouter une ligne comme celle-ci
+  // Option : Servir des fichiers statiques si nécessaire
   // app.useStaticAssets(join(__dirname, '..', 'public'));
 
-  const PORT = 3000;
-  await app.listen(PORT, '0.0.0.0');  // Écoute sur toutes les adresses (0.0.0.0) et sur le port 3000
+  const PORT = process.env.PORT || 3000;
+  await app.listen(PORT, '0.0.0.0');
 
   console.log(`🚀 Application is running on: http://localhost:${PORT}`);
 }
