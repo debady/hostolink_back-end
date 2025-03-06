@@ -166,7 +166,20 @@ les Endpoints
         "otpCode": "123456"
         }
 
-------------- CLOUDINARY --------------------------------------------
+    
+    --------------------.env fonctionnelle -------------------------------------
+    # # ⚙️ Configuration de PostgreSQL
+    # DB_HOST=localhost
+    # DB_PORT=5432
+    # DB_USER=dev_sohapigroup
+    # DB_PASSWORD=mdp_dev_sohapigroup
+    # DB_NAME=hostolink_bd
+
+    # # Clé secrète pour JWT
+    # JWT_SECRET=MY_SECRET_KEY
+
+
+    ---------------------------------------------------------
 
 API Secret 
         HEEz2vCv7MyxBRjCZScbXeUKgEw
@@ -205,39 +218,5 @@ database:
     postgres
 
 user:
-    postgres.skwupmsitzsxukbmnkwv
-
-
-
-
-pool_mode session
----------------------------------------------------------
-
-
-TEST API 
-    curl -X GET "https://skwupmsitzsxukbmnkwv.supabase.co/rest/v1/" -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68"
-
-
-VERIF TABLE DE LA BD 
-    curl -X GET "https://skwupmsitzsxukbmnkwv.supabase.co/rest/v1/" \
-  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68"
-
-
-
-  ---.en LOCAL-------
-
-# Configuration de la base de données PostgreSQL
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=NGUESSAN
-DATABASE_NAME=hostolink_bd
-
-# Configuration de Cloudinary
-CLOUDINARY_CLOUD_NAME=dhrrk7vsd
-CLOUDINARY_API_KEY=197881586145143
-CLOUDINARY_API_SECRET=HEEz2vCv7MyxBRjCZScbXeUKgEw
-
-# Clé secrète pour JWT
-JWT_SECRET=MY_SECRET_KEY
+postgres
 
