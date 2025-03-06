@@ -14,128 +14,10 @@
     back-end : netjs 
     environnement de test avant de l'introduit dans le flutter déjà développer :postman
 
-- Structure de Votre Projet Backend
-    Répertoire Principal
-    .env : Fichier de configuration pour les variables d'environnement (comme les clés API, les informations de connexion à la base de données, etc.).
+    hebergeur d'images : cloudinary
+    hebergeur bd : supabase
+    hebergeur back-end : render
 
-    .gitignore : Fichier pour ignorer certains fichiers/dossiers dans Git (ex: node_modules, .env).
-
-    .prettierrc : Fichier de configuration pour Prettier (formatage du code).
-
-    bd : Dossier contenant probablement des scripts ou des fichiers liés à la base de données (ex: migrations, scripts SQL).
-
-    dist : Dossier généré contenant le code JavaScript compilé à partir de TypeScript.
-
-    eslint.config.mjs : Fichier de configuration pour ESLint (linter pour JavaScript/TypeScript).
-
-    nest-cli.json : Fichier de configuration pour NestJS CLI.
-
-    node_modules : Dossier contenant les dépendances du projet (installées via npm ou yarn).
-
-    package-lock.json : Fichier verrouillant les versions des dépendances installées.
-
-    package.json : Fichier contenant les métadonnées du projet et les dépendances.
-
-    prompt.txt : Fichier texte contenant probablement des informations ou des instructions.
-
-    README.md : Fichier de documentation du projet.
-
-    src : Dossier principal contenant le code source du backend.
-
-    test : Dossier contenant les tests unitaires ou d'intégration.
-
-    tsconfig.build.json : Fichier de configuration TypeScript pour la compilation.
-
-    tsconfig.json : Fichier de configuration TypeScript principal.
-
-    Dossier src (Code Source)
-    Le dossier src est le cœur de votre application. Voici ce que j'attends généralement dans un projet NestJS :
-
-    main.ts : Point d'entrée de l'application.
-
-    app.module.ts : Module principal de l'application.
-
-    entities/ : Contient les entités TypeORM (ex: User, Otp).
-
-    controllers/ : Contient les contrôleurs pour gérer les routes (ex: user.controller.ts).
-
-    services/ : Contient la logique métier (ex: user.service.ts, otp.service.ts).
-
-    dto/ : Contient les Data Transfer Objects (DTO) pour valider les données entrantes.
-
-    interfaces/ : Contient les interfaces TypeScript.
-
-    repositories/ : Contient les repositories TypeORM (si utilisés).
-
-    migrations/ : Contient les scripts de migration de la base de données.
-
-    Problèmes Actuels
-    À partir de ce que vous avez partagé, voici les problèmes que vous pourriez rencontrer :
-
-    Erreurs de Dépendances :
-
-    Problèmes liés à l'importation de modules (ex: OtpModule dans UserModule).
-
-    Erreurs comme UnknownDependenciesException.
-
-    Problèmes de TypeORM :
-
-    Migrations non fonctionnelles.
-
-    Relations mal configurées entre les entités (ex: User et Otp).
-
-    Problèmes de Validation des OTP :
-
-    La méthode verifyOtp() n'est pas reconnue ou ne fonctionne pas correctement.
-
-    Problèmes de génération ou d'envoi d'OTP.
-
-    Problèmes de Sécurité :
-
-    Stockage des mots de passe ou des OTPs de manière non sécurisée.
-
-    Absence de validation des données entrantes.
-
-    Prochaines Étapes
-    Analyse du Code :
-
-    Partagez le contenu des fichiers clés (ex: user.controller.ts, otp.service.ts, user.entity.ts, otp.entity.ts, etc.).
-
-    Cela me permettra de mieux comprendre votre implémentation et de corriger les erreurs.
-
-    Correction des Problèmes :
-
-    Je vais vous aider à résoudre les erreurs de dépendances, de TypeORM et de logique OTP.
-
-    Je vais également vérifier la sécurité de votre application.
-
-    Optimisation :
-
-    Amélioration de la structure du code.
-
-    Ajout de tests unitaires ou d'intégration.
-
-
-Récapitulatif complet de ce que tu voulais faire et des étapes parcourues :
-    🔹 Objectif initial
-    Tu voulais implémenter un système de connexion sécurisé avec OTP dans ton backend Nest.js. Ce système devait permettre à un utilisateur de :
-
-    saisir soit  un email ou un numéro de téléphone. 
-    s'il n'existe pas alors il est nouveau alors on l'insert puis on passe a la suite 
-    Définir un mot de passe après l’inscription.
-    Recevoir un OTP pour valider certaines actions (connexion, réinitialisation, etc.).
-    Vérifier l’OTP saisi par l’utilisateur.
-    Utiliser PostgreSQL pour stocker les utilisateurs et les OTPs.
-    🔹 Ce qui existait déjà dans ton projet
-    ✔ Backend Nest.js fonctionnel avec des routes pour la gestion des utilisateurs.
-    ✔ Connexion à PostgreSQL via TypeORM.
-    ✔ Endpoints existants :
-
-    check-user → Vérifie si un utilisateur existe.
-    register-user → Inscrit un utilisateur sans mot de passe.
-    define-password → Permet à l’utilisateur de définir un mot de passe.
-    verify-pin → Vérifie un PIN de connexion.
-    verify-code → Vérifie un ancien système d’OTP lié aux utilisateurs.
 
 
 - la base de donnéee
@@ -284,35 +166,16 @@ les Endpoints
         "otpCode": "123456"
         }
 
-    
-    --------------------.env fonctionnelle -------------------------------------
-    # # ⚙️ Configuration de PostgreSQL
-    # DB_HOST=localhost
-    # DB_PORT=5432
-    # DB_USER=postgres
-    # DB_PASSWORD=NGUESSAN
-    # DB_NAME=hostolink_bd
-
-    # # Clé secrète pour JWT
-    # JWT_SECRET=MY_SECRET_KEY
-
-
 ------------- CLOUDINARY --------------------------------------------
 
 API Secret 
         HEEz2vCv7MyxBRjCZScbXeUKgEw
+
 API KEY 
         197881586145143
+
 API environment variable 
         CLOUDINARY_URL=cloudinary://<your_api_key>:<your_api_secret>@dhrrk7vsd
-
-
-curl -X POST "https://api.cloudinary.com/v1_1/dhrrk7vsd/image/upload" -F "file=@C:\Users\NGUESSAN.DESKTOP-38E6PIP\Desktop\SohapiGroup\hostolink_back-end\src\images\imgtes.PNG" -F "upload_preset=hostolink_preset"
-
-
-installer  : npm install @nestjs/platform-express multer multer-storage-cloudinary cloudinary uuid
-commande d'installation du certificat supabase 
-    curl -o supabase-ca.pem https://curl.se/ca/cacert.pem
 
 
 
@@ -325,11 +188,15 @@ commande d'installation du certificat supabase
 projet name = hostolink
 mdp : mdp_dev_sohapigroup
 
-Direct connection
-    postgresql://postgres:[YOUR-PASSWORD]@db.skwupmsitzsxukbmnkwv.supabase.co:5432/postgres
+
+
+Session pooler Supavisor
+------------------------------------------------------
+Url
+    postgresql://postgres.skwupmsitzsxukbmnkwv:[YOUR-PASSWORD]@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
 
 host:
-    db.skwupmsitzsxukbmnkwv.supabase.co
+    aws-0-eu-west-3.pooler.supabase.com
 
 port:
     5432
@@ -338,42 +205,15 @@ database:
     postgres
 
 user:
-    postgres
-
-
-Project URL
-    https://skwupmsitzsxukbmnkwv.supabase.co
-
-API Key
-    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68
-
-------
-Session pooler
-Supavisor
-Only recommended as an alternative to Direct Connection, when connecting via an IPv4 network.
-
-postgresql://postgres.skwupmsitzsxukbmnkwv:[YOUR-PASSWORD]@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
-
-
-View parameters
-host:
-aws-0-eu-west-3.pooler.supabase.com
-
-port:
-5432
-
-database:
-postgres
-
-user:
-postgres.skwupmsitzsxukbmnkwv
-
-pool_mode:
-session
+    postgres.skwupmsitzsxukbmnkwv
 
 
 
------
+
+pool_mode session
+---------------------------------------------------------
+
+
 TEST API 
     curl -X GET "https://skwupmsitzsxukbmnkwv.supabase.co/rest/v1/" -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68"
 
@@ -384,10 +224,9 @@ VERIF TABLE DE LA BD
 
 
 
-  ---.env avant -------
+  ---.en LOCAL-------
 
-
-  # Configuration de la base de données PostgreSQL
+# Configuration de la base de données PostgreSQL
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
 DATABASE_USER=postgres

@@ -21,6 +21,7 @@ Avant de commencer, assurez-vous d'avoir installé :
 - [NestJS CLI](https://docs.nestjs.com/) (`npm install -g @nestjs/cli`)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Docker](https://www.docker.com/) (optionnel, mais recommandé)
+- [Télécharger] https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
 
 ---
 
@@ -44,11 +45,29 @@ Avant de démarrer l'API, configurez l'environnement :
 1. **Dupliquez** le fichier `.env.example` et renommez-le `.env`
 2. **Modifiez** les variables selon votre environnement :
 
-```env
+```env Local
 PORT=3000
 DATABASE_URL=postgresql://postgres:motdepasse@localhost:5432/hostolink_bd
 JWT_SECRET=secret_jwt
 FIREBASE_API_KEY=xxx
+```
+
+```env Sur render
+# ✅ Connexion PostgreSQL sur Supabase via le pooler avec SSL activé
+DB_HOST=................supabase.com
+DB_PORT=........
+DB_NAME=......
+DB_USER=postgres.............
+DB_PASSWORD=......
+DB_SSL=true
+
+# ✅ Configuration de Cloudinary
+CLOUDINARY_CLOUD_NAME=...........
+CLOUDINARY_API_KEY=...............
+CLOUDINARY_API_SECRET=..............
+
+# ✅ Clé secrète pour JWT
+JWT_SECRET=................
 ```
 
 ---
@@ -113,10 +132,7 @@ npm run test:e2e
 
 ---
 
-## 📌 Contribution
-Les contributions sont les bienvenues ! Clonez le repo, créez une branche et proposez vos modifications via une pull request.
 
----
 
 ## 📜 Licence
 Ce projet est sous licence **MIT**. Consultez le fichier `LICENSE` pour plus de détails.
@@ -128,14 +144,12 @@ Si vous avez des questions, contactez-nous à **contact@hostolink.com** ou ouvre
 
 ---
 
-🚀 **Développé avec ❤️ par l'équipe Hostolink** https://chatgpt.com/canvas/shared/67b24cad23d081918af94c0c51613f51
+🚀 **Développé avec ❤️ par l'équipe Hostolink** https://sohapigroup-communication
         
         
 
 #                          CONFIGURATION DE BASE
 
-        Télécharger postgres sur 
-            > https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
 
         Installer en s'assurant d'avoir cocher
             ✅ PostgreSQL Server
@@ -187,7 +201,7 @@ Si vous avez des questions, contactez-nous à **contact@hostolink.com** ou ouvre
             > \dt
 
 
-*-                  CONNECTER CETTE BD AU BACK-END(netjs) ET AU FRONT-END(flutter)*
+#                 CONNECTER CETTE BD AU BACK-END(netjs) ET AU FRONT-END(flutter)*
 
         - Ouvrir le projet back-end dans un éditeur 
             dans le fichier C:\Users\NGUESSAN.DESKTOP-38E6PIP\Desktop\SohapiGroup\hostolink_back-end\src\app.module.ts
@@ -238,102 +252,106 @@ Si vous avez des questions, contactez-nous à **contact@hostolink.com** ou ouvre
         - Installer et se connecter à son compte 
         -inviter les collab
         - créer une colection 
-            > POST 
-            > URL http://localhost:3000/users
-            >Header : Key: Content-Type Value: application/json
-            > Body cocher row 
-                {
-                    "nom": "nouvelle",
-                    "prenom": "donnee ",
-                    "email": "nouvelldonne@gmail.com",
-                    "telephone": "07089100",
-                    "pays": "Côte d'ivoire"
-                    }
-            > Send 
 
-        - Pour récuperer tous 
-            > GET 
-            > URL http://localhost:3000/users
-            > send
+*-    ok - 1- MISSION : Vérifier si un utilisateur existe*
+    Méthode : POST
+    URL : http://localhost:3000/api/check-user
+    BODY 
+        {
+        "identifier": "testemail@gmail.com"
+        }
 
------------------------------VENDREDI 28 fEVRIER 2024 ----------------------------------------------------
-    📌 Récapitulatif du projet et des étapes accomplies 🚀
+    
+*-    ok - 2- MISSION : Enregistrer un utilisateur (Sans mot de passe)*
+    Méthode : POST
+    URL : http://localhost:3000/api/register-user
+    BODY 
+        {
+        "identifier": "testemail@gmail.com"
+        }
+
+    
+*-    ok - 3-MISSION : Définir un mot de passe après inscription*
+    Méthode : POST
+    URL :http://localhost:3000/api/define-password
+    BODY 
+        {
+        "identifier": "testemail@gmail.com",
+        "password": "MonMotDePasse123"
+        }
+
+*-    ok - 4-MISSION : Générer un OTP*
+    Méthode : POST
+    URL : http://localhost:3000/api/generate-otp
+    BODY 
+        {
+        "identifier": "testemail@gmail.com"
+        }
+
+
+*-    ok - 5-MISSION :  Vérifier un OTP*
+    Méthode : POST
+    URL : http://localhost:3000/api/verify-otp
+    BODY 
+        {
+        "identifier": "testemail@gmail.com",
+        "otpCode": "123456"
+        }
+
+
+
+*-    ok - 6-MISSION :   Vérifier le PIN (mot de passe)*
+    Méthode : POST
+    URL : http://localhost:3000/api/verify-pin
+    BODY 
+        {
+        "identifier": "testemail@gmail.com",
+        "otpCode": "123456"
+        }
+    
+*-    ok -7-MISSION :Récupérer tous les utilisateurs (Test Admin uniquement)*
+    Méthode : POST
+    URL : http://localhost:3000/api/verify-pin
+    BODY 
+        {
+        "identifier": "testemail@gmail.com",
+        "otpCode": "123456"
+        }
+
+*----------RECAP DES ENDPINT DEVELOPPER ------------------*
+
     🎯 Objectif initial :
-    Tu voulais mettre en place un système d’authentification sécurisé dans ton back-end NestJS avec :
+     mettre en place un système d’authentification sécurisé dans ton back-end NestJS avec :
 
     🔑 Inscription & Gestion du mot de passe
-    📲 Génération et vérification de l’OTP
-    🔒 Connexion sécurisée avec JWT
-    🔍 Récupération des données utilisateur après authentification
-    ✅ Ce qu’on a fait jusqu’à présent :
+        📲 Génération et vérification de l’OTP
+        🔒 Connexion sécurisée avec JWT
+        🔍 Récupération des données utilisateur après authentification
+        ✅ Ce qu’on a fait jusqu’à présent :
     1️⃣ Gestion des utilisateurs
-    ✔ Vérification de l'existence d’un utilisateur → /api/check-user
-    ✔ Création d’un compte sans mot de passe → /api/register-user
-    ✔ Définition d’un mot de passe → /api/define-password
+
+        ✔ Vérification de l'existence d’un utilisateur → /api/check-user
+        ✔ Création d’un compte sans mot de passe → /api/register-user
+        ✔ Définition d’un mot de passe → /api/define-password
 
     2️⃣ OTP (One-Time Password)
-    ✔ Génération d’un OTP → /api/generate-otp
-    ✔ Vérification d’un OTP → /api/verify-otp
+        ✔ Génération d’un OTP → /api/generate-otp
+        ✔ Vérification d’un OTP → /api/verify-otp
 
     3️⃣ Authentification avec JWT
-    ✔ Mise en place de JWT (@nestjs/jwt et passport-jwt)
-    ✔ Connexion et génération d’un Token JWT → /api/auth/login
-    ✔ Création d’un JwtStrategy et JwtAuthGuard
-    ✔ Vérification du Token JWT pour récupérer les infos utilisateur → /api/user/me
+        ✔ Mise en place de JWT (@nestjs/jwt et passport-jwt)
+        ✔ Connexion et génération d’un Token JWT → /api/auth/login
+        ✔ Création d’un JwtStrategy et JwtAuthGuard
+        ✔ Vérification du Token JWT pour récupérer les infos utilisateur → /api/user/me
 
     🛠 Ce qu'on a mis en place au niveau du code :
-    📁 Fichiers créés/modifiés :
 
-    user.controller.ts → Routes utilisateur
-    user.service.ts → Gestion des utilisateurs
-    otp.service.ts → Gestion des OTPs
-    jwt.strategy.ts → Vérification des tokens JWT
-    auth.module.ts → Configuration JWT et Passport
-    auth.service.ts → Validation des identifiants et génération du token
-    jwt-auth.guard.ts → Protection des routes avec JWT
-    auth.controller.ts → Connexion utilisateur
-    📌 Où en sommes-nous ?
-    🔵 Tout fonctionne bien ! 🔥
-
-    📲 Tu peux inscrire un utilisateur, définir son mot de passe et gérer son OTP.
-    🔐 Il peut ensuite se connecter avec son email/téléphone et obtenir un JWT.
-    👤 Grâce à ce JWT, il peut accéder aux routes protégées et récupérer ses informations.
-    ⏭️ Quelle est la prochaine étape ?
-    1️⃣ Gestion des rôles et permissions (Admin, utilisateur, etc.)
-    2️⃣ Ajout d'une expiration et d’un rafraîchissement du token JWT
-    3️⃣ Intégration des fonctionnalités avancées de l’application
-
-
-
-*-----------------------------------------------------------------------------------------------------*
-PROJET NAME hostolink_bd
-MDP SUPABASE mdp_dev_sohapigroup
-pays france 
-
-public eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jcm9vd3VrZWR6ZnN4b2Nrd2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MTEwNTcsImV4cCI6MjA1NTM4NzA1N30.3OqLcL5E_Lg17sMxtoRFwyg7F14VwLBuXiAoi_B_RNo
-
-projet url https://ocroowukedzfsxockwjf.supabase.co
-API Key eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jcm9vd3VrZWR6ZnN4b2Nrd2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MTEwNTcsImV4cCI6MjA1NTM4NzA1N30.3OqLcL5E_Lg17sMxtoRFwyg7F14VwLBuXiAoi_B_RNo
-
-
-Javascript
-Dart
-import { createClient } from '@supabase/supabase-js'
-const supabaseUrl = 'https://ocroowukedzfsxockwjf.supabase.co'
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-
-
-Project name
-hostolink_bd
-Project ID
-ocroowukedzfsxockwjf
-Copy
-* pour la connexion en local*
-cmd                   : npm run start:dev
-postman | naviagteur :http://localhost:3000/auth/check-user
-POUR AFFICHER QUE LE SERVER TOURNE BIEN : http://localhost:3000/auth/
-AFFICHER TOUT LES USERS ajouter get dans postman et navigateur : http://localhost:3000/auth/users
-images uploader accessible via http://localhost:3000/uploads/nom_du_fichier.jpg
-EXPORTER LA BD : pg_dump -U postgres hostolink_bd > C:/Users/NGUESSAN.DESKTOP-38E6PIP/Desktop/SohapiGroup/hostolink_back-end/bd/hostolink_bd.sql
+        📁 ENSPOINT INSCRIPTION - CONNEXION - OTP - TOKEN CONNEXION  :
+            - user.controller.ts → Routes utilisateur
+            - user.service.ts → Gestion des utilisateurs
+            - otp.service.ts → Gestion des OTPs
+            - jwt.strategy.ts → Vérification des tokens JWT
+            - auth.module.ts → Configuration JWT et Passport
+            - auth.service.ts → Validation des identifiants et génération du token
+            - jwt-auth.guard.ts → Protection des routes avec JWT
+            - auth.controller.ts → Connexion utilisateur
