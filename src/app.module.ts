@@ -3,12 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Localisation } from './localisation_sante/entities/localisation.entity';
 import { LocalisationModule } from './localisation_sante/localisation.module';
 
-
-
-
 @Module({
   imports: [
-    // Connexion PostgreSQL
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -16,11 +12,10 @@ import { LocalisationModule } from './localisation_sante/localisation.module';
       username: 'postgres',
       password: 'NGUESSAN',
       database: 'hostolink_bd',
-      entities: [Localisation], // Ajout de l'entité Localisation
-      synchronize: true, // À désactiver en production
+      entities: [Localisation], 
+      synchronize: true, 
     }),
 
-    // Ajout du module de Localisation
     LocalisationModule,
   ],
   controllers: [],  
