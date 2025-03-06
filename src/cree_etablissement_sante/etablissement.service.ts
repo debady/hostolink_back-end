@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EtablissementSante } from '../entities/etablissement_sante.entity';
-import { CreateEtablissementDto } from '../dto/create-etablissement.dto';
+import { EtablissementSante } from './entities/etablissement_sante.entity';
+import { CreateEtablissementDto } from './dto/create-etablissement.dto';
+
 
 
 @Injectable()

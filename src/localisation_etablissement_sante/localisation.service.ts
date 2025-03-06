@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Localisation } from '../entities/localisation.entity';
-import { CreateLocalisationDto } from '../dto/create-localisation.dto';
+import { Localisation } from './entities/localisation.entity';
+import { CreateLocalisationDto } from './dto/create-localisation.dto';
+
 
 @Injectable()
 export class LocalisationService {

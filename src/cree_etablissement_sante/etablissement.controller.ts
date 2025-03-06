@@ -1,6 +1,6 @@
 import { Controller, Post, Body, UsePipes, ValidationPipe } from '@nestjs/common';
-import { EtablissementService } from '../services/etablissement.service';
-import { CreateEtablissementDto } from '../dto/create-etablissement.dto';
+import { CreateEtablissementDto } from './dto/create-etablissement.dto';
+import { EtablissementService } from './etablissement.service';
 
 
 @Controller('etablissements')
@@ -13,4 +13,6 @@ export class EtablissementController {
   async createEtablissement(@Body() createEtablissementDto: CreateEtablissementDto) {
     return this.etablissementService.createEtablissement(createEtablissementDto);
   }
+
+  
 }

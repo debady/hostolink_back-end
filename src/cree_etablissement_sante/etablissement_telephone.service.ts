@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EtablissementTelephone } from '../entities/etablissement_telephone.entity';
-import { CreateEtablissementTelephoneDto } from '../dto/create-etablissement-telephone .dto';
-import { EtablissementSante } from '../entities/etablissement_sante.entity';
+import { CreateEtablissementTelephoneDto } from './create-etablissement-telephone .dto';
+import { EtablissementSante } from './entities/etablissement_sante.entity';
+import { EtablissementTelephone } from './entities/etablissement_telephone.entity';
 
 
 @Injectable()

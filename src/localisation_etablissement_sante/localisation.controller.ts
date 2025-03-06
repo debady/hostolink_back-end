@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Body } from '@nestjs/common';
-import { LocalisationService } from '../services/localisation.service';
-import { CreateLocalisationDto } from '../dto/create-localisation.dto';
+import { CreateLocalisationDto } from './dto/create-localisation.dto';
+import { LocalisationService } from 'src/localisation_sante/localisation.service';
 
 @Controller('localisations')  // ✅ Vérifie que le chemin est bien '/localisations'
 export class LocalisationController {

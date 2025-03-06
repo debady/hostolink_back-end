@@ -1,7 +1,8 @@
+import { TypeEtablissement } from 'src/categories_etabalissement_sante/entities/type-etablissement.entity';
+import { Localisation } from 'src/localisation_etablissement_sante/entities/localisation.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { Localisation } from './localisation.entity';
-import { EtablissementTelephone } from './etablissement_telephone.entity';  // Importation de l'entité
-import { TypeEtablissement } from './type-etablissement.entity';
+import { EtablissementTelephone } from './etablissement_telephone.entity';
+
 
 @Entity('etablissement_sante')
 export class EtablissementSante {

@@ -1,5 +1,5 @@
+import { EtablissementSante } from 'src/cree_etablissement_sante/entities/etablissement_sante.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { EtablissementSante } from './etablissement_sante.entity';
 
 @Entity('type_etablissement')
 export class TypeEtablissement {

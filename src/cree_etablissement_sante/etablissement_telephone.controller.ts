@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Get } from '@nestjs/common';
-import { EtablissementTelephoneService } from '../services/etablissement_telephone.service';
-import { CreateEtablissementTelephoneDto } from '../dto/create-etablissement-telephone .dto';
+import { EtablissementTelephoneService } from './etablissement_telephone.service';
+import { CreateEtablissementTelephoneDto } from './create-etablissement-telephone .dto';
 
 
 @Controller('etablissement-telephones')

@@ -5,10 +5,17 @@ import { Repository } from 'typeorm';
 import { UpdateLocalisationDto } from './dto/update-localisation.dto';
 import { Localisation } from './entities/localisation.entity';
 import { GetLocalisationDto } from './dto/get-localisation.dto';
+import { CreateLocalisationDto } from 'src/localisation_etablissement_sante/dto/create-localisation.dto';
 
 
 @Injectable()
 export class LocalisationService {
+  getAllLocalisations() {
+    throw new Error('Method not implemented.');
+  }
+  createLocalisation(createLocalisationDto: CreateLocalisationDto) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     @InjectRepository(Localisation)
     private localisationRepository: Repository<Localisation>,

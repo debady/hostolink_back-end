@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { TypeEtablissementService } from '../services/type-etablissement.service';
-import { CreateTypeEtablissementDto } from '../dto/create-type-etablissement';
+import { TypeEtablissementService } from './type-etablissement.service';
+import { CreateTypeEtablissementDto } from './dto/create-type-etablissement';
 
 
 @Controller('type-etablissement')
