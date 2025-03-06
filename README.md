@@ -317,6 +317,15 @@ Si vous avez des questions, contactez-nous à **contact@hostolink.com** ou ouvre
         "identifier": "testemail@gmail.com",
         "otpCode": "123456"
         }
+    
+*-    ok -7-MISSION :Récupérer tous les utilisateurs (Test Admin uniquement)*
+    Méthode : POST
+    URL : http://localhost:3000/api/verify-pin
+    BODY 
+        {
+        "identifier": "testemail@gmail.com",
+        "otpCode": "123456"
+        }
 
 *----------RECAP DES ENDPINT DEVELOPPER ------------------*
 
