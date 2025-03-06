@@ -343,3 +343,91 @@ postgres
 user:
 postgres
 
+
+
+# Configuration de la base de données PostgreSQL
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=dev_sohapigroup
+DATABASE_PASSWORD=mdp_dev_sohapigroup
+DATABASE_NAME=hostolink_bd
+
+# Configuration de Cloudinary
+CLOUDINARY_CLOUD_NAME=dhrrk7vsd
+CLOUDINARY_API_KEY=197881586145143
+CLOUDINARY_API_SECRET=HEEz2vCv7MyxBRjCZScbXeUKgEw
+
+# Clé secrète pour JWT
+JWT_SECRET=MY_SECRET_KEY
+
+# main.ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+
+async function bootstrap() {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.useGlobalPipes(new ValidationPipe());
+
+  app.enableCors({
+    origin: '*', 
+    methods: ['GET', 'HEAD', 'PATCH','POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
+  const PORT = 3000;
+  await app.listen(PORT, '0.0.0.0');
+
+  console.log(`🚀 Application is running on: http://localhost:${PORT}`);
+}
+
+bootstrap();
+
+# app.module.ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/user.module';
+import { User } from './user/entities/user.entity';
+import { AuthModule } from './auth/auth.module';
+import { ImageModule } from './image/image.module';
+import { PublicationModule } from './publication/publication.module';
+import { CommentaireModule } from './commentaire/commentaire.module';
+import { PartageModule } from './partage/partage.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,  // ✅ Charge `.env` pour toute l'application
+      envFilePath: '.env',  // ✅ Spécifie où est `.env`
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DATABASE_HOST ?? 'localhost',
+      port: parseInt(process.env.DATABASE_PORT ?? '5432', 10),
+      username: process.env.DATABASE_USER ?? 'postgres',
+      password: process.env.DATABASE_PASSWORD ?? 'NGUESSAN',
+      database: process.env.DATABASE_NAME ?? 'hostolink_bd',
+      entities: [User],
+      autoLoadEntities: true,
+      synchronize: false,
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrationsRun: true,
+      logging: true,
+    }),
+    UserModule,
+    AuthModule,
+    ImageModule,
+    PublicationModule,
+    CommentaireModule,
+    PartageModule,
+  ],
+})
+export class AppModule {}
+
+// ✅ Vérifie si `.env` est bien chargé
+console.log('Cloudinary API Key:', process.env.CLOUDINARY_API_KEY);
+
