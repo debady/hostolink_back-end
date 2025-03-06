@@ -1,4 +1,6 @@
-COMMANDE DE CONNEXION A LA BAD SUR SUPABASE CMD
+                        COMMANDE A EXECUTER DANS LES TERMINALES
+
+CONNEXION A LA BD SUPABASE
     psql "postgresql://postgres.skwupmsitzsxukbmnkwv:mdp_dev_sohapigroup@aws-0-eu-west-3.pooler.supabase.com:5432/postgres?sslmode=require"
 
 Exporter  
