@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-<<<<<<< HEAD
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -8,6 +7,10 @@ import { ImageModule } from './image/image.module';
 import { PublicationModule } from './publication/publication.module';
 import { CommentaireModule } from './commentaire/commentaire.module';
 import { PartageModule } from './partage/partage.module';
+import { EtablissementService } from './etablissement/services/etablissement.service';
+import { TypeEtablissementController } from './etablissement/controllers/type-etablissement.controller';
+import { TypeEtablissementService } from './etablissement/services/type-etablissement.service';
+import { EtablissementController } from './etablissement/controllers/etablissement.controller';
 
 @Module({
   imports: [
@@ -36,50 +39,16 @@ import { PartageModule } from './partage/partage.module';
     PublicationModule,
     CommentaireModule,
     PartageModule,
-=======
-import { EtablissementSante } from './etablissement/entities/etablissement_sante.entity';
-import { Localisation } from './etablissement/entities/localisation.entity';
-import { EtablissementTelephone } from './etablissement/entities/etablissement_telephone.entity';
-import { EtablissementService } from './etablissement/services/etablissement.service';
-import { EtablissementController } from './etablissement/controllers/etablissement.controller';
-import { TypeEtablissementController } from './etablissement/controllers/type-etablissement.controller';
-import { TypeEtablissementService } from './etablissement/services/type-etablissement.service';
-import { TypeEtablissement } from './etablissement/entities/type-etablissement.entity';
-import { EtablissementTelephoneModule } from './etablissement/etablissement_telephone.module';
-import { EtablissementSanteModule } from './etablissement/etablissement-sante.module';
- // Module ajouté ici
-
-@Module({
-  imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'NGUESSAN',
-      database: 'hostolink_bd',
-      entities: [EtablissementSante, TypeEtablissement, Localisation, EtablissementTelephone], 
-      synchronize: true,
-    }),
-    TypeOrmModule.forFeature([EtablissementSante, TypeEtablissement, Localisation, EtablissementTelephone]),
-    EtablissementTelephoneModule,  // Module pour les téléphones
-    EtablissementSanteModule, // Correctement importé ici
->>>>>>> c2809185ef9fdef4bdce26e64315234f28dd58ac
   ],
-  controllers: [EtablissementController, TypeEtablissementController],  // Contrôleurs ici
+  controllers: [EtablissementController, TypeEtablissementController], 
   providers: [EtablissementService, TypeEtablissementService],
 })
 export class AppModule {}
-<<<<<<< HEAD
 console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
 
 
+// ---------------------LOCAL ---------------------
 
-
-
-
-// Vérifie que la variable Cloudinary est bien chargée
-// console.log('Cloudinary API Key:', process.env.CLOUDINARY_API_KEY);
 // import { Module } from '@nestjs/common';
 // import { TypeOrmModule } from '@nestjs/typeorm';
 // import { ConfigModule } from '@nestjs/config';
@@ -87,6 +56,9 @@ console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
 // import { User } from './user/entities/user.entity';
 // import { AuthModule } from './auth/auth.module';
 // import { ImageModule } from './image/image.module';
+// import { PublicationModule } from './publication/publication.module';
+// import { CommentaireModule } from './commentaire/commentaire.module';
+// import { PartageModule } from './partage/partage.module';
 
 // @Module({
 //   imports: [
@@ -111,10 +83,12 @@ console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
 //     UserModule,
 //     AuthModule,
 //     ImageModule,
+//     PublicationModule,
+//     CommentaireModule,
+//     PartageModule,
 //   ],
 // })
 // export class AppModule {}
 
-// // console.log('Cloudinary API Key:', process.env.CLOUDINARY_API_KEY);
-=======
->>>>>>> c2809185ef9fdef4bdce26e64315234f28dd58ac
+// // ✅ Vérifie si `.env` est bien chargé
+// console.log('Cloudinary API Key:', process.env.CLOUDINARY_API_KEY);
