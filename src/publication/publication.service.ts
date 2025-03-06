@@ -16,6 +16,7 @@ export class PublicationService {
     private readonly commentaireRepository: Repository<Commentaire>,
   ) {}
 
+  // creer une publication
   async create(createPublicationDto: CreatePublicationDto): Promise<Publication> {
     const { id_user, ...publicationData } = createPublicationDto;
     
@@ -29,6 +30,7 @@ export class PublicationService {
     return this.publicationRepository.save(publication);
   }
 
+  //  recupérer une publication spécifique
   async findOne(id_publication: number): Promise<Publication> {
     const publication = await this.publicationRepository.findOne({
       where: { id_publication },
@@ -73,6 +75,7 @@ export class PublicationService {
       return this.publicationRepository.save(publication);
     }
 
+    // récuperer toutes les publications avec les commentaires 
   async findAll(): Promise<Publication[]> {
     return this.publicationRepository.find({ 
       relations: ['user', 'commentaires', 'commentaires.user'],
@@ -80,7 +83,7 @@ export class PublicationService {
     });
   }
 
-
+  // récuperer les publications d'un utilisateur spécifique avec les commentaires 
   async findByUserId(userId: number): Promise<Publication[]> {
     return this.publicationRepository.find({
       where: { user: { id_user: userId } },

@@ -97,9 +97,9 @@ export class User {
   commentaires: Commentaire[];
 
   // ✅ Relation One-to-One avec Partage
-  @OneToOne(() => Partage, (partage) => partage.user, { cascade: true, nullable: true })
-  @JoinColumn() // Ajoute une clé étrangère `partageId` dans la table utilisateur
-  partage?: Partage;
+  // @OneToOne(() => Partage, (partage) => partage.user, { cascade: true, nullable: true })
+  // @JoinColumn() // Ajoute une clé étrangère `partageId` dans la table utilisateur
+  // partage?: Partage;
 }
 
 
