@@ -7,10 +7,7 @@ import { ImageModule } from './image/image.module';
 import { PublicationModule } from './publication/publication.module';
 import { CommentaireModule } from './commentaire/commentaire.module';
 import { PartageModule } from './partage/partage.module';
-import { EtablissementService } from './etablissement/services/etablissement.service';
-import { TypeEtablissementController } from './etablissement/controllers/type-etablissement.controller';
-import { TypeEtablissementService } from './etablissement/services/type-etablissement.service';
-import { EtablissementController } from './etablissement/controllers/etablissement.controller';
+
 
 @Module({
   imports: [
@@ -40,8 +37,7 @@ import { EtablissementController } from './etablissement/controllers/etablisseme
     CommentaireModule,
     PartageModule,
   ],
-  controllers: [EtablissementController, TypeEtablissementController], 
-  providers: [EtablissementService, TypeEtablissementService],
+
 })
 export class AppModule {}
 console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
