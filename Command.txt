@@ -32,4 +32,5 @@ TEST API supabase
 
 INSTALLER LES DEPENDANCES ET REBUILDER (supprimer dist)
     npm run build
-    npm run build
+    npm run buildù
+
