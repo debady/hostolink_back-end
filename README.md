@@ -337,3 +337,10 @@ POUR AFFICHER QUE LE SERVER TOURNE BIEN : http://localhost:3000/auth/
 AFFICHER TOUT LES USERS ajouter get dans postman et navigateur : http://localhost:3000/auth/users
 images uploader accessible via http://localhost:3000/uploads/nom_du_fichier.jpg
 EXPORTER LA BD : pg_dump -U postgres hostolink_bd > C:/Users/NGUESSAN.DESKTOP-38E6PIP/Desktop/SohapiGroup/hostolink_back-end/bd/hostolink_bd.sql
+
+
+-------------------------------------------------------------------**********************
+
+POUR LA PARTIE GEOLOCATION
+
+ J AI INSTALLER POSTGIS cest un un modèle TypeORM pour gérer les données spatiales  cela me mettre d eviter de creer une table appelle localisation et les champs car dans ce modele on peut trouver tout les champs de ma table localisation

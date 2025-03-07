@@ -35,4 +35,7 @@ export class User {
 
   @OneToMany(() => Otp, otp => otp.user, { cascade: true, nullable: true }) // ✅ Ajout de nullable: true
   otps?: Otp[];
+
+  @Column('geometry', { spatialFeatureType: 'Point', srid: 4326, nullable: true })
+  position?: string;
 }
