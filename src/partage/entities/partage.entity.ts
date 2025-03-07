@@ -8,7 +8,7 @@ export class Partage {
   @PrimaryGeneratedColumn()
   id_partage: number;
 
-  @OneToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'id_user' })
   user: User;
 
