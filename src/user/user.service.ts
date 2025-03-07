@@ -111,6 +111,19 @@ export class UserService {
   
   
   
+  // dev1
+  // async mettreAJourPosition(id_user: number, lat: number, lon: number) {
+  //   const positionGeometrique = `SRID=4326;POINT(${lon} ${lat})`;
+  
+  //   return this.utilisateurRepository.query(
+  //     `UPDATE utilisateur 
+  //      SET position = ST_GeomFromText($1, 4326)
+  //      WHERE id_user = $2`,
+  //     [positionGeometrique, id_user]
+  //   );
+  // }
+
+
 }
 
 

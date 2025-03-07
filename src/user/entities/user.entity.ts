@@ -89,17 +89,9 @@ export class User {
 
   @OneToMany(() => Otp, otp => otp.user, { cascade: true, nullable: true })
   otps?: Otp[];
-  
-  @OneToMany(() => Publication, (publication) => publication.user)
-  publications: Publication[];
 
-  @OneToMany(() => Commentaire, commentaire => commentaire.user)
-  commentaires: Commentaire[];
-
-  // ✅ Relation One-to-One avec Partage
-  @OneToMany(() => Partage, (partage) => partage.user, { cascade: true, nullable: true })
-  @JoinColumn() // Ajoute une clé étrangère `partageId` dans la table utilisateur
-  partage?: Partage;
+  @Column('geometry', { spatialFeatureType: 'Point', srid: 4326, nullable: true })
+  position?: string;
 }
 
 

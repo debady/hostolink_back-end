@@ -7,8 +7,11 @@ export class Otp {
   id: number;
 
   @ManyToOne(() => User, user => user.otps, { onDelete: 'CASCADE', eager: false, nullable: false })
-  @JoinColumn({ name: 'user_id' }) // ✅ Associe `user_id` à la relation
+  @JoinColumn({ name: 'user_id' }) 
   user: User;
+
+  @Column({ name: 'user_id', type: 'int' }) 
+  userId: number;
 
   @Column({ type: 'varchar', length: 6 })
   otp_code: string;
