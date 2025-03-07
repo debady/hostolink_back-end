@@ -55,10 +55,7 @@ import { ImageModule } from './image/image.module';
 import { PublicationModule } from './publication/publication.module';
 import { CommentaireModule } from './commentaire/commentaire.module';
 import { PartageModule } from './partage/partage.module';
-import { TypeEtablissementController } from './etablissement/controllers/type-etablissement.controller';
-import { EtablissementController } from './etablissement/controllers/etablissement.controller';
-import { TypeEtablissementService } from './etablissement/services/type-etablissement.service';
-import { EtablissementService } from './etablissement/services/etablissement.service';
+
 
 @Module({
   imports: [
@@ -87,8 +84,7 @@ import { EtablissementService } from './etablissement/services/etablissement.ser
     CommentaireModule,
     PartageModule,
   ],
-  // controllers: [EtablissementController, TypeEtablissementController], 
-  // providers: [EtablissementService, TypeEtablissementService],
+
 })
 export class AppModule {}
 // ✅ Vérifie si `.env` est bien chargé
