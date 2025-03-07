@@ -1,32 +1,26 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Etablissement } from './etablissement/entities/etablissement_sante.entity';
-import { Utilisateur } from './utilisateurs/entities/utilisateur.entity';
-import { UtilisateurModule } from './utilisateurs/utilisateur.module';
-import { EtablissementModule } from './etablissement/etablissement_sante.module';
-
-
+import { ConfigModule } from '@nestjs/config';
+import { EtablissementSanteModule } from './etablissement_sante/etablissement_sante.module';
 
 @Module({
   imports: [
-    // Connexion PostgreSQL
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'NGUESSAN',
-      database: 'hostolink_bd',
-      entities: [Utilisateur, Etablissement], // Ajout de toutes les entités
-      synchronize: false, // ⚠️ À désactiver en production
+      host: process.env.DATABASE_HOST || 'localhost',
+      port: Number(process.env.DATABASE_PORT) || 5432,
+      username: process.env.DATABASE_USER || 'postgres',
+      password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
+      database: process.env.DATABASE_NAME || 'hostolink_bd',
+      autoLoadEntities: true,
+      synchronize: true, 
     }),
-
-    // Ajout des modules principaux
-    UtilisateurModule,
-    EtablissementModule,
-
+    EtablissementSanteModule, 
   ],
-  controllers: [],  
-  providers: [],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  onModuleInit() {
+    console.log("✅ Connexion à la base de données réussie !");
+  }
+}
