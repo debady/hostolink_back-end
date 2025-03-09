@@ -26,7 +26,7 @@ export class ImageController {
   // ✅ Endpoint pour supprimer une image
   @Delete(':id')
   async deleteImage(@Param('id') id: string) {
-    console.log("🟡 Suppression de l'image ID :", id); // ✅ Vérification côté serveur
+    console.log("🟡 Suppression de l'image ID :", id);
     return await this.imageService.deleteImage(id);
   }
 

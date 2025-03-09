@@ -34,3 +34,9 @@ INSTALLER LES DEPENDANCES ET REBUILDER (supprimer dist)
     npm run build
     npm run buildù
 
+Installer geojson
+    npm install geojson
+    npm install --save-dev @types/geojson
+
+
+

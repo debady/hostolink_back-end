@@ -7,6 +7,12 @@ export class Image {
 
   @Column()
   url_image: string;
+  
+  // @Column()
+  // id_user: Number;
+
+  // @Column()
+  // modtif: string;
 
   @CreateDateColumn()
   date: Date;

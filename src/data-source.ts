@@ -10,9 +10,9 @@ export const AppDataSource = new DataSource({
     username: "postgres",
     password: "NGUESSAN",
     database: "hostolink_bd",
-    synchronize: false,
+    synchronize: true,
 
-    logging: false,
+    logging: true,
     entities: ["src/**/entities/*.ts"],
     // entities: [User, Otp], 
     migrations: ["src/migrations/*.ts"],

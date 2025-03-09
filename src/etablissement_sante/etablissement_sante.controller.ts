@@ -18,7 +18,7 @@ export class EtablissementSanteController {
     return this.etablissementSanteService.findAll();
   }
   @Get('proches')
-  @UsePipes(new ValidationPipe({ transform: true })) // ✅ Utilisation correcte du DTO sans conversion manuelle
+  @UsePipes(new ValidationPipe({ transform: true })) 
   async findNearby(@Query() query: FindNearbyDto): Promise<EtablissementSante[]> {
     return this.etablissementSanteService.findNearby(query.lat, query.lng, query.distance);
   }
