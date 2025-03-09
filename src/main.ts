@@ -1,5 +1,3 @@
-
-
 // // ------------LOCAL -----------------
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -48,6 +46,9 @@ async function bootstrap() {
   console.log(`le server tourne bien sur le porte 🚀: http://localhost:${PORT}`);
 }
 bootstrap();
+
+
+//  ----- config en ligne
 
 // import { NestFactory } from '@nestjs/core';
 // import { AppModule } from './app.module';

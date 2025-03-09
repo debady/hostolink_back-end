@@ -26,16 +26,15 @@ import { EtablissementSanteModule } from './etablissement_sante/etablissement_sa
       autoLoadEntities: true,
       synchronize: true, 
   }),
-    // EtablissementSanteModule, 
-    UserModule,
-    AuthModule,
-    ImageModule,
-    // PublicationModule,
-    // CommentaireModule,
-    // PartageModule,
+  UserModule,
+  AuthModule,
+  ImageModule,
+  // PublicationModule,
+  // CommentaireModule,
+  // PartageModule,
+  // EtablissementSanteModule, 
     EtablissementSanteModule
   ],
 })
 
 export class AppModule {}
-console.log('Cloudinary API Key:', process.env.CLOUDINARY_API_KEY);
