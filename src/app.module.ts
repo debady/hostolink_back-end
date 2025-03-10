@@ -10,9 +10,12 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { EtablissementSanteModule } from './etablissement_sante/etablissement_sante.module';
-import { Publication } from './publication/entities/publication.entity';
 import { Commentaire } from './commentaire/entities/commentaire.entity';
 import { Otp } from './otp/entities/otp.entity';
+import { Publication } from './publication/entities/publication.entity';
+import { Partage } from './partage/entities/partage.entity';
+import { Image } from './image/entities/image.entity';
+import { EtablissementSante } from './etablissement_sante/entities/etablissement_sante.entity';
 
 
 @Module({
@@ -26,10 +29,9 @@ import { Otp } from './otp/entities/otp.entity';
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
       database: process.env.DATABASE_NAME || 'hostolink_bd',
-      entities: [User, Commentaire, Publication, Otp],
+      autoLoadEntities: false,
       synchronize: false, 
-      autoLoadEntities: true,
-
+      entities: [User, Commentaire,Otp,Publication,Partage,Image,EtablissementSante,], 
   }),
   UserModule,
   AuthModule,
@@ -38,7 +40,7 @@ import { Otp } from './otp/entities/otp.entity';
   CommentaireModule,
   PartageModule,
   EtablissementSanteModule, 
-    EtablissementSanteModule
+  EtablissementSanteModule
   ],
 })
 
