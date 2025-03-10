@@ -7,40 +7,39 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
+const common_1 = require("@nestjs/common");
+const typeorm_1 = require("@nestjs/typeorm");
+const config_1 = require("@nestjs/config");
 const user_module_1 = require("./user/user.module");
-const user_entity_1 = require("./user/entities/user.entity");
 const auth_module_1 = require("./auth/auth.module");
 const image_module_1 = require("./image/image.module");
 const publication_module_1 = require("./publication/publication.module");
 const commentaire_module_1 = require("./commentaire/commentaire.module");
 const partage_module_1 = require("./partage/partage.module");
-const common_1 = require("@nestjs/common");
-const typeorm_1 = require("@nestjs/typeorm");
-const config_1 = require("@nestjs/config");
-const etablissement_sante_module_1 = require("./etablissement_sante/etablissement_sante.module");
-const commentaire_entity_1 = require("./commentaire/entities/commentaire.entity");
-const otp_entity_1 = require("./otp/entities/otp.entity");
-const publication_entity_1 = require("./publication/entities/publication.entity");
-const partage_entity_1 = require("./partage/entities/partage.entity");
-const image_entity_1 = require("./image/entities/image.entity");
-const etablissement_sante_entity_1 = require("./etablissement_sante/entities/etablissement_sante.entity");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            config_1.ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env', }),
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+            }),
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
-                host: process.env.DATABASE_HOST || 'localhost',
-                port: Number(process.env.DATABASE_PORT) || 5432,
-                username: process.env.DATABASE_USER || 'postgres',
-                password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
-                database: process.env.DATABASE_NAME || 'hostolink_bd',
-                autoLoadEntities: false,
+                host: process.env.DB_HOST,
+                port: Number(process.env.DB_PORT),
+                username: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME,
+                autoLoadEntities: true,
                 synchronize: false,
-                entities: [user_entity_1.User, commentaire_entity_1.Commentaire, otp_entity_1.Otp, publication_entity_1.Publication, partage_entity_1.Partage, image_entity_1.Image, etablissement_sante_entity_1.EtablissementSante,],
+                migrations: [__dirname + '/migrations/*{.ts,.js}'],
+                migrationsRun: true,
+                logging: process.env.NODE_ENV !== 'production',
+                extra: process.env.DB_SSL === 'true'
+                    ? { ssl: { rejectUnauthorized: false } }
+                    : undefined,
             }),
             user_module_1.UserModule,
             auth_module_1.AuthModule,
@@ -48,8 +47,8 @@ exports.AppModule = AppModule = __decorate([
             publication_module_1.PublicationModule,
             commentaire_module_1.CommentaireModule,
             partage_module_1.PartageModule,
-            etablissement_sante_module_1.EtablissementSanteModule,
         ],
     })
 ], AppModule);
+console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
 //# sourceMappingURL=app.module.js.map
