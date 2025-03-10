@@ -46,3 +46,13 @@ EXPORTER LA BD
 
 
 
+TELECHARGER POSTGIS 
+    https://ftp.postgresql.org/pub/postgis/pg17/v3.5.0/win64/postgis-bundle-pg17x64-setup-3.5.0-2.exe
+
+    executer
+    choix  version 
+    coche postgis (avant dernière dans la liste)
+    executer puis 
+    connexion a la bd
+    taper la commande d'extension postgis
+        > CREATE EXTENSION..
