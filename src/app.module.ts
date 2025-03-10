@@ -10,6 +10,9 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { EtablissementSanteModule } from './etablissement_sante/etablissement_sante.module';
+import { Publication } from './publication/entities/publication.entity';
+import { Commentaire } from './commentaire/entities/commentaire.entity';
+import { Otp } from './otp/entities/otp.entity';
 
 
 @Module({
@@ -23,16 +26,18 @@ import { EtablissementSanteModule } from './etablissement_sante/etablissement_sa
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
       database: process.env.DATABASE_NAME || 'hostolink_bd',
+      entities: [User, Commentaire, Publication, Otp],
+      synchronize: false, 
       autoLoadEntities: true,
-      synchronize: true, 
+
   }),
   UserModule,
   AuthModule,
   ImageModule,
-  // PublicationModule,
-  // CommentaireModule,
-  // PartageModule,
-  // EtablissementSanteModule, 
+  PublicationModule,
+  CommentaireModule,
+  PartageModule,
+  EtablissementSanteModule, 
     EtablissementSanteModule
   ],
 })
