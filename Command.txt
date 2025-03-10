@@ -55,4 +55,10 @@ TELECHARGER POSTGIS
     executer puis 
     connexion a la bd
     taper la commande d'extension postgis
-        > CREATE EXTENSION..
+        > CREATE EXTENSION postgis;
+        
+    Activer Toutes les Fonctionnalités PostGIS (Optionnel)
+        Si tu veux aussi ajouter toutes les fonctionnalités supplémentaires de PostGIS, exécute :
+            CREATE EXTENSION postgis_topology; 
+            CREATE EXTENSION postgis_raster;
+            CREATE EXTENSION postgis_sfcgal; -- Pour la 3D
