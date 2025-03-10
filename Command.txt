@@ -38,5 +38,21 @@ Installer geojson
     npm install geojson
     npm install --save-dev @types/geojson
 
+CONNEXION A LA BD supababse 
+    pg_dump -U postgres.skwupmsitzsxukbmnkwv -h aws-0-eu-west-3.pooler.supabase.com -d postgres -f hostolink_bd_supabase.sql
+
+EXPORTER LA BD supababse
+    pg_dump -U postgres.skwupmsitzsxukbmnkwv -h aws-0-eu-west-3.pooler.supabase.com -d postgres -f hostolink_bd_supabase.sql
 
 
+
+TELECHARGER POSTGIS 
+    https://ftp.postgresql.org/pub/postgis/pg17/v3.5.0/win64/postgis-bundle-pg17x64-setup-3.5.0-2.exe
+
+    executer
+    choix  version 
+    coche postgis (avant dernière dans la liste)
+    executer puis 
+    connexion a la bd
+    taper la commande d'extension postgis
+        > CREATE EXTENSION..
