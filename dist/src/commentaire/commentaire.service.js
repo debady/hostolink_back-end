@@ -17,16 +17,32 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const commentaire_entity_1 = require("./entities/commentaire.entity");
+const publication_entity_1 = require("../publication/entities/publication.entity");
+const user_entity_1 = require("../user/entities/user.entity");
 let CommentaireService = class CommentaireService {
-    constructor(commentaireRepository) {
+    constructor(commentaireRepository, publicationRepository, userRepository) {
         this.commentaireRepository = commentaireRepository;
+        this.publicationRepository = publicationRepository;
+        this.userRepository = userRepository;
     }
-    async create(createCommentaireDto) {
-        const { id_publication, id_user, ...commentaireData } = createCommentaireDto;
+    async create(id_publication, createCommentaireDto) {
+        const { id_user, contenu } = createCommentaireDto;
+        const publication = await this.publicationRepository.findOne({
+            where: { id_publication },
+        });
+        if (!publication) {
+            throw new common_1.NotFoundException(`Publication avec id ${id_publication} non trouvée`);
+        }
+        const user = await this.userRepository.findOne({
+            where: { id_user },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException(`Utilisateur avec id ${id_user} non trouvé`);
+        }
         const commentaire = this.commentaireRepository.create({
-            ...commentaireData,
-            publication: { id_publication },
-            user: { id_user }
+            contenu,
+            publication,
+            user,
         });
         return this.commentaireRepository.save(commentaire);
     }
@@ -34,17 +50,17 @@ let CommentaireService = class CommentaireService {
         return this.commentaireRepository.find({
             where: { publication: { id_publication } },
             relations: ['user'],
-            order: { date_commentaire: 'DESC' }
+            order: { date_commentaire: 'DESC' },
         });
     }
     async findByPublicationIdAndUserId(id_publication, id_user) {
         return this.commentaireRepository.find({
             where: {
                 publication: { id_publication },
-                user: { id_user }
+                user: { id_user },
             },
             relations: ['user'],
-            order: { date_commentaire: 'DESC' }
+            order: { date_commentaire: 'DESC' },
         });
     }
 };
@@ -52,6 +68,10 @@ exports.CommentaireService = CommentaireService;
 exports.CommentaireService = CommentaireService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(commentaire_entity_1.Commentaire)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(publication_entity_1.Publication)),
+    __param(2, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository])
 ], CommentaireService);
 //# sourceMappingURL=commentaire.service.js.map

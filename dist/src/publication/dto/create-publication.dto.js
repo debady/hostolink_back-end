@@ -16,14 +16,22 @@ class CreatePublicationDto {
 exports.CreatePublicationDto = CreatePublicationDto;
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreatePublicationDto.prototype, "titre_publication", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreatePublicationDto.prototype, "contenu", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePublicationDto.prototype, "image", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Number)
+], CreatePublicationDto.prototype, "id_user", void 0);
 //# sourceMappingURL=create-publication.dto.js.map

@@ -18,9 +18,12 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const config_1 = require("@nestjs/config");
 const etablissement_sante_module_1 = require("./etablissement_sante/etablissement_sante.module");
-const publication_entity_1 = require("./publication/entities/publication.entity");
 const commentaire_entity_1 = require("./commentaire/entities/commentaire.entity");
 const otp_entity_1 = require("./otp/entities/otp.entity");
+const publication_entity_1 = require("./publication/entities/publication.entity");
+const partage_entity_1 = require("./partage/entities/partage.entity");
+const image_entity_1 = require("./image/entities/image.entity");
+const etablissement_sante_entity_1 = require("./etablissement_sante/entities/etablissement_sante.entity");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,9 +38,9 @@ exports.AppModule = AppModule = __decorate([
                 username: process.env.DATABASE_USER || 'postgres',
                 password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
                 database: process.env.DATABASE_NAME || 'hostolink_bd',
-                entities: [user_entity_1.User, commentaire_entity_1.Commentaire, publication_entity_1.Publication, otp_entity_1.Otp],
-                synchronize: false,
-                autoLoadEntities: true,
+                autoLoadEntities: false,
+                synchronize: true,
+                entities: [user_entity_1.User, commentaire_entity_1.Commentaire, otp_entity_1.Otp, publication_entity_1.Publication, partage_entity_1.Partage, image_entity_1.Image, etablissement_sante_entity_1.EtablissementSante,],
             }),
             user_module_1.UserModule,
             auth_module_1.AuthModule,
