@@ -38,5 +38,11 @@ Installer geojson
     npm install geojson
     npm install --save-dev @types/geojson
 
+CONNEXION A LA BD 
+    pg_dump -U postgres.skwupmsitzsxukbmnkwv -h aws-0-eu-west-3.pooler.supabase.com -d postgres -f hostolink_bd_supabase.sql
+
+EXPORTER LA BD
+    pg_dump -U postgres.skwupmsitzsxukbmnkwv -h aws-0-eu-west-3.pooler.supabase.com -d postgres -f hostolink_bd_supabase.sql
+
 
 
