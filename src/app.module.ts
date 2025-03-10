@@ -30,7 +30,7 @@ import { EtablissementSante } from './etablissement_sante/entities/etablissement
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
       database: process.env.DATABASE_NAME || 'hostolink_bd',
       autoLoadEntities: false,
-      synchronize: true, 
+      synchronize: false, 
       // synchronize: false, 
       entities: [User, Commentaire,Otp,Publication,Partage,Image,EtablissementSante,], 
   }),
@@ -41,7 +41,6 @@ import { EtablissementSante } from './etablissement_sante/entities/etablissement
   CommentaireModule,
   PartageModule,
   EtablissementSanteModule, 
-  EtablissementSanteModule
   ],
 })
 

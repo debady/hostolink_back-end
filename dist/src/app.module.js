@@ -39,7 +39,7 @@ exports.AppModule = AppModule = __decorate([
                 password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
                 database: process.env.DATABASE_NAME || 'hostolink_bd',
                 autoLoadEntities: false,
-                synchronize: true,
+                synchronize: false,
                 entities: [user_entity_1.User, commentaire_entity_1.Commentaire, otp_entity_1.Otp, publication_entity_1.Publication, partage_entity_1.Partage, image_entity_1.Image, etablissement_sante_entity_1.EtablissementSante,],
             }),
             user_module_1.UserModule,
@@ -49,7 +49,6 @@ exports.AppModule = AppModule = __decorate([
             commentaire_module_1.CommentaireModule,
             partage_module_1.PartageModule,
             etablissement_sante_module_1.EtablissementSanteModule,
-            etablissement_sante_module_1.EtablissementSanteModule
         ],
     })
 ], AppModule);

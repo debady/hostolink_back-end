@@ -272,7 +272,7 @@ ALTER SEQUENCE public.contacts_enregistres_id_contact_seq OWNED BY public.contac
 
 
 --
--- Name: etablissement_sante; Type: TABLE; Schema: public; Owner: dev_sohapigroup
+-- Name: etablissement_sante; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.etablissement_sante (
@@ -288,10 +288,10 @@ CREATE TABLE public.etablissement_sante (
 );
 
 
-ALTER TABLE public.etablissement_sante OWNER TO dev_sohapigroup;
+ALTER TABLE public.etablissement_sante OWNER TO postgres;
 
 --
--- Name: etablissement_sante_id_etablissement_seq1; Type: SEQUENCE; Schema: public; Owner: dev_sohapigroup
+-- Name: etablissement_sante_id_etablissement_seq1; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.etablissement_sante_id_etablissement_seq1
@@ -303,10 +303,10 @@ CREATE SEQUENCE public.etablissement_sante_id_etablissement_seq1
     CACHE 1;
 
 
-ALTER SEQUENCE public.etablissement_sante_id_etablissement_seq1 OWNER TO dev_sohapigroup;
+ALTER SEQUENCE public.etablissement_sante_id_etablissement_seq1 OWNER TO postgres;
 
 --
--- Name: etablissement_sante_id_etablissement_seq1; Type: SEQUENCE OWNED BY; Schema: public; Owner: dev_sohapigroup
+-- Name: etablissement_sante_id_etablissement_seq1; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.etablissement_sante_id_etablissement_seq1 OWNED BY public.etablissement_sante.id_etablissement;
@@ -856,7 +856,7 @@ ALTER TABLE ONLY public.contacts_enregistres ALTER COLUMN id_contact SET DEFAULT
 
 
 --
--- Name: etablissement_sante id_etablissement; Type: DEFAULT; Schema: public; Owner: dev_sohapigroup
+-- Name: etablissement_sante id_etablissement; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.etablissement_sante ALTER COLUMN id_etablissement SET DEFAULT nextval('public.etablissement_sante_id_etablissement_seq1'::regclass);
@@ -995,7 +995,7 @@ COPY public.contacts_enregistres (id_contact, id_user, id_contact_user, nom_cont
 
 
 --
--- Data for Name: etablissement_sante; Type: TABLE DATA; Schema: public; Owner: dev_sohapigroup
+-- Data for Name: etablissement_sante; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.etablissement_sante (id_etablissement, nom, telephone, categorie, adresse, creat_at, latitude, longitude, geom) FROM stdin;
@@ -1132,7 +1132,7 @@ SELECT pg_catalog.setval('public.carte_bancaire_id_carte_bancaire_seq', 1, false
 -- Name: commentaire_id_commentaire_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.commentaire_id_commentaire_seq', 15, true);
+SELECT pg_catalog.setval('public.commentaire_id_commentaire_seq', 16, true);
 
 
 --
@@ -1150,7 +1150,7 @@ SELECT pg_catalog.setval('public.contacts_enregistres_id_contact_seq', 1, false)
 
 
 --
--- Name: etablissement_sante_id_etablissement_seq1; Type: SEQUENCE SET; Schema: public; Owner: dev_sohapigroup
+-- Name: etablissement_sante_id_etablissement_seq1; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.etablissement_sante_id_etablissement_seq1', 2, true);
@@ -1195,14 +1195,14 @@ SELECT pg_catalog.setval('public.otp_id_seq', 9, true);
 -- Name: partages_id_partage_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.partages_id_partage_seq', 2, true);
+SELECT pg_catalog.setval('public.partages_id_partage_seq', 3, true);
 
 
 --
 -- Name: publication_id_publication_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.publication_id_publication_seq', 14, true);
+SELECT pg_catalog.setval('public.publication_id_publication_seq', 16, true);
 
 
 --
@@ -1244,11 +1244,11 @@ SELECT pg_catalog.setval('public.transaction_id_transaction_seq', 1, false);
 -- Name: utilisateur_id_user_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.utilisateur_id_user_seq', 1, false);
+SELECT pg_catalog.setval('public.utilisateur_id_user_seq', 1, true);
 
 
 --
--- Name: etablissement_sante PK_28872ffe39dc5f7355edde5b1cb; Type: CONSTRAINT; Schema: public; Owner: dev_sohapigroup
+-- Name: etablissement_sante PK_28872ffe39dc5f7355edde5b1cb; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.etablissement_sante
