@@ -24,15 +24,23 @@ import { EtablissementSante } from './etablissement_sante/entities/etablissement
 
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DATABASE_HOST || 'localhost',
+      host: process.env.DATABASE_HOST || 'aws-0-eu-west-3.pooler.supabase.com',
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
-      database: process.env.DATABASE_NAME || 'hostolink_bd',
-      autoLoadEntities: false,
+      password: process.env.DATABASE_PASSWORD || '6640ywfeiQqiBMM5',
+      database: process.env.DATABASE_NAME || 'postgres',
+      autoLoadEntities: true,
       synchronize: false, 
-      // synchronize: false, 
       entities: [User, Commentaire,Otp,Publication,Partage,Image,EtablissementSante,], 
+     
+
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrationsRun: true,
+      logging: process.env.NODE_ENV !== 'production',
+      extra: process.env.DB_SSL === 'true'
+        ? { ssl: { rejectUnauthorized: false } }
+        : undefined,
+      
   }),
   UserModule,
   AuthModule,
@@ -45,3 +53,4 @@ import { EtablissementSante } from './etablissement_sante/entities/etablissement
 })
 
 export class AppModule {}
+console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);

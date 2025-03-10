@@ -7,6 +7,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
 async function bootstrap() {
+  try {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.useGlobalPipes(
@@ -17,7 +18,7 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN || '*',  
@@ -25,7 +26,6 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // ✅ Optionnel : Servir des fichiers statiques (ex: images, PDF, etc.)
   if (process.env.SERVE_STATIC === 'true') {
     app.useStaticAssets(join(__dirname, '..', 'public'));
   }
@@ -40,10 +40,14 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'], 
   });
 
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 10000;
   await app.listen(PORT, '0.0.0.0');
 
   console.log(`le server tourne bien sur le porte 🚀: http://localhost:${PORT}`);
+}catch (error) {
+    console.error('❌ erreur lors du demarrage de l application', error);
+    process.exit(1);
+  }
 }
 bootstrap();
 
