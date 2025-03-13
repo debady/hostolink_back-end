@@ -71,7 +71,8 @@ export class EtablissementSanteController {
 
   
   @Get(':id')
-    async findOne(@Param('id', ParseIntPipe) id: number): Promise<EtablissementSante | null> { // ✅ Ajout de ParseIntPipe pour garantir que `id` est bien un `number`
+    async findOne(@Param('id', ParseIntPipe) id: number): Promise<EtablissementSante | null> {
+      
       return this.etablissementSanteService.findOne(id);
   }
 
