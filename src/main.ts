@@ -1,4 +1,4 @@
-// // // ------------LOCAL -----------------
+// ------------LOCAL -----------------
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -31,7 +31,6 @@ async function bootstrap() {
     app.useStaticAssets(join(__dirname, '..', 'public'));
   }
 
-  // ✅ Démarrage du serveur
   app.use(json());  
   app.use(urlencoded({ extended: true })); 
 
@@ -42,7 +41,6 @@ async function bootstrap() {
   });
 
   const PORT = process.env.PORT || 3000;
-  // const PORT = process.env.PORT || 10000;
   await app.listen(PORT, '0.0.0.0');
 
   console.log(`le server tourne bien sur le porte 🚀: http://localhost:${PORT}`);
@@ -54,7 +52,8 @@ async function bootstrap() {
 bootstrap();
 
 
-//  ----- config en ligne
+//  ----- config en ligne -------
+
 // import { NestFactory } from '@nestjs/core';
 // import { AppModule } from './app.module';
 // import { ValidationPipe } from '@nestjs/common';

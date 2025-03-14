@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Otp } from './entities/otp.entity';
 import { OtpService } from './otp.service';
-import { User } from '../user/entities/user.entity'; // ✅ Ajout correct de l'importation de User
+import { User } from '../utilisateur/entities/user.entity'; 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Otp, User])], // ✅ Ajout de User ici
+  imports: [TypeOrmModule.forFeature([Otp, User])], 
   providers: [OtpService], 
   exports: [OtpService],   
 })

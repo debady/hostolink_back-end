@@ -218,5 +218,5 @@ database:
     postgres
 
 user:
-postgres
+    postgres
 

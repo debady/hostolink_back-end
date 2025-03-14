@@ -56,7 +56,7 @@ import { Repository } from 'typeorm';
 import { Commentaire } from './entities/commentaire.entity';
 import { CreateCommentaireDto } from './dto/create-commentaire.dto';
 import { Publication } from 'src/publication/entities/publication.entity';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/utilisateur/entities/user.entity';
 
 @Injectable()
 export class CommentaireService {

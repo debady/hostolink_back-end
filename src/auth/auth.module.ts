@@ -3,9 +3,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../utilisateur/user.module';
 import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller'; // ✅ Ajout du contrôleur
+import { AuthController } from './auth.controller'; 
 
 @Module({
   imports: [
@@ -17,11 +17,11 @@ import { AuthController } from './auth.controller'; // ✅ Ajout du contrôleur
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' }, // ⏳ Expiration du token
+        signOptions: { expiresIn: '1h' },
       }),
     }),
   ],
-  controllers: [AuthController], // ✅ Ajout du contrôleur ici
+  controllers: [AuthController], 
   providers: [AuthService, JwtStrategy],
   exports: [AuthService, JwtStrategy, PassportModule, JwtModule],
 })

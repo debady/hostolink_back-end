@@ -1,22 +1,22 @@
 // ---------------------LOCAL ---------------------
 
-import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
+import { UserModule } from './utilisateur/user.module';
+import { User } from './utilisateur/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ImageModule } from './image/image.module';
 import { PublicationModule } from './publication/publication.module';
 import { CommentaireModule } from './commentaire/commentaire.module';
 import { PartageModule } from './partage/partage.module';
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { EtablissementSanteModule } from './etablissement_sante/etablissement_sante.module';
+import { EtablissementSanteModule } from './localisation_etablissement_sante/etablissement_sante.module';
 import { Commentaire } from './commentaire/entities/commentaire.entity';
-import { Otp } from './otp/entities/otp.entity';
+import { Otp } from './code_verif_otp/entities/otp.entity';
 import { Publication } from './publication/entities/publication.entity';
 import { Partage } from './partage/entities/partage.entity';
 import { Image } from './image/entities/image.entity';
-import { EtablissementSante } from './etablissement_sante/entities/etablissement_sante.entity';
+import { EtablissementSante } from './localisation_etablissement_sante/entities/etablissement_sante.entity';
 
 @Module({
   imports: [
@@ -35,11 +35,11 @@ import { EtablissementSante } from './etablissement_sante/entities/etablissement
   }),
   UserModule,
   AuthModule,
-  ImageModule,
-  PublicationModule,
-  CommentaireModule,
-  PartageModule,
-  EtablissementSanteModule, 
+  // ImageModule,
+  // PublicationModule,
+  // CommentaireModule,
+  // PartageModule,
+  // EtablissementSanteModule, 
   ],
 })
 

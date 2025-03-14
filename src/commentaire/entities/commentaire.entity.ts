@@ -1,7 +1,7 @@
 
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { Publication } from 'src/publication/entities/publication.entity';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/utilisateur/entities/user.entity';
 
 @Entity()
 export class Commentaire {

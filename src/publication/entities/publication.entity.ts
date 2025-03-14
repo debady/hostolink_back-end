@@ -1,6 +1,6 @@
 import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
 import { Partage } from 'src/partage/entities/partage.entity';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/utilisateur/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity()

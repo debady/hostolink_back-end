@@ -1,6 +1,6 @@
 // src/partage/entities/partage.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, OneToOne } from 'typeorm';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/utilisateur/entities/user.entity';
 import { Publication } from 'src/publication/entities/publication.entity';
 
 @Entity()

@@ -4,7 +4,7 @@ import { CommentaireController } from './commentaire.controller';
 import { CommentaireService } from './commentaire.service';
 import { Commentaire } from './entities/commentaire.entity';
 import { Publication } from 'src/publication/entities/publication.entity';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/utilisateur/entities/user.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Commentaire, User, Publication])],
