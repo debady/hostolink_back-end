@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 
-@Entity('otp')
+@Entity('code_verif_otp')
 export class Otp {
   @PrimaryGeneratedColumn()
   id: number;

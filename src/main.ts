@@ -1,4 +1,5 @@
 // // // ------------LOCAL -----------------
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -40,7 +41,8 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'], 
   });
 
-  const PORT = process.env.PORT || 10000;
+  const PORT = process.env.PORT || 3000;
+  // const PORT = process.env.PORT || 10000;
   await app.listen(PORT, '0.0.0.0');
 
   console.log(`le server tourne bien sur le porte 🚀: http://localhost:${PORT}`);

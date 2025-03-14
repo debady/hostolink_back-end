@@ -44,7 +44,7 @@ import { EtablissementSante } from './etablissement_sante/entities/etablissement
 })
 
 export class AppModule {}
-console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
+console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DATABASE_NAME);
 
 
 // // ----------en ligne ------------------
