@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -13,85 +13,109 @@ export class UserService {
 
   // ✅ Vérifie si un utilisateur existe (email ou téléphone)
   async checkUserExistence(identifier: string): Promise<boolean> {
-    const user = await this.userRepository.findOneBy([
-      { email: identifier },
-      { telephone: identifier }
-    ]);
+    console.log(`🔍 Vérification de l'existence de l'utilisateur : ${identifier}`);
+    
+    const user = await this.userRepository.findOne({
+      where: [{ email: identifier }, { telephone: identifier }],
+    });
+
     return !!user;
   }
 
-  // ✅ Inscrit un utilisateur sans mot de passe
-  async registerUser(identifier: string): Promise<{ success: boolean; message: string }> {
+  async registerUser(identifier: string): Promise<{ success: boolean; id_user?: string; message: string }> {
     try {
-      const existingUser = await this.userRepository.findOneBy([
-        { email: identifier },
-        { telephone: identifier }
-      ]);
+        console.log(`📝 Tentative d'inscription pour : ${identifier}`);
 
-      // if (existingUser) {
-      //   throw new ConflictException("Cet identifiant est déjà utilisé.");
-      // }
+        const existingUser = await this.userRepository.findOne({
+            where: [{ email: identifier }, { telephone: identifier }],
+        });
 
-      if (existingUser) {
-        if (existingUser.email === identifier) {
-          throw new ConflictException("Cet Email déjà utilisé");
+        if (existingUser) {
+            if (existingUser.email === identifier) {
+                console.error(`❌ Échec : L'email ${identifier} est déjà utilisé.`);
+                return { success: false, message: `L'email ${identifier} est déjà utilisé.` };
+            }
+            if (existingUser.telephone === identifier) {
+                console.error(`❌ Échec : Le numéro ${identifier} est déjà utilisé.`);
+                return { success: false, message: `Le numéro ${identifier} est déjà utilisé.` };
+            }
         }
-        if (existingUser.telephone === identifier) {
-          throw new ConflictException("Cet Numéro déjà utilisé");
-        }
-      }
 
-      const newUser = this.userRepository.create({
-        email: identifier.includes('@') ? identifier : undefined,
-        telephone: identifier.includes('@') ? undefined : identifier,
-        code_confirmation: Math.floor(1000 + Math.random() * 9000).toString(),
-        date_inscription: new Date(),
-      } as Partial<User>);
-      
+        const newUser = this.userRepository.create({
+            email: identifier.includes('@') ? identifier : undefined,
+            telephone: identifier.includes('@') ? undefined : identifier,
+            code_confirmation: Math.floor(1000 + Math.random() * 9000).toString(),
+            date_inscription: new Date(),
+        } as Partial<User>);
 
-      await this.userRepository.save(newUser);
-      return { success: true, message: "Utilisateur inscrit, redirection vers la définition du mot de passe." };
+        await this.userRepository.save(newUser);
+
+        console.log(`✅ Inscription réussie : id_user = ${newUser.id_user}`);
+        return { success: true, id_user: newUser.id_user, message: "Utilisateur inscrit, redirection vers la définition du mot de passe." };
+
     } catch (error) {
-      console.error("❌ Erreur registerUser:", error);
-      throw new InternalServerErrorException("Erreur lors de l'inscription");
+        console.error("❌ Erreur lors de l'inscription :", error);
+        throw new InternalServerErrorException("Erreur lors de l'inscription");
     }
+}
+
+
+// ✅ Définit un mot de passe sécurisé avec gestion correcte des erreurs
+async setUserPassword(identifier: string, password: string): Promise<{ success: boolean; message: string }> {
+  if (!password.trim()) {
+      console.error("❌ Erreur : Mot de passe vide.");
+      return { success: false, message: "Le mot de passe ne peut pas être vide." };
   }
 
-  // ✅ Définit un mot de passe sécurisé
-  async setUserPassword(identifier: string, password: string): Promise<boolean> {
-    if (!password.trim()) {
-      throw new BadRequestException("Le mot de passe ne peut pas être vide");
-    }
+  const user = await this.userRepository.findOne({
+      where: [{ email: identifier }, { telephone: identifier }],
+  });
 
-    const user = await this.userRepository.findOneBy([
-      { email: identifier },
-      { telephone: identifier }
-    ]);
-
-    if (!user) {
-      throw new BadRequestException("Utilisateur non trouvé");
-    }
-
-    user.mdp = await bcrypt.hash(password.trim(), 10);
-    await this.userRepository.save(user);
-    return true;
+  if (!user) {
+    console.error(`❌ Erreur : Identifiant incorrect pour ${identifier}`);
+    throw new BadRequestException(
+      identifier.includes("@")
+        ? `L'email ${identifier} est incorrect.`
+        : `Le numéro ${identifier} est incorrect.`
+    );
   }
+  
+  
+
+  user.mdp = await bcrypt.hash(password.trim(), 10);
+  await this.userRepository.save(user);
+
+  console.log(`🔑 Mot de passe défini avec succès pour l'utilisateur ${identifier}`);
+  return { success: true, message: "Mot de passe défini avec succès." };
+}
+
+
 
   // ✅ Vérifie un PIN de connexion (mot de passe)
   async verifyUserPin(identifier: string, pin: string): Promise<boolean> {
     identifier = identifier.trim();
     pin = pin.trim();
-  
-    const user = await this.userRepository.findOneBy([
-      { email: identifier },
-      { telephone: identifier }
-    ]);
-  
+
+    console.log(`🔐 Vérification du PIN pour ${identifier}`);
+
+    const user = await this.userRepository.findOne({
+      where: [{ email: identifier }, { telephone: identifier }],
+    });
+
     if (!user || !user.mdp) {
+      console.warn(`⚠️ Échec de la vérification PIN : utilisateur introuvable ou mot de passe manquant.`);
       return false;
     }
-  
-    return await bcrypt.compare(pin, user.mdp);
+
+    const isValid = await bcrypt.compare(pin, user.mdp);
+    
+    if (isValid) {
+      console.log(`✅ PIN correct pour ${identifier}`);
+    } else {
+      console.warn(`❌ PIN incorrect pour ${identifier}`);
+    }
+    
+    return isValid;
   }
 
   // ✅ Vérifie un code de confirmation (OTP)
@@ -99,35 +123,71 @@ export class UserService {
     identifier = identifier.trim();
     code = code.trim();
 
+    console.log(`📩 Vérification du code OTP pour ${identifier}`);
+
     const user = await this.userRepository.findOne({
       where: [{ email: identifier }, { telephone: identifier }],
     });
 
     if (!user || user.code_confirmation !== code) {
+      console.warn(`❌ Échec de la vérification OTP pour ${identifier}`);
       return false;
     }
 
     user.code_confirmation = "";
+    user.compte_verifier = true; // ✅ Met à jour le compte comme vérifié
     await this.userRepository.save(user);
+
+    console.log(`✅ Code OTP validé et compte vérifié pour ${identifier}`);
     return true;
   }
 
-
-  async getUserById(id_user: number): Promise<User | null> {
+  // ✅ Récupère un utilisateur par son UUID
+  async getUserById(id_user: string): Promise<User | null> {
+    console.log(`🔍 Récupération de l'utilisateur avec id_user = ${id_user}`);
+    
     const user = await this.userRepository.findOneBy({ id_user });
-    if (!user) throw new BadRequestException("Utilisateur introuvable");
+
+    if (!user) {
+      console.warn(`❌ Utilisateur introuvable : id_user = ${id_user}`);
+      throw new NotFoundException("Utilisateur introuvable");
+    }
+
     return user;
   }
 
+  // ✅ Trouve un utilisateur par email ou téléphone
   async findUserByIdentifier(identifier: string): Promise<User | null> {
-    return await this.userRepository.findOneBy([
-      { email: identifier },
-      { telephone: identifier }
-    ]);
+    console.log(`🔍 Recherche d'un utilisateur avec identifiant : ${identifier}`);
+    
+    return await this.userRepository.findOne({
+      where: [{ email: identifier }, { telephone: identifier }],
+    });
   }
 
-  async findUserById(id_user: number): Promise<User | null> {
-    return await this.userRepository.findOneBy({ id_user });
+  // pour mettre compte_verifier = true :
+  async updateUserVerificationStatus(identifier: string): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: [{ email: identifier }, { telephone: identifier }],
+    });
+  
+    if (user) {
+      user.compte_verifier = true;
+      await this.userRepository.save(user);
+    }
   }
 
+  // ✅ Nouvelle méthode pour récupérer un utilisateur par son UUID (id_user)
+  async findUserById(id_user: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: { id_user }, // Recherche par UUID (id_user)
+    });
+
+    if (!user) {
+      throw new BadRequestException('Utilisateur non trouvé');
+    }
+
+    return user;
+  }
+  
 }

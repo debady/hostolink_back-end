@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Strategy, ExtractJwt } from 'passport-jwt';
+import { ConfigService } from '@nestjs/config';
 import { UserService } from '../utilisateur/user.service';
 
 @Injectable()
@@ -11,22 +11,30 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly configService: ConfigService,
   ) {
     const secretKey = configService.get<string>('JWT_SECRET');
+
     if (!secretKey) {
-      throw new Error('JWT_SECRET is not defined in the environment variables.');
+      throw new Error('❌ JWT_SECRET n\'est pas défini dans les variables d\'environnement');
     }
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
       secretOrKey: secretKey,
+      ignoreExpiration: false,
     });
   }
 
-  async validate(payload: { id_user: number }) {
+  async validate(payload: { id_user: string }) {
+    console.log('🔐 Validation du payload JWT :', payload);
+
     const user = await this.userService.findUserById(payload.id_user);
+
     if (!user) {
+      console.warn(`❌ Utilisateur non trouvé avec l'id : ${payload.id_user}`);
       throw new UnauthorizedException('Utilisateur non trouvé');
     }
-    return user; // ✅ L'utilisateur validé sera injecté dans les requêtes
+
+    console.log(`✅ JWT validé pour l'utilisateur : ${user.id_user}`);
+
+    return user; 
   }
 }

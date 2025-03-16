@@ -16,8 +16,9 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
 
 interface AuthenticatedRequest extends Request {
-  user: { id_user: number };
+  user: { id_user: string };
 }
+
 
 @Controller('api')
 export class UserController {
@@ -40,17 +41,15 @@ export class UserController {
    // ✅ Création d'un utilisateur (sans mot de passe)
   @Post('register-user')
   async registerUser(@Body() checkUserDto: CheckUserDto) {
-    if (!checkUserDto.identifier?.trim()) {
-      throw new BadRequestException('L’identifiant est requis');
-    }
-
     try {
-      return await this.userService.registerUser(checkUserDto.identifier.trim());
+      const result = await this.userService.registerUser(checkUserDto.identifier.trim());
+      return { success: result.success, id_user: result.id_user, message: result.message };
     } catch (error) {
       console.error('❌ Erreur register-user:', error);
       throw new InternalServerErrorException(error.message || "Erreur lors de l'inscription");
     }
   }
+  
 
   // ✅ Définition du mot de passe après inscription
   @Post('define-password')
@@ -95,41 +94,33 @@ export class UserController {
   }
   
 
-  // ✅ Générer un OTP
-  @Post('generate-otp')
-  async generateOtp(@Body() body: { identifier: string }) {
-    if (!body.identifier?.trim()) {
-      throw new BadRequestException("L'identifiant est requis");
-    }
-
-    try {
-      await this.otpService.generateOtp(body.identifier.trim());
-      return { success: true, message: "OTP généré avec succès" };
-    } catch (error) {
-      console.error("❌ Erreur generate-otp:", error);
-      throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");
-    }
-  }
-
   // ✅ Vérifier un OTP
   @Post('verify-otp')
   async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
-    if (!body.identifier?.trim() || !body.otpCode?.trim()) {
-      throw new BadRequestException("Identifiant et code OTP requis");
-    }
-
     try {
-      return await this.otpService.verifyOtp(body.identifier.trim(), body.otpCode.trim());
+      console.log(`📩 Vérification OTP pour ${body.identifier}`);
+      
+      const isValid = await this.otpService.verifyOtp(body.identifier.trim(), body.otpCode.trim());
+
+      if (isValid.success) {
+        await this.userService.updateUserVerificationStatus(body.identifier.trim());
+        console.log(`✅ Compte vérifié pour ${body.identifier}`);
+      }
+
+      return isValid;
     } catch (error) {
       console.error("❌ Erreur verify-otp:", error);
       throw new InternalServerErrorException(error.message || "Erreur lors de la vérification de l'OTP");
     }
   }
 
+
   // ✅ Récupérer les infos de l'utilisateur connecté
   @Get('user/me')
   @UseGuards(JwtAuthGuard)
   async getMe(@Req() req: AuthenticatedRequest) {
+    console.log(`📌 Récupération des infos utilisateur pour id_user : ${req.user.id_user}`);
     return this.userService.getUserById(req.user.id_user);
   }
+
 }

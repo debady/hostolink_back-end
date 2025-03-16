@@ -1,4 +1,4 @@
-import { IsNotEmpty, Matches } from 'class-validator';
+import { IsNotEmpty, Matches, IsOptional, IsUUID } from 'class-validator';
 
 export class CheckUserDto {
   @IsNotEmpty()
@@ -6,4 +6,8 @@ export class CheckUserDto {
     message: "L'identifiant doit être un email valide ou un numéro de téléphone (8 à 15 chiffres)",
   })
   identifier: string;
+
+  @IsOptional()
+  @IsUUID()
+  id_user?: string;
 }

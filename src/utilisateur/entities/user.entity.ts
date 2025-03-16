@@ -1,14 +1,12 @@
-import { Partage } from 'src/partage/entities/partage.entity';
-import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
 import { Otp } from 'src/code_verif_otp/entities/otp.entity';
-import { Publication } from 'src/publication/entities/publication.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 
 @Entity('utilisateur')  
 export class User {
   [x: string]: any;
-  @PrimaryGeneratedColumn()
-  id_user: number; 
+
+  @PrimaryGeneratedColumn('uuid')
+  id_user: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
   email?: string;
@@ -34,8 +32,15 @@ export class User {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   date_inscription: Date;
 
-  @Column({ type: 'varchar', length: 10, nullable: true, default: null })
-  code_confirmation: string | null;
+  // @Column({ type: 'varchar', length: 10, nullable: true, default: null })
+  // code_confirmation: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  raison_banni?: string;
+
+  @Column({ type: 'boolean', default: false })
+  compte_verifier: boolean;
+
 
   @OneToMany(() => Otp, otp => otp.user, { cascade: true, nullable: true })
   otps?: Otp[];
