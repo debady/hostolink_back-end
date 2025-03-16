@@ -3,20 +3,10 @@
 import { UserModule } from './utilisateur/user.module';
 import { User } from './utilisateur/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
-import { ImageModule } from './image/image.module';
-import { PublicationModule } from './publication/publication.module';
-import { CommentaireModule } from './commentaire/commentaire.module';
-import { PartageModule } from './partage/partage.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { EtablissementSanteModule } from './localisation_etablissement_sante/etablissement_sante.module';
-import { Commentaire } from './commentaire/entities/commentaire.entity';
 import { Otp } from './code_verif_otp/entities/otp.entity';
-import { Publication } from './publication/entities/publication.entity';
-import { Partage } from './partage/entities/partage.entity';
-import { Image } from './image/entities/image.entity';
-import { EtablissementSante } from './localisation_etablissement_sante/entities/etablissement_sante.entity';
 
 @Module({
   imports: [
@@ -31,7 +21,7 @@ import { EtablissementSante } from './localisation_etablissement_sante/entities/
       database: process.env.DATABASE_NAME || 'hostolink_bd',
       autoLoadEntities: false,
       synchronize: false, 
-      entities: [User, Commentaire,Otp,Publication,Partage,Image,EtablissementSante,], 
+      entities: [User,Otp,], 
   }),
   UserModule,
   AuthModule,
@@ -44,7 +34,6 @@ import { EtablissementSante } from './localisation_etablissement_sante/entities/
 })
 
 export class AppModule {}
-console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DATABASE_NAME);
 
 
 // // ----------en ligne ------------------
