@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { User } from '../utilisateur/entities/user.entity';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
 import { EmailService } from '../notifications/email.service';
+import { SmsService } from '../notifications/sms.service';
+import { response } from 'express';
 
 
 @Injectable()
@@ -16,6 +18,8 @@ export class OtpService {
     private readonly userRepository: Repository<User>,
 
     private readonly emailService: EmailService,
+
+    private readonly smsService: SmsService,
   ) {}
 
   // ✅ Générer un OTP
@@ -63,13 +67,25 @@ export class OtpService {
   
       await this.otpRepository.save(otp);
 
+      if (moyen_envoyer === MoyenEnvoiEnum.TELEPHONE) {
+        if (user.telephone) {
+          await this.smsService.sendOtpSms(user.telephone, otpCode);
+          console.log(`✅ SMS OTP envoyé à ${user.telephone}`);
+          console.log("📌 Réponse Vonage :", JSON.stringify(response, null, 2));
+
+        } else {
+          console.error(`❌ Erreur : Impossible d'envoyer l'OTP par SMS, l'utilisateur ${identifier} n'a pas de numéro de téléphone.`);
+        }
+      }
+      
+
       // ✅ Mettre à jour la date du dernier OTP envoyé
       const maintenant = new Date();
      // ✅ Mettre à jour la date du dernier OTP envoyé si l'utilisateur existe
-    if (user) {
-      user.dernier_otp_envoye = new Date();
-      await this.userRepository.update(user.id_user, { dernier_otp_envoye: () => `'${new Date().toISOString()}'` });
-    }
+        if (user) {
+          user.dernier_otp_envoye = new Date();
+          await this.userRepository.update(user.id_user, { dernier_otp_envoye: () => `'${new Date().toISOString()}'` });
+        }
 
       
 
