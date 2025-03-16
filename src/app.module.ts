@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'; // ✅ ORM TypeORM pour Postgre
 import { ConfigModule } from '@nestjs/config'; // ✅ Gestion des variables d’environnement
 import { Otp } from './code_verif_otp/entities/otp.entity'; // ✅ Entité OTP
 import { NotificationsModule } from './notifications/notifications.module'; // ✅ Module des notifications (emails, SMS)
+// import { EtablissementSanteModule } from './localisation_etablissement_sante/etablissement_sante.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { NotificationsModule } from './notifications/notifications.module'; // �
 
     // ✅ Module gérant les notifications (email OTP)
     NotificationsModule,
+    // EtablissementSanteModule,
 
     // ✅ Connexion à la base de données PostgreSQL via TypeORM
     TypeOrmModule.forRoot({
