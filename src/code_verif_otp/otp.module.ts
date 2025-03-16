@@ -5,11 +5,14 @@ import { OtpService } from './otp.service';
 import { OtpController } from './otp.controller';
 import { UserModule } from '../utilisateur/user.module'; // ✅ Corrigé ici
 import { User } from 'src/utilisateur/entities/user.entity';
+import { NotificationsModule } from '../notifications/notifications.module'; // ✅ Ajout du module Notifications
+
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Otp,User]),
     forwardRef(() => UserModule),
+    NotificationsModule
   ],
   controllers: [OtpController],
   providers: [OtpService],

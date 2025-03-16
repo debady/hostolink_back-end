@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../utilisateur/entities/user.entity';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
+import { EmailService } from '../notifications/email.service';
+
 
 @Injectable()
 export class OtpService {
@@ -12,6 +14,8 @@ export class OtpService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    private readonly emailService: EmailService,
   ) {}
 
   // ✅ Générer un OTP
@@ -58,6 +62,39 @@ export class OtpService {
       });
   
       await this.otpRepository.save(otp);
+
+      // ✅ Mettre à jour la date du dernier OTP envoyé
+      const maintenant = new Date();
+     // ✅ Mettre à jour la date du dernier OTP envoyé si l'utilisateur existe
+    if (user) {
+      user.dernier_otp_envoye = new Date();
+      await this.userRepository.update(user.id_user, { dernier_otp_envoye: () => `'${new Date().toISOString()}'` });
+    }
+
+      
+
+
+      // ✅ ENVOI DE L'OTP PAR EMAIL SI `EMAIL` EST CHOISI
+      if (moyen_envoyer === MoyenEnvoiEnum.EMAIL) {
+        try {
+          if (moyen_envoyer === MoyenEnvoiEnum.EMAIL && user.email) {
+            try {
+              await this.emailService.sendOtpEmail(user.email, otpCode);
+              console.log(`✅ Email OTP envoyé à ${user.email}`);
+            } catch (error) {
+              console.error(`❌ Erreur lors de l'envoi de l'email OTP à ${user.email} :`, error);
+            }
+          } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL && !user.email) {
+            console.error(`❌ Erreur : Impossible d'envoyer l'OTP, l'utilisateur ${identifier} n'a pas d'email.`);
+          }
+          
+          
+          console.log(`✅ Email OTP envoyé à ${user.email}`);
+        } catch (error) {
+          console.error("❌ Erreur lors de l'envoi de l'email OTP :", error);
+        }
+      }
+
   
       console.log(`✅ OTP généré avec succès pour ${identifier} : ${otpCode}`);
   
@@ -82,18 +119,22 @@ export class OtpService {
         where: [{ email: identifier }, { telephone: identifier }],
       });
 
-      if (!user) {
-        console.error(`❌ Échec : Utilisateur non trouvé pour ${identifier}`);
-        throw new BadRequestException("Utilisateur non trouvé");
+      // ✅ Vérifier si un OTP a déjà été envoyé récemment (limite de 2 minutes)
+      const maintenant = new Date();
+      if (user && user.dernier_otp_envoye) {
+        const dernierOtp = new Date(user.dernier_otp_envoye).getTime();
+        const tempsEcoule = new Date().getTime() - dernierOtp;
+        
+        if (tempsEcoule < 2 * 60 * 1000) {
+          throw new BadRequestException(`Trop de demandes d'OTP. Attendez encore ${Math.ceil((120000 - tempsEcoule) / 1000)} secondes.`);
+        }
       }
+      
+      
+
 
       if (!user) {
         console.error(`❌ Échec : Utilisateur non trouvé pour ${identifier}`);
-        
-        // Ajoutez un log pour voir la liste des utilisateurs
-        const allUsers = await this.userRepository.find();
-        console.log("📌 Liste des utilisateurs enregistrés :", allUsers);
-      
         throw new BadRequestException("Utilisateur non trouvé");
       }
 

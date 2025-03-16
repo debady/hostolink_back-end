@@ -32,8 +32,9 @@ export class User {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   date_inscription: Date;
 
-  // @Column({ type: 'varchar', length: 10, nullable: true, default: null })
-  // code_confirmation: string | null;
+  @Column({ type: 'timestamp', nullable: true })
+  dernier_otp_envoye?: Date;
+
 
   @Column({ type: 'text', nullable: true })
   raison_banni?: string;

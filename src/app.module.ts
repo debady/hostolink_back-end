@@ -1,17 +1,23 @@
 // ---------------------LOCAL ---------------------
 
-import { UserModule } from './utilisateur/user.module';
-import { User } from './utilisateur/entities/user.entity';
-import { AuthModule } from './auth/auth.module';
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-import { Otp } from './code_verif_otp/entities/otp.entity';
+import { UserModule } from './utilisateur/user.module'; // ✅ Module utilisateur
+import { User } from './utilisateur/entities/user.entity'; // ✅ Entité utilisateur
+import { AuthModule } from './auth/auth.module'; // ✅ Module d'authentification
+import { Module } from '@nestjs/common'; 
+import { TypeOrmModule } from '@nestjs/typeorm'; // ✅ ORM TypeORM pour PostgreSQL
+import { ConfigModule } from '@nestjs/config'; // ✅ Gestion des variables d’environnement
+import { Otp } from './code_verif_otp/entities/otp.entity'; // ✅ Entité OTP
+import { NotificationsModule } from './notifications/notifications.module'; // ✅ Module des notifications (emails, SMS)
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true,envFilePath: '.env', }),
+    // ✅ Chargement des variables d'environnement depuis `.env`
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
 
+    // ✅ Module gérant les notifications (email OTP)
+    NotificationsModule,
+
+    // ✅ Connexion à la base de données PostgreSQL via TypeORM
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
@@ -19,21 +25,25 @@ import { Otp } from './code_verif_otp/entities/otp.entity';
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
       database: process.env.DATABASE_NAME || 'hostolink_bd',
-      autoLoadEntities: false,
-      synchronize: false, 
-      entities: [User,Otp,], 
-  }),
-  UserModule,
-  AuthModule,
-  // ImageModule,
-  // PublicationModule,
-  // CommentaireModule,
-  // PartageModule,
-  // EtablissementSanteModule, 
+      autoLoadEntities: false, // ❌ Désactivé pour éviter le chargement automatique des entités
+      synchronize: false, // ❌ Désactivé pour éviter les pertes de données accidentelles
+      entities: [User, Otp], // ✅ Déclaration explicite des entités utilisées
+    }),
+
+    // ✅ Modules principaux de l’application
+    UserModule, // ✅ Module de gestion des utilisateurs
+    AuthModule, // ✅ Module d'authentification
+
+    // ✅ Modules supplémentaires (commentés pour l’instant)
+    // ImageModule, // ✅ Gestion des images
+    // PublicationModule, // ✅ Gestion des publications
+    // CommentaireModule, // ✅ Gestion des commentaires
+    // PartageModule, // ✅ Gestion des partages
+    // EtablissementSanteModule, // ✅ Gestion des établissements de santé
   ],
 })
-
 export class AppModule {}
+
 
 
 // // ----------en ligne ------------------
