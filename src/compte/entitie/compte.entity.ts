@@ -1,7 +1,5 @@
-
-// Entité Compte
-import { UserEtablissementSante } from 'src/user_etablissement_sante/entitie/user_etablissement_sante.entity';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+// src/compte/entities/compte.entity.ts
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('compte')
 export class Compte {
@@ -23,10 +21,10 @@ export class Compte {
   @Column({ length: 50, nullable: true })
   mode_paiement_preferentiel: string;
 
-  @Column({ length: 20, nullable: false })
+  @Column({ length: 20 })
   type_user: string;
 
-  @Column({ length: 10, nullable: false })
+  @Column({ length: 10 })
   devise: string;
 
   @Column({ length: 50, nullable: true, unique: true })
@@ -41,13 +39,9 @@ export class Compte {
   @Column({ length: 20, default: 'actif' })
   statut: string;
 
-  @Column({ nullable: true })
-  id_user_etablissement_sante: number;
-
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ nullable: true, type: 'uuid' })
   id_user: string;
 
-  @ManyToOne(() => UserEtablissementSante, { nullable: true })
-  @JoinColumn({ name: 'id_user_etablissement_sante' })
-  etablissement: UserEtablissementSante;
+  @Column({ nullable: true })
+  id_user_etablissement_sante: number;
 }

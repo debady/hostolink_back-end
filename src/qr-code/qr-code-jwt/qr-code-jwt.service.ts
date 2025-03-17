@@ -1,3 +1,4 @@
+// src/qr-code/qr-code-jwt.service.ts
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';

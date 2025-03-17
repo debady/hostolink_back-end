@@ -7,31 +7,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
-const user_module_1 = require("./user/user.module");
-const user_entity_1 = require("./user/entities/user.entity");
+const user_module_1 = require("./utilisateur/user.module");
+const user_entity_1 = require("./utilisateur/entities/user.entity");
 const auth_module_1 = require("./auth/auth.module");
-const image_module_1 = require("./image/image.module");
-const publication_module_1 = require("./publication/publication.module");
-const commentaire_module_1 = require("./commentaire/commentaire.module");
-const partage_module_1 = require("./partage/partage.module");
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const config_1 = require("@nestjs/config");
-const commentaire_entity_1 = require("./commentaire/entities/commentaire.entity");
-const otp_entity_1 = require("./otp/entities/otp.entity");
-const publication_entity_1 = require("./publication/entities/publication.entity");
-const partage_entity_1 = require("./partage/entities/partage.entity");
-const image_entity_1 = require("./image/entities/image.entity");
+const otp_entity_1 = require("./code_verif_otp/entities/otp.entity");
+const notifications_module_1 = require("./notifications/notifications.module");
+const compte_module_1 = require("./compte/compte.module");
 const qr_code_module_1 = require("./qr-code/qr-code.module");
-const transaction_frais_module_1 = require("./transaction_frais/transaction_frais.module");
-const user_etablissement_sante_module_1 = require("./user_etablissement_sante/user_etablissement_sante.module");
+const compte_entity_1 = require("./compte/entitie/compte.entity");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            config_1.ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env', }),
+            config_1.ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+            notifications_module_1.NotificationsModule,
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
                 host: process.env.DATABASE_HOST || 'localhost',
@@ -41,17 +35,12 @@ exports.AppModule = AppModule = __decorate([
                 database: process.env.DATABASE_NAME || 'hostolink_bd',
                 autoLoadEntities: false,
                 synchronize: false,
-                entities: [user_entity_1.User, commentaire_entity_1.Commentaire, otp_entity_1.Otp, publication_entity_1.Publication, partage_entity_1.Partage, image_entity_1.Image,
-                ],
+                entities: [user_entity_1.User, otp_entity_1.Otp, compte_entity_1.Compte],
             }),
-            user_etablissement_sante_module_1.EtablissementModule,
             user_module_1.UserModule,
             auth_module_1.AuthModule,
-            image_module_1.ImageModule,
-            publication_module_1.PublicationModule,
-            commentaire_module_1.CommentaireModule,
-            partage_module_1.PartageModule,
-            qr_code_module_1.QrCodeModule, transaction_frais_module_1.TransactionFraisModule,
+            compte_module_1.CompteModule,
+            qr_code_module_1.QrCodeModule,
         ],
     })
 ], AppModule);

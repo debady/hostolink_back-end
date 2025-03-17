@@ -1,7 +1,4 @@
-// ----------------------
-// Entités QR Code
-// ----------------------
-import { UserEtablissementSante } from 'src/user_etablissement_sante/entitie/user_etablissement_sante.entity';
+// src/qr-code/entities/qr-code-statique.entity.ts
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('qr_code_paiement_statique')
@@ -26,8 +23,4 @@ export class QrCodeStatique {
 
   @Column({ length: 20, default: 'actif' })
   statut: string;
-
-  @ManyToOne(() => UserEtablissementSante, { nullable: true })
-  @JoinColumn({ name: 'id_user_etablissement_sante' })
-  etablissement: UserEtablissementSante;
 }

@@ -1,3 +1,4 @@
+// src/compte/compte.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CompteController } from './compte.controller';

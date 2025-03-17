@@ -11,15 +11,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JwtStrategy = void 0;
 const common_1 = require("@nestjs/common");
-const config_1 = require("@nestjs/config");
 const passport_1 = require("@nestjs/passport");
 const passport_jwt_1 = require("passport-jwt");
-const user_service_1 = require("../user/user.service");
+const config_1 = require("@nestjs/config");
+const user_service_1 = require("../utilisateur/user.service");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
     constructor(userService, configService) {
         const secretKey = configService.get('JWT_SECRET');
         if (!secretKey) {
-            throw new Error('JWT_SECRET is not defined in the environment variables.');
+            throw new Error('❌ JWT_SECRET n\'est pas défini dans les variables d\'environnement');
         }
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -30,10 +30,13 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         this.configService = configService;
     }
     async validate(payload) {
+        console.log('🔐 Validation du payload JWT :', payload);
         const user = await this.userService.findUserById(payload.id_user);
         if (!user) {
+            console.warn(`❌ Utilisateur non trouvé avec l'id : ${payload.id_user}`);
             throw new common_1.UnauthorizedException('Utilisateur non trouvé');
         }
+        console.log(`✅ JWT validé pour l'utilisateur : ${user.id_user}`);
         return user;
     }
 };

@@ -45,7 +45,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
-const user_service_1 = require("../user/user.service");
+const user_service_1 = require("../utilisateur/user.service");
 const bcrypt = __importStar(require("bcrypt"));
 const config_1 = require("@nestjs/config");
 let AuthService = class AuthService {
@@ -55,46 +55,23 @@ let AuthService = class AuthService {
         this.configService = configService;
     }
     async validateUser(identifier, password) {
+        console.log(`🔐 Tentative de connexion avec l'identifiant : ${identifier}`);
         const user = await this.userService.findUserByIdentifier(identifier);
         if (!user || !user.mdp) {
-            console.log('⚠️ Utilisateur introuvable ou mot de passe non défini.');
+            console.warn(`❌ Utilisateur introuvable ou mot de passe non défini pour : ${identifier}`);
             throw new common_1.BadRequestException('Identifiant ou mot de passe incorrect');
         }
-        console.log('Utilisateur trouvé:', user);
-        console.log('Mot de passe en base:', user.mdp);
-        console.log('Mot de passe fourni:', password);
+        console.log(`✅ Utilisateur trouvé : ${user.id_user} (${user.email || user.telephone})`);
         const isMatch = await bcrypt.compare(password, user.mdp);
         if (!isMatch) {
-            console.log('❌ Mot de passe incorrect');
+            console.warn(`❌ Mot de passe incorrect pour l'utilisateur : ${identifier}`);
             throw new common_1.BadRequestException('Identifiant ou mot de passe incorrect');
         }
-        const payload = { id_user: user.id_user };
+        const payload = { id_user: user.id_user, email: user.email };
         const access_token = this.jwtService.sign(payload);
+        console.log(`✅ Connexion réussie pour : ${user.id_user}, Token généré : ${access_token}`);
         console.log('✅ Connexion réussie, Token généré:', access_token);
-        return { access_token };
-    }
-    generateStaticQrCodeToken(payload) {
-        return this.jwtService.sign(payload, {
-            secret: this.configService.get('JWT_STATIC_QR_SECRET'),
-            expiresIn: '365d',
-        });
-    }
-    generateDynamicQrCodeToken(payload) {
-        return this.jwtService.sign(payload, {
-            secret: this.configService.get('JWT_DYNAMIC_QR_SECRET'),
-            expiresIn: '1m',
-        });
-    }
-    verifyQrCodeToken(token, isDynamic = false) {
-        try {
-            const secret = isDynamic
-                ? this.configService.get('QR_DYNAMIC_SECRET')
-                : this.configService.get('QR_STATIC_SECRET');
-            return this.jwtService.verify(token, { secret });
-        }
-        catch (error) {
-            throw new common_1.UnauthorizedException('QR code invalide ou expiré');
-        }
+        return { user, access_token };
     }
 };
 exports.AuthService = AuthService;
