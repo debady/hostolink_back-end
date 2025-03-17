@@ -20,6 +20,12 @@ const image_entity_1 = require("./entities/image.entity");
 const cloudinary_1 = require("cloudinary");
 const config_1 = require("@nestjs/config");
 let ImageService = class ImageService {
+    uploadImageToCloudinary(file) {
+        throw new Error('Method not implemented.');
+    }
+    deleteImageFromCloudinary(image) {
+        throw new Error('Method not implemented.');
+    }
     constructor(imageRepository, configService) {
         this.imageRepository = imageRepository;
         this.configService = configService;

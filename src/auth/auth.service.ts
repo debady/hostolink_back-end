@@ -2,12 +2,15 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    // Pour la sacurité des transaction
+    private configService: ConfigService,
   ) {}
 
   async validateUser(identifier: string, password: string): Promise<{ access_token: string } | null> {
@@ -33,7 +36,34 @@ export class AuthService {
 
     console.log('✅ Connexion réussie, Token généré:', access_token);
     return { access_token };
-
   }
   
+  // Méthode pour signer les JWT des QR codes statiques (longue durée)
+  generateStaticQrCodeToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_STATIC_QR_SECRET'),
+      expiresIn: '365d', // Validité d'un an
+    });
+  }
+
+  // Méthode pour signer les JWT des QR codes dynamiques (courte durée)
+  generateDynamicQrCodeToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_DYNAMIC_QR_SECRET'),
+      expiresIn: '1m', // Validité d'une minute
+    });
+  }
+
+  // Méthode pour vérifier les QR codes
+  verifyQrCodeToken(token: string, isDynamic: boolean = false) {
+    try {
+      const secret = isDynamic 
+        ? this.configService.get('QR_DYNAMIC_SECRET')
+        : this.configService.get('QR_STATIC_SECRET');
+      
+      return this.jwtService.verify(token, { secret });
+    } catch (error) {
+      throw new UnauthorizedException('QR code invalide ou expiré');
+    }
+  }
 }

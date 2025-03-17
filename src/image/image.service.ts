@@ -8,6 +8,12 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ImageService {
+  uploadImageToCloudinary(file: Express.Multer.File): PromiseLike<null> | null {
+    throw new Error('Method not implemented.');
+  }
+  deleteImageFromCloudinary(image: string) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,

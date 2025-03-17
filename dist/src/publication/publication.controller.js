@@ -14,15 +14,19 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PublicationController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const publication_service_1 = require("./publication.service");
-const create_publication_dto_1 = require("./dto/create-publication.dto");
-const create_commentaire_dto_1 = require("../commentaire/dto/create-commentaire.dto");
 let PublicationController = class PublicationController {
     constructor(publicationService) {
         this.publicationService = publicationService;
     }
-    create(createPublicationDto) {
-        return this.publicationService.create(createPublicationDto);
+    async create(body, file) {
+        const createPublicationDto = {
+            titre_publication: String(body.titre_publication),
+            contenu: String(body.contenu),
+            id_user: parseInt(body.id_user, 10)
+        };
+        return this.publicationService.create(createPublicationDto, file);
     }
     findAll() {
         return this.publicationService.findAll();
@@ -33,12 +37,13 @@ let PublicationController = class PublicationController {
     findByUserId(userId) {
         return this.publicationService.findByUserId(userId);
     }
-    addComment(id_publication, createCommentaireDto) {
-        const commentaireData = {
-            ...createCommentaireDto,
-            id_publication
+    async addComment(id_publication, body) {
+        const createCommentaireDto = {
+            contenu: String(body.contenu),
+            id_user: parseInt(body.id_user, 10),
+            id_publication: id_publication,
         };
-        return this.publicationService.addComment(commentaireData);
+        return this.publicationService.addComment(createCommentaireDto);
     }
     getCommentsByPublicationId(id_publication) {
         return this.publicationService.getCommentsByPublicationId(id_publication);
@@ -49,13 +54,18 @@ let PublicationController = class PublicationController {
     dislikePost(id) {
         return this.publicationService.dislikePost(id);
     }
+    async deletePublication(id, body) {
+        return this.publicationService.deletePublication(id, body.id_user);
+    }
 };
 exports.PublicationController = PublicationController;
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('image')),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_publication_dto_1.CreatePublicationDto]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], PublicationController.prototype, "create", null);
 __decorate([
@@ -83,7 +93,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id_publication', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, create_commentaire_dto_1.CreateCommentaireDto]),
+    __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], PublicationController.prototype, "addComment", null);
 __decorate([
@@ -107,6 +117,14 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], PublicationController.prototype, "dislikePost", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], PublicationController.prototype, "deletePublication", null);
 exports.PublicationController = PublicationController = __decorate([
     (0, common_1.Controller)('publication'),
     __metadata("design:paramtypes", [publication_service_1.PublicationService])

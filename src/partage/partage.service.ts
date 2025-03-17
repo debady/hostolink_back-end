@@ -91,4 +91,10 @@ export class PartageService {
     
     }
 
+    // supprimer le partage d'une publication lorsque la publication est supprimée.
+    async deletePartagesByPublicationId(id_publication: number): Promise<void> {
+      await this.partageRepository.delete({ publication: { id_publication } });
+    }
+    
+
 }

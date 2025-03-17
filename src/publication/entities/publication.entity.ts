@@ -15,7 +15,8 @@ export class Publication { // Utiliser une majuscule pour le nom de classe
   contenu: string;
 
   @Column({ nullable: true })
-  image: string;
+  image?: string;
+
 
   @Column()
   date_publication: Date;

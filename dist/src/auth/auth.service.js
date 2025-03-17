@@ -47,10 +47,12 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const user_service_1 = require("../user/user.service");
 const bcrypt = __importStar(require("bcrypt"));
+const config_1 = require("@nestjs/config");
 let AuthService = class AuthService {
-    constructor(userService, jwtService) {
+    constructor(userService, jwtService, configService) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.configService = configService;
     }
     async validateUser(identifier, password) {
         const user = await this.userService.findUserByIdentifier(identifier);
@@ -71,11 +73,35 @@ let AuthService = class AuthService {
         console.log('✅ Connexion réussie, Token généré:', access_token);
         return { access_token };
     }
+    generateStaticQrCodeToken(payload) {
+        return this.jwtService.sign(payload, {
+            secret: this.configService.get('JWT_STATIC_QR_SECRET'),
+            expiresIn: '365d',
+        });
+    }
+    generateDynamicQrCodeToken(payload) {
+        return this.jwtService.sign(payload, {
+            secret: this.configService.get('JWT_DYNAMIC_QR_SECRET'),
+            expiresIn: '1m',
+        });
+    }
+    verifyQrCodeToken(token, isDynamic = false) {
+        try {
+            const secret = isDynamic
+                ? this.configService.get('QR_DYNAMIC_SECRET')
+                : this.configService.get('QR_STATIC_SECRET');
+            return this.jwtService.verify(token, { secret });
+        }
+        catch (error) {
+            throw new common_1.UnauthorizedException('QR code invalide ou expiré');
+        }
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [user_service_1.UserService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        config_1.ConfigService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

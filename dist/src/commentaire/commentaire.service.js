@@ -63,6 +63,21 @@ let CommentaireService = class CommentaireService {
             order: { date_commentaire: 'DESC' },
         });
     }
+    async deleteComment(id_commentaire, id_user) {
+        const commentaire = await this.commentaireRepository.findOne({
+            where: { id_commentaire },
+            relations: ['user'],
+        });
+        if (!commentaire) {
+            throw new common_1.NotFoundException(`Commentaire avec l'ID ${id_commentaire} non trouvé.`);
+        }
+        if (commentaire.user.id_user !== id_user) {
+            throw new Error('Vous n\'êtes pas autorisé à supprimer ce commentaire.');
+        }
+        await this.commentaireRepository.remove(commentaire);
+        console.log(`🗑️ utilisateur ${id_user}, vous avez supprimé votre Commentaire.  ID_commentaire ${id_commentaire} `);
+        return { success: true, message: 'Commentaire supprimé avec succès.' };
+    }
 };
 exports.CommentaireService = CommentaireService;
 exports.CommentaireService = CommentaireService = __decorate([

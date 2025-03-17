@@ -11,4 +11,5 @@ export declare class PartageService {
     findByUser(id_user: number): Promise<Partage[]>;
     countByPublication(id_publication: number): Promise<number>;
     getPublicationShareStats(id_publication: number): Promise<any>;
+    deletePartagesByPublicationId(id_publication: number): Promise<void>;
 }

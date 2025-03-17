@@ -29,6 +29,9 @@ let CommentaireController = class CommentaireController {
     findByPublicationId(id_publication) {
         return this.commentaireService.findByPublicationId(id_publication);
     }
+    async deleteComment(id_commentaire, body) {
+        return this.commentaireService.deleteComment(id_commentaire, body.id_user);
+    }
 };
 exports.CommentaireController = CommentaireController;
 __decorate([
@@ -54,6 +57,14 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], CommentaireController.prototype, "findByPublicationId", null);
+__decorate([
+    (0, common_1.Delete)(':id_publication/commentaire/:id_commentaire'),
+    __param(0, (0, common_1.Param)('id_commentaire', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], CommentaireController.prototype, "deleteComment", null);
 exports.CommentaireController = CommentaireController = __decorate([
     (0, common_1.Controller)('publication'),
     __metadata("design:paramtypes", [commentaire_service_1.CommentaireService])

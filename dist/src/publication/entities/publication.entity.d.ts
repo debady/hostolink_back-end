@@ -5,7 +5,7 @@ export declare class Publication {
     id_publication: number;
     titre_publication: string;
     contenu: string;
-    image: string;
+    image?: string;
     date_publication: Date;
     compteur_like: number;
     user: User;

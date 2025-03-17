@@ -13,6 +13,7 @@ const publication_controller_1 = require("./publication.controller");
 const publication_service_1 = require("./publication.service");
 const publication_entity_1 = require("./entities/publication.entity");
 const commentaire_entity_1 = require("../commentaire/entities/commentaire.entity");
+const cloudinary_providers_1 = require("../cloudinary/cloudinary.providers");
 let PublicationModule = class PublicationModule {
 };
 exports.PublicationModule = PublicationModule;
@@ -20,8 +21,8 @@ exports.PublicationModule = PublicationModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([publication_entity_1.Publication, commentaire_entity_1.Commentaire])],
         controllers: [publication_controller_1.PublicationController],
-        providers: [publication_service_1.PublicationService],
-        exports: [publication_service_1.PublicationService]
+        providers: [publication_service_1.PublicationService, cloudinary_providers_1.CloudinaryProvider],
+        exports: [cloudinary_providers_1.CloudinaryProvider],
     })
 ], PublicationModule);
 //# sourceMappingURL=publication.module.js.map

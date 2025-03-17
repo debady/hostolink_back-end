@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: secretKey,
+      secretOrKey: configService.get('JWT_SECRET') || 'secretKey',
     });
   }
 
@@ -30,3 +30,5 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return user; // ✅ L'utilisateur validé sera injecté dans les requêtes
   }
 }
+
+

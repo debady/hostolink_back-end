@@ -7,4 +7,10 @@ export declare class CommentaireController {
     create(id_publication: number, createCommentaireDto: CreateCommentaireDto): Promise<Commentaire>;
     findByPublicationIdAndUserId(id_publication: number, id_user: number): Promise<Commentaire[]>;
     findByPublicationId(id_publication: number): Promise<Commentaire[]>;
+    deleteComment(id_commentaire: number, body: {
+        id_user: number;
+    }): Promise<{
+        success: boolean;
+        message: string;
+    }>;
 }

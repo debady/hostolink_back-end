@@ -77,6 +77,9 @@ let PartageService = class PartageService {
             where: { publication: { id_publication } }
         });
     }
+    async deletePartagesByPublicationId(id_publication) {
+        await this.partageRepository.delete({ publication: { id_publication } });
+    }
 };
 exports.PartageService = PartageService;
 exports.PartageService = PartageService = __decorate([
