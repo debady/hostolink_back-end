@@ -1,25 +1,20 @@
 // ---------------------LOCAL ---------------------
 
-import { UserModule } from './utilisateur/user.module'; // ✅ Module utilisateur
-import { User } from './utilisateur/entities/user.entity'; // ✅ Entité utilisateur
-import { AuthModule } from './auth/auth.module'; // ✅ Module d'authentification
+import { UserModule } from './utilisateur/user.module'; 
+import { User } from './utilisateur/entities/user.entity'; 
+import { AuthModule } from './auth/auth.module'; 
 import { Module } from '@nestjs/common'; 
-import { TypeOrmModule } from '@nestjs/typeorm'; // ✅ ORM TypeORM pour PostgreSQL
-import { ConfigModule } from '@nestjs/config'; // ✅ Gestion des variables d’environnement
-import { Otp } from './code_verif_otp/entities/otp.entity'; // ✅ Entité OTP
-import { NotificationsModule } from './notifications/notifications.module'; // ✅ Module des notifications (emails, SMS)
-// import { EtablissementSanteModule } from './localisation_etablissement_sante/etablissement_sante.module';
+import { TypeOrmModule } from '@nestjs/typeorm'; 
+import { ConfigModule } from '@nestjs/config'; 
+import { Otp } from './code_verif_otp/entities/otp.entity'; 
+import { NotificationsModule } from './notifications/notifications.module'; 
 
 @Module({
   imports: [
-    // ✅ Chargement des variables d'environnement depuis `.env`
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-
-    // ✅ Module gérant les notifications (email OTP)
     NotificationsModule,
     // EtablissementSanteModule,
 
-    // ✅ Connexion à la base de données PostgreSQL via TypeORM
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
@@ -27,14 +22,13 @@ import { NotificationsModule } from './notifications/notifications.module'; // �
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
       database: process.env.DATABASE_NAME || 'hostolink_bd',
-      autoLoadEntities: false, // ❌ Désactivé pour éviter le chargement automatique des entités
-      synchronize: false, // ❌ Désactivé pour éviter les pertes de données accidentelles
-      entities: [User, Otp], // ✅ Déclaration explicite des entités utilisées
+      autoLoadEntities: false, 
+      synchronize: false, 
+      entities: [User, Otp], 
     }),
 
-    // ✅ Modules principaux de l’application
-    UserModule, // ✅ Module de gestion des utilisateurs
-    AuthModule, // ✅ Module d'authentification
+    UserModule, 
+    AuthModule, 
 
     // ✅ Modules supplémentaires (commentés pour l’instant)
     // ImageModule, // ✅ Gestion des images

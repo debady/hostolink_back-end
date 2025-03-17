@@ -11,8 +11,6 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    console.log("📌 SMTP_PORT:", process.env.SMTP_PORT);
-
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587', 10),

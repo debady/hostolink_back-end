@@ -15,6 +15,11 @@ import { OtpService } from '../code_verif_otp/otp.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
 
+
+import {Patch} from '@nestjs/common';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+
+
 interface AuthenticatedRequest extends Request {
   user: { id_user: string };
 }
@@ -122,5 +127,12 @@ export class UserController {
     console.log(`📌 Récupération des infos utilisateur pour id_user : ${req.user.id_user}`);
     return this.userService.getUserById(req.user.id_user);
   }
+
+  @UseGuards(JwtAuthGuard) // Protège l’endpoint avec JWT
+  @Patch('/update-profile')
+  async updateProfile(@Body() updateProfileDto: UpdateProfileDto) {
+    return this.userService.updateUserProfile(updateProfileDto);
+  }
+
 
 }

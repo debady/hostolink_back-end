@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -188,6 +189,25 @@ async setUserPassword(identifier: string, password: string): Promise<{ success: 
     }
 
     return user;
+  }
+
+  async updateUserProfile(updateProfileDto: UpdateProfileDto) {
+    const { id_user, ...updateData } = updateProfileDto;
+
+    // Vérifier si l’utilisateur existe
+    const user = await this.userRepository.findOne({ where: { id_user } });
+    if (!user) {
+      throw new NotFoundException("Utilisateur introuvable.");
+    }
+
+    // Vérifier s’il y a des données à mettre à jour
+    if (Object.keys(updateData).length === 0) {
+      throw new BadRequestException("Aucune donnée à mettre à jour.");
+    }
+
+    // Mettre à jour les champs
+    await this.userRepository.update(id_user, updateData as Partial<User>);
+    return { success: true, message: "Profil mis à jour avec succès." };
   }
   
 }
