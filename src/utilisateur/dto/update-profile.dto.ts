@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsEmail, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsEmail, IsUUID, MaxLength } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsUUID()
@@ -6,14 +6,17 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(100) 
   nom?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   prenom?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   pays?: string;
 
   @IsOptional()
@@ -22,9 +25,6 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(20) 
   telephone?: string;
-
-  @IsOptional()
-  @IsString()
-  photo_profile?: string;
 }

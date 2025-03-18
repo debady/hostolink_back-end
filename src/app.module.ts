@@ -8,6 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config'; 
 import { Otp } from './code_verif_otp/entities/otp.entity'; 
 import { NotificationsModule } from './notifications/notifications.module'; 
+import { ImageModule } from './image/image.module';
+import { Image } from './image/entities/image.entity';
+
 
 @Module({
   imports: [
@@ -24,14 +27,14 @@ import { NotificationsModule } from './notifications/notifications.module';
       database: process.env.DATABASE_NAME || 'hostolink_bd',
       autoLoadEntities: false, 
       synchronize: false, 
-      entities: [User, Otp], 
+      entities: [User, Otp,Image], 
     }),
 
     UserModule, 
     AuthModule, 
+    ImageModule, 
 
     // ✅ Modules supplémentaires (commentés pour l’instant)
-    // ImageModule, // ✅ Gestion des images
     // PublicationModule, // ✅ Gestion des publications
     // CommentaireModule, // ✅ Gestion des commentaires
     // PartageModule, // ✅ Gestion des partages

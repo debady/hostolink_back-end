@@ -63,7 +63,7 @@ src/etablissement
 src/Module_admin
 
 src/localisation_etablissement_sante
-src/image
+# src/image
 src/commentaire
 src/partage
 src/publication

@@ -5,25 +5,24 @@ import {
   BadRequestException, 
   InternalServerErrorException, 
   Get, 
-  UseGuards,
-  Req 
+  UseGuards, 
+  Req, 
+  Patch, 
+  UploadedFile, 
+  UseInterceptors 
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { CheckUserDto } from './dto/check-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { OtpService } from '../code_verif_otp/otp.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
-
-
-import {Patch} from '@nestjs/common';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-
 
 interface AuthenticatedRequest extends Request {
   user: { id_user: string };
 }
-
 
 @Controller('api')
 export class UserController {
@@ -43,7 +42,7 @@ export class UserController {
     return { success: true, exists, identifier: checkUserDto.identifier.trim() };
   }
 
-   // ✅ Création d'un utilisateur (sans mot de passe)
+  // ✅ Création d'un utilisateur (sans mot de passe)
   @Post('register-user')
   async registerUser(@Body() checkUserDto: CheckUserDto) {
     try {
@@ -54,7 +53,6 @@ export class UserController {
       throw new InternalServerErrorException(error.message || "Erreur lors de l'inscription");
     }
   }
-  
 
   // ✅ Définition du mot de passe après inscription
   @Post('define-password')
@@ -79,16 +77,20 @@ export class UserController {
       throw new InternalServerErrorException(error.message || "Erreur lors de la mise à jour du mot de passe");
     }
   }
-  
+
   // ✅ Vérification du PIN de connexion
   @Post('verify-pin')
   async verifyPin(@Body() body: { identifier: string; pin: string }) {
     if (!body.identifier?.trim() || !body.pin?.trim()) {
       throw new BadRequestException('Identifiant et PIN requis');
     }
-  
+
     try {
-      const isValid = await this.userService.verifyUserPin(body.identifier.trim(), body.pin.trim());
+      const isValid = await this.userService.verifyUserPin(
+        body.identifier.trim(), 
+        body.pin.trim()
+      );
+      
       return isValid 
         ? { success: true, message: 'PIN valide' } 
         : { success: false, message: 'PIN incorrect' };
@@ -97,20 +99,23 @@ export class UserController {
       throw new InternalServerErrorException("Erreur lors de la vérification du PIN");
     }
   }
-  
 
-  // ✅ Vérifier un OTP
+  // ✅ Vérification d'un OTP
   @Post('verify-otp')
   async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
     try {
       console.log(`📩 Vérification OTP pour ${body.identifier}`);
       
-      const isValid = await this.otpService.verifyOtp(body.identifier.trim(), body.otpCode.trim());
-
-      if (isValid.success) {
+      const isValid = await this.userService.verifyConfirmationCode(
+        body.identifier.trim(), 
+        body.otpCode.trim()
+      );
+      
+      if (isValid) { // ✅ Vérification correcte car `isValid` est un booléen
         await this.userService.updateUserVerificationStatus(body.identifier.trim());
         console.log(`✅ Compte vérifié pour ${body.identifier}`);
       }
+      
 
       return isValid;
     } catch (error) {
@@ -118,7 +123,6 @@ export class UserController {
       throw new InternalServerErrorException(error.message || "Erreur lors de la vérification de l'OTP");
     }
   }
-
 
   // ✅ Récupérer les infos de l'utilisateur connecté
   @Get('user/me')
@@ -128,11 +132,17 @@ export class UserController {
     return this.userService.getUserById(req.user.id_user);
   }
 
-  @UseGuards(JwtAuthGuard) // Protège l’endpoint avec JWT
+  // ✅ Mise à jour du profil utilisateur avec gestion de l'image de profil
   @Patch('/update-profile')
-  async updateProfile(@Body() updateProfileDto: UpdateProfileDto) {
-    return this.userService.updateUserProfile(updateProfileDto);
+  @UseGuards(JwtAuthGuard) // 🔒 Protège l’endpoint avec JWT
+  @UseInterceptors(FileInterceptor('file')) // ✅ Intercepte le fichier uploadé
+  async updateProfile(
+    @Req() req: AuthenticatedRequest, 
+    @Body() updateProfileDto: UpdateProfileDto, 
+    @UploadedFile() file?: Express.Multer.File // ✅ Prend en charge le fichier
+  ) {
+    const id_user = req.user.id_user; // ✅ Récupération automatique de id_user via JWT
+    console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
+    return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
   }
-
-
 }
