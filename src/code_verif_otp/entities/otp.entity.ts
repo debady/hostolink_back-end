@@ -12,14 +12,14 @@ export class Otp {
   id: number;
 
   @ManyToOne(() => User, user => user.otps, { onDelete: 'CASCADE', nullable: false, eager: true })
-  @JoinColumn({ name: 'id_user' })  // ✅ Assure la correspondance avec la base de données
+  @JoinColumn({ name: 'id_user' })  
   user: User;
 
   @Column({ type: 'varchar', length: 6 })
   otp_code: string;
 
   @Column({ type: 'enum', enum: MoyenEnvoiEnum, nullable: false })
-  moyen_envoyer: MoyenEnvoiEnum; // ✅ Pas besoin de `.toLowerCase()`, correction dans `generateOtp()`
+  moyen_envoyer: MoyenEnvoiEnum; 
 
   @Column({ type: 'timestamp' })
   expires_at: Date;

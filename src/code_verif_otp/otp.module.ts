@@ -3,10 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Otp } from './entities/otp.entity';
 import { OtpService } from './otp.service';
 import { OtpController } from './otp.controller';
-import { UserModule } from '../utilisateur/user.module'; // ✅ Corrigé ici
+import { UserModule } from '../utilisateur/user.module'; 
 import { User } from 'src/utilisateur/entities/user.entity';
-import { NotificationsModule } from '../notifications/notifications.module'; // ✅ Ajout du module Notifications
-
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
