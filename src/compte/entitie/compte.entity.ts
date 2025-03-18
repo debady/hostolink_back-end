@@ -24,7 +24,7 @@ export class Compte {
   @Column({ length: 20 })
   type_user: string;
 
-  @Column({ length: 10 })
+  @Column({ length: 10, default: 'XOF'})
   devise: string;
 
   @Column({ length: 50, nullable: true, unique: true })

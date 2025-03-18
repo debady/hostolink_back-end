@@ -25,3 +25,5 @@ import { CompteModule } from 'src/compte/compte.module';
   exports: [QrCodeService, QrCodeJwtService]
 })
 export class QrCodeModule {}
+
+

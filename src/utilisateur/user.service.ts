@@ -12,6 +12,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    
   ) {}
 
   // ✅ Vérifie si un utilisateur existe (email ou téléphone)
@@ -198,8 +199,6 @@ async findOneUserById(userId: string) {
     }
 
     return user;
-  }
-
-
-  
+  }  
 }
+

@@ -36,3 +36,5 @@ export class QrCodeController {
     return this.qrCodeService.validateQrCode(body.token);
   }
 }
+
+

@@ -40,6 +40,7 @@ import { Compte } from './compte/entitie/compte.entity';
     AuthModule, // ✅ Module d'authentification
     CompteModule,
     QrCodeModule,
+    // EtablissementModule,
     
 
     // ✅ Modules supplémentaires (commentés pour l’instant)
