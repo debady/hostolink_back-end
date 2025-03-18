@@ -8,6 +8,7 @@ export enum ImageMotifEnum {
   RESEAU_SOCIAL = 'reseau_social',
   DISCUSSION_ASSISTANCE = 'discussion_assistance',
   PUBLICITE = 'publicite',
+  // ADMINISTRATEUR = 'Administrateur',
   AUTRE = 'autre',
 }
 
