@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../utilisateur/entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';  // ✅ Celui d'admin
+import { ActivationUserDto } from './dto/activation-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class GestUtilisateurService {
@@ -50,11 +53,6 @@ export class GestUtilisateurService {
       image_profil,      // ✅ Ajout de l'URL de la photo de profil
     };
   }
-  
-  
-  
-  
-  
 
   async updateBanReason(id_user: string, updateUserDto: UpdateUserDto): Promise<User & { image_profil: string | null }> {
     const { raison_banni } = updateUserDto;
@@ -72,5 +70,42 @@ export class GestUtilisateurService {
 
   async remove(id_user: string): Promise<void> {
     await this.userRepository.delete(id_user);
+  }
+
+  async updateActivation(id_user: string, activationUserDto: ActivationUserDto): Promise<User> {
+    const { actif } = activationUserDto;
+  
+    // Vérifier si l'utilisateur existe
+    const user = await this.userRepository.findOne({ where: { id_user } });
+  
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé.');
+    }
+  
+    // Mettre à jour l'état actif/inactif
+    user.actif = actif;
+    await this.userRepository.save(user);
+  
+    return user;
+  }
+
+  async resetPassword(id_user: string, resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
+    const { nouveau_mot_de_passe } = resetPasswordDto;
+  
+    // Vérifier si l'utilisateur existe
+    const user = await this.userRepository.findOne({ where: { id_user } });
+  
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé.');
+    }
+  
+    // Hacher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(nouveau_mot_de_passe, 10);
+  
+    // Mettre à jour le mot de passe
+    user.mdp = hashedPassword;
+    await this.userRepository.save(user);
+  
+    return { message: 'Mot de passe réinitialisé avec succès.' };
   }
 }

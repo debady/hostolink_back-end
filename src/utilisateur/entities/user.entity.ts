@@ -48,4 +48,7 @@ export class User {
 
   @OneToMany(() => Image, (image) => image.user, { cascade: true })
   images?: Image[];
+
+  @Column({ type: 'boolean', default: true }) // Par défaut, l'utilisateur est actif
+  actif: boolean;
 }
