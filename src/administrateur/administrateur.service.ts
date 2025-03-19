@@ -265,9 +265,28 @@ export class AdministrateurService {
   
     return { message: 'Permissions mises à jour avec succès.', permissions };
   }
+
+
+  async rechercherParRole(role: string) {
+    const admins = await this.adminRepository.find({ where: { role } });
   
+    const adminsAvecAvatar = await Promise.all(admins.map(async admin => {
+      const avatar = await this.imageRepository.findOne({
+        where: { id_admin_gestionnaire: admin.id_admin_gestionnaire, motif: ImageMotifEnum.AVATAR_ADMIN },
+      });
   
+      return {
+        ...admin,
+        avatar_url: avatar ? avatar.url_image : null,
+      };
+    }));
   
+    return {
+      nombre_resultats: admins.length,
+      administrateurs: adminsAvecAvatar,
+    };
+  }
   
+   
   
 }

@@ -156,6 +156,20 @@ export class AdministrateurController {
     return this.adminService.modifierPermissionsAdmin(id, permissions);
   }
 
+  @Get('role/:role')
+  @UseGuards(JwtAdminGuard)
+  async rechercherAdminParRole(
+    @Param('role') role: string,
+    @Request() req,
+  ) {
+    if (req.user.role !== 'super_admin') {
+      throw new UnauthorizedException('Accès réservé au super administrateur.');
+    }
+
+    return this.adminService.rechercherParRole(role);
+  }
+
+
 
 
 
