@@ -5,8 +5,6 @@ import { User } from '../utilisateur/entities/user.entity';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
 import { EmailService } from '../notifications/email.service';
 import { SmsService } from '../notifications/sms.service';
-import { response } from 'express';
-// import { UserEtablissementSante } from '../user-etablissement/entities/user_etablissement.entity';
 
 @Injectable()
 export class OtpService {
@@ -19,9 +17,6 @@ export class OtpService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-
-    // @InjectRepository(UserEtablissementSante)
-    // private readonly userEtablissementRepo: Repository<UserEtablissementSante>,
 
     private readonly emailService: EmailService,
     private readonly smsService: SmsService,
@@ -36,26 +31,18 @@ export class OtpService {
         where: [{ email: identifier }, { telephone: identifier }],
       });
 
-      // const etablissement = await this.userEtablissementRepo.findOne({
-      //   where: [{ telephone: identifier }],
-      // });
-
-      // if (!user && !etablissement) {
-      //   throw new BadRequestException("Utilisateur ou Établissement non trouvé");
-      // }
-
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
       const expirationDate = new Date();
       expirationDate.setMinutes(expirationDate.getMinutes() + 5);
 
       await this.otpRepository.createQueryBuilder()
-        .delete()
-        .from(Otp)
-        .where("id_user = :id_user OR id_user_etablissement_sante = :id_etablissement", {
-          id_user: user ? user.id_user : null,
-          // id_etablissement: etablissement ? etablissement.id_user_etablissement_sante : null,
-        })
-        .execute();
+      .delete()
+      .from(Otp)
+      .where("id_user = :id_user", {
+        id_user: user ? user.id_user : null,
+      })
+      .execute();
+
 
         const otp = this.otpRepository.create({
           otp_code: otpCode,
@@ -63,7 +50,6 @@ export class OtpService {
           is_valid: true,
           moyen_envoyer: moyen_envoyer,
           id_user: user ? user.id_user : undefined,
-          // id_user_etablissement_sante: etablissement ? etablissement.id_user_etablissement_sante : undefined,
         });
         
         
@@ -95,20 +81,12 @@ export class OtpService {
         where: [{ email: identifier }, { telephone: identifier }],
       });
 
-      // const etablissement = await this.userEtablissementRepo.findOne({
-      //   where: [{ telephone: identifier }],
-      // });
-
-      // if (!user && !etablissement) {
-      //   throw new BadRequestException("Utilisateur ou Établissement non trouvé");
-      // }
 
       const otp = await this.otpRepository.findOne({
         where: [
           ...(user ? [{ user: user, otp_code: otpCode, is_valid: true }] : []),
-          // ...(etablissement ? [{ userEtablissementSante: etablissement, otp_code: otpCode, is_valid: true }] : []),
         ],
-        relations: ['user', 'userEtablissementSante'],
+        relations: ['user'],
       });
       
 
