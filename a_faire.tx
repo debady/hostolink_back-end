@@ -32,26 +32,10 @@ https://collection.cloudinary.com/dhrrk7vsd/387f34fb0827d86134e0d6d720f22e23
 liste d'endpoints supplémentaires à développer pour le module **Administrateurs** :
 
 
-1. **Lister tous les administrateurs (GET)**
-   ```
-   GET /administrateurs
-   ```
-   (_avec pagination et filtres par rôle, statut, date_)
 
-2. **Détail d'un administrateur précis (GET)**
-   ```
-   GET /administrateurs/:id
-   ```
 
-3. **Modifier les infos d'un administrateur (PUT ou PATCH)**
-   ```
-   PATCH /administrateurs/:id
-   ```
 
-4. **Changer le mot de passe administrateur**
-   ```
-   PATCH /administrateurs/:id/mot-de-passe
-   ```
+
 
 
 

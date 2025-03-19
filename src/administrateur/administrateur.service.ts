@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Image, ImageMotifEnum } from '../image/entities/image.entity';
 import { v2 as cloudinary } from 'cloudinary';
 
+
 @Injectable()
 export class AdministrateurService {
   constructor(
@@ -16,11 +17,12 @@ export class AdministrateurService {
     @InjectRepository(Administrateur)
     private readonly adminRepository: Repository<Administrateur>,
 
-    @InjectRepository(Image)
-    private readonly imageRepository: Repository<Image>,
-
     private readonly jwtService: JwtService,
     @Inject('CLOUDINARY') private cloudinaryProvider: typeof cloudinary,
+
+    @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
+
+
     
   ) {}
 
@@ -117,6 +119,16 @@ export class AdministrateurService {
       throw new NotFoundException('Administrateur non trouvé.');
     }
 
+    // ✅ ajoute exactement ce bloc ci-dessous
+    const avatar = await this.imageRepository.findOne({
+      where: { id_admin_gestionnaire: id, motif: ImageMotifEnum.AVATAR_ADMIN },
+    });
+
+    return {
+      ...admin,
+      avatar_url: avatar ? avatar.url_image : null,
+    };
+
     return admin;
   }
 
@@ -200,11 +212,23 @@ export class AdministrateurService {
   async recupererTousLesAdmins() {
     const [admins, nombre] = await this.adminRepository.findAndCount();
   
+    const adminsAvecAvatar = await Promise.all(admins.map(async admin => {
+      const avatar = await this.imageRepository.findOne({
+        where: { id_admin_gestionnaire: admin.id_admin_gestionnaire, motif: ImageMotifEnum.AVATAR_ADMIN },
+      });
+  
+      return {
+        ...admin,
+        avatar_url: avatar ? avatar.url_image : null,
+      };
+    }));
+  
     return {
       nombre_admins: nombre,
-      administrateurs: admins,
+      administrateurs: adminsAvecAvatar,
     };
   }
+  
   
   
 }

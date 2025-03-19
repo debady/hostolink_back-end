@@ -44,8 +44,8 @@ export class AdministrateurController {
   
   @Get('me')
   @UseGuards(JwtAdminGuard)
-  getMe(@Request() req) {
-    return req.user;
+  async getMe(@Request() req) {
+    return this.adminService.getAdminById(req.user.id_admin_gestionnaire);
   }
 
   // ✅ Endpoint ajouté pour upload avatar
@@ -112,6 +112,23 @@ export class AdministrateurController {
     }
     return this.adminService.recupererTousLesAdmins();
   }
+
+
+  @Get(':id/details')
+  @UseGuards(JwtAdminGuard)
+  async afficherDetailsAdmin(
+    @Param('id') id: number,
+    @Request() req,
+  ) {
+    if (req.user.role !== 'super_admin') {
+      throw new UnauthorizedException('Accès réservé au super administrateur.');
+    }
+
+    
+
+    return this.adminService.getAdminById(id);
+  }
+
 
 
 
