@@ -53,24 +53,12 @@ liste d'endpoints supplémentaires à développer pour le module **Administrateu
    PATCH /administrateurs/:id/mot-de-passe
    ```
 
-5. **Modifier le statut d'un administrateur (activer/désactiver)**
-   ```
-   PATCH /administrateurs/:id/statut
-   ```
 
-6. **Supprimer un administrateur (DELETE)**
-   ```
-   DELETE /administrateurs/:id
-   ```
 
 7. **Gérer les permissions spécifiques d'un administrateur**
    ```
    PATCH /administrateurs/:id/permissions
    ```
 
-8. **Uploader ou modifier l'image (avatar) d'un administrateur**
-   ```
-   POST /administrateurs/:id/avatar
-   ```
 
 Ces endpoints supplémentaires rendront ton module administrateur complet, sécurisé et flexible.

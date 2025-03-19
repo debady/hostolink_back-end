@@ -98,3 +98,11 @@ Clé primaire sur id_user dans utilisateur utilisateur_pkey référencées par d
     extension pgcrypto pour les criptage sécurisés
 
         CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+
+SUPPRIMER TOUTES LES ADMIN DE LA BD
+    TRUNCATE TABLE administrateurs CASCADE;
+
+SUPPRIMER LA CONTRAINT D'ENUM DE role 
+    ALTER TABLE administrateurs ALTER COLUMN role TYPE VARCHAR(50);
+DROP TYPE IF EXISTS role_admin_enum;

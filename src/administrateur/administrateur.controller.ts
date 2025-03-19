@@ -9,7 +9,10 @@ import {
   Request,
   Param,
   UploadedFile,
-  UseInterceptors
+  UseInterceptors,
+  Delete,
+  UnauthorizedException,
+  Patch
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateAdministrateurDto } from './dto/create-administrateur.dto';
@@ -58,4 +61,50 @@ export class AdministrateurController {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
+
+  @Delete(':id')
+  @UseGuards(JwtAdminGuard)
+  async supprimerAdministrateur(@Param('id') id: number) {
+    return this.adminService.supprimerAdministrateur(id);
+  }
+
+  @Delete(':id/supprimer')
+  @UseGuards(JwtAdminGuard) // seul un super admin peut exécuter cette action
+  async supprimerAdminParSuperAdmin(@Param('id') id: number, @Request() req) {
+    if (req.user.role !== 'super_admin') {
+      throw new UnauthorizedException('Accès réservé au super administrateur.');
+    }
+
+    return this.adminService.supprimerAdministrateur(id);
+  }
+
+  @Patch(':id/statut')
+  @UseGuards(JwtAdminGuard)
+  async modifierStatutAdmin(
+    @Param('id') id: number,
+    @Body('statut') statut: string,
+    @Request() req,
+  ) {
+    if (req.user.role !== 'super_admin') {
+      throw new UnauthorizedException('Accès réservé au super administrateur.');
+    }
+    return this.adminService.modifierStatutAdministrateur(id, statut);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAdminGuard)
+  async modifierAdministrateur(
+    @Param('id') id: number,
+    @Body() dto: Partial<CreateAdministrateurDto>,
+    @Request() req,
+  ) {
+    if (req.user.role !== 'super_admin') {
+      throw new UnauthorizedException('Accès réservé au super administrateur.');
+    }
+    return this.adminService.modifierAdministrateur(id, dto);
+  }
+
+
+
+
 }

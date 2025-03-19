@@ -158,5 +158,45 @@ export class AdministrateurService {
       url_image: uploadResult.secure_url,
     };
   }
+
+  async supprimerAdministrateur(id: number) {
+    const resultat = await this.adminRepository.delete(id);
+  
+    if (resultat.affected === 0) {
+      throw new NotFoundException("Administrateur non trouvé.");
+    }
+  
+    return { message: 'Administrateur supprimé avec succès.' };
+  }
+
+  async modifierStatutAdministrateur(id: number, statut: string) {
+    const admin = await this.adminRepository.findOneBy({ id_admin_gestionnaire: id });
+  
+    if (!admin) {
+      throw new NotFoundException("Administrateur non trouvé.");
+    }
+  
+    admin.statut = statut;
+    await this.adminRepository.save(admin);
+  
+    return { message: `Statut modifié avec succès en "${statut}".` };
+  }
+  
+
+  async modifierAdministrateur(id: number, dto: Partial<CreateAdministrateurDto>) {
+    const admin = await this.adminRepository.findOneBy({ id_admin_gestionnaire: id });
+  
+    if (!admin) {
+      throw new NotFoundException("Administrateur non trouvé.");
+    }
+  
+    Object.assign(admin, dto, { date_modification: new Date() });
+  
+    await this.adminRepository.save(admin);
+  
+    return { message: 'Informations administrateur modifiées avec succès.', admin };
+  }
+  
+  
   
 }
