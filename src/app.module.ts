@@ -1,23 +1,32 @@
 // ---------------------LOCAL ---------------------
 
-import { UserModule } from './utilisateur/user.module'; 
-import { User } from './utilisateur/entities/user.entity'; 
-import { AuthModule } from './auth/auth.module'; 
-import { Module } from '@nestjs/common'; 
-import { TypeOrmModule } from '@nestjs/typeorm'; 
-import { ConfigModule } from '@nestjs/config'; 
-import { Otp } from './code_verif_otp/entities/otp.entity'; 
-import { NotificationsModule } from './notifications/notifications.module'; 
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+
+// Utilisateurs & Authentification
+import { UserModule } from './utilisateur/user.module';
+import { User } from './utilisateur/entities/user.entity';
+import { AuthModule } from './auth/auth.module';
+
+// OTP & Notifications
+import { Otp } from './code_verif_otp/entities/otp.entity';
+import { NotificationsModule } from './notifications/notifications.module';
+
+// Images & Établissements de Santé
 import { ImageModule } from './image/image.module';
 import { Image } from './image/entities/image.entity';
+// import { UserEtablissementModule } from './user-etablissement/user-etablissement.module';
 
+
+import { AdministrateurModule } from './administrateur/administrateur.module';
 
 @Module({
   imports: [
+    // configuration globale
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-    NotificationsModule,
-    // EtablissementSanteModule,
 
+    //connexion à la base de données PostgreSQL
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
@@ -25,15 +34,19 @@ import { Image } from './image/entities/image.entity';
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
       database: process.env.DATABASE_NAME || 'hostolink_bd',
-      autoLoadEntities: false, 
+      autoLoadEntities: true, 
       synchronize: false, 
-      entities: [User, Otp,Image], 
+      entities: [User, Otp, Image], 
     }),
 
+    // ✅ Modules principaux de l'application
     UserModule, 
     AuthModule, 
     ImageModule, 
-
+    NotificationsModule,
+    AdministrateurModule
+    
+    // UserEtablissementModule,
     // ✅ Modules supplémentaires (commentés pour l’instant)
     // PublicationModule, // ✅ Gestion des publications
     // CommentaireModule, // ✅ Gestion des commentaires
@@ -56,6 +69,8 @@ export class AppModule {}
 // import { PublicationModule } from './publication/publication.module';
 // import { CommentaireModule } from './commentaire/commentaire.module';
 // import { PartageModule } from './partage/partage.module';
+// import { UserEtablissementModule } from './user-etablissement/user-etablissement.module';
+// import { AdministrateurModule } from './administrateur/administrateur.module';
 
 
 // @Module({

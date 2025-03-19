@@ -68,7 +68,7 @@ export class ImageService {
       const newImage = this.imageRepository.create({
         url_image: result.secure_url,
         id_user,
-        motif: motif || ImageMotifEnum.PROFILE, // Définir 'profile' par défaut
+        motif: motif || ImageMotifEnum.PROFILE,
         type_user,
       });
 
