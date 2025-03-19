@@ -1,31 +1,43 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Administrateur } from './entities/administrateur.entity';
+import { Image } from '../image/entities/image.entity';
 import { AdministrateurService } from './administrateur.service';
 import { AdministrateurController } from './administrateur.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Administrateur]),
+    TypeOrmModule.forFeature([Administrateur, Image]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const secret = configService.get<string>('JWT_SECRET');
-        if (!secret) {
-          throw new Error('❌ JWT_SECRET n\'est pas défini dans les variables d\'environnement');
-        }
-        return {
-          secret,
-          signOptions: { expiresIn: '1d' },
-        };
-      },
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
     }),
   ],
   controllers: [AdministrateurController],
-  providers: [AdministrateurService],
+  providers: [
+    AdministrateurService,
+    {
+      provide: 'CLOUDINARY',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const cloudinary = require('cloudinary').v2;
+        cloudinary.config({
+          cloud_name: configService.get('CLOUDINARY_CLOUD_NAME'),
+          api_key: configService.get('CLOUDINARY_API_KEY'),
+          api_secret: configService.get('CLOUDINARY_API_SECRET'),
+        });
+        return cloudinary;
+      },
+    },
+    
+  ],
   exports: [AdministrateurService, JwtModule],
 })
 export class AdministrateurModule {}

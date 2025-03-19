@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, NotFoundException, UnauthorizedException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -6,13 +6,22 @@ import { Administrateur } from './entities/administrateur.entity';
 import { CreateAdministrateurDto } from './dto/create-administrateur.dto';
 import { LoginAdministrateurDto } from './dto/login-administrateur.dto';
 import { JwtService } from '@nestjs/jwt';
+import { Image, ImageMotifEnum } from '../image/entities/image.entity';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class AdministrateurService {
   constructor(
+
     @InjectRepository(Administrateur)
     private readonly adminRepository: Repository<Administrateur>,
+
+    @InjectRepository(Image)
+    private readonly imageRepository: Repository<Image>,
+
     private readonly jwtService: JwtService,
+    @Inject('CLOUDINARY') private cloudinaryProvider: typeof cloudinary,
+    
   ) {}
 
   async inscrireAdministrateur(dto: CreateAdministrateurDto) {
@@ -34,7 +43,6 @@ export class AdministrateurService {
       ...dto,
       mot_de_passe: hash,
       role,
-      nom_image: dto.nom_image || undefined,
     });
 
     try {
@@ -46,7 +54,6 @@ export class AdministrateurService {
           email: nouvelAdmin.email,
           telephone: nouvelAdmin.telephone,
           role: nouvelAdmin.role,
-          nom_image: nouvelAdmin.nom_image,
         },
       };
     } catch (error) {
@@ -103,16 +110,53 @@ export class AdministrateurService {
         'dernier_connexion',
         'date_creation',
         'date_modification',
-        'nom_image',
       ],
     });
-  
+
     if (!admin) {
       throw new NotFoundException('Administrateur non trouvé.');
     }
-  
+
     return admin;
+  }
+
+  // ✅ Ajout méthode uploadAvatarAdmin
+  async uploadAvatarAdmin(id: number, avatar: Express.Multer.File) {
+    const admin = await this.adminRepository.findOneBy({ id_admin_gestionnaire: id });
+    if (!admin) throw new NotFoundException('Administrateur non trouvé.');
+  
+    const uploadResult = await this.cloudinaryProvider.uploader.upload(avatar.path, {
+      folder: 'avatars_admin',
+      public_id: `admin_${id}_${Date.now()}`,
+      overwrite: true,
+    });
+  
+    const ancienneImage = await this.imageRepository.findOne({
+      where: { id_admin_gestionnaire: id, motif: ImageMotifEnum.AVATAR_ADMIN },
+    });
+  
+    if (ancienneImage) {
+      const ancienneUrl = ancienneImage.url_image;
+      const publicId = ancienneUrl?.split('/').pop()?.split('.')[0];
+      if (publicId) {
+        await this.cloudinaryProvider.uploader.destroy(`avatars_admin/${publicId}`);
+      }
+      ancienneImage.url_image = uploadResult.secure_url;
+      await this.imageRepository.save(ancienneImage);
+    } else {
+      const nouvelleImage = this.imageRepository.create({
+        url_image: uploadResult.secure_url,
+        motif: ImageMotifEnum.AVATAR_ADMIN,
+        id_admin_gestionnaire: id,
+      });
+  
+      await this.imageRepository.save(nouvelleImage);
+    }
+  
+    return {
+      message: 'Avatar administrateur uploadé avec succès',
+      url_image: uploadResult.secure_url,
+    };
   }
   
 }
-

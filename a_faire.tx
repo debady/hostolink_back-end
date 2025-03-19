@@ -28,3 +28,49 @@ ALTER TABLE utilisateur ADD COLUMN dernier_otp_envoye TIMESTAMP NULL;
 
 -- 
 https://collection.cloudinary.com/dhrrk7vsd/387f34fb0827d86134e0d6d720f22e23
+
+liste d'endpoints supplémentaires à développer pour le module **Administrateurs** :
+
+
+1. **Lister tous les administrateurs (GET)**
+   ```
+   GET /administrateurs
+   ```
+   (_avec pagination et filtres par rôle, statut, date_)
+
+2. **Détail d'un administrateur précis (GET)**
+   ```
+   GET /administrateurs/:id
+   ```
+
+3. **Modifier les infos d'un administrateur (PUT ou PATCH)**
+   ```
+   PATCH /administrateurs/:id
+   ```
+
+4. **Changer le mot de passe administrateur**
+   ```
+   PATCH /administrateurs/:id/mot-de-passe
+   ```
+
+5. **Modifier le statut d'un administrateur (activer/désactiver)**
+   ```
+   PATCH /administrateurs/:id/statut
+   ```
+
+6. **Supprimer un administrateur (DELETE)**
+   ```
+   DELETE /administrateurs/:id
+   ```
+
+7. **Gérer les permissions spécifiques d'un administrateur**
+   ```
+   PATCH /administrateurs/:id/permissions
+   ```
+
+8. **Uploader ou modifier l'image (avatar) d'un administrateur**
+   ```
+   POST /administrateurs/:id/avatar
+   ```
+
+Ces endpoints supplémentaires rendront ton module administrateur complet, sécurisé et flexible.

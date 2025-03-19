@@ -32,6 +32,4 @@ export class Administrateur {
   @CreateDateColumn({ type: 'timestamp' })
   date_modification: Date;
 
-  @Column({ type: 'varchar', length: 255, nullable: true }) 
-  nom_image?: string; 
 }

@@ -18,7 +18,4 @@ export class CreateAdministrateurDto {
   @IsNotEmpty()
   role: string;
 
-  @IsString()
-  @IsOptional() // ✅ Correction ici : champ facultatif
-  nom_image?: string;
 }
