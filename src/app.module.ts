@@ -20,6 +20,7 @@ import { Image } from './image/entities/image.entity';
 
 
 import { AdministrateurModule } from './administrateur/administrateur.module';
+import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
 
 @Module({
   imports: [
@@ -43,7 +44,8 @@ import { AdministrateurModule } from './administrateur/administrateur.module';
     AuthModule, 
     ImageModule, 
     NotificationsModule,
-    AdministrateurModule
+    AdministrateurModule,
+    GestionUtilisateurModule
     
     // UserEtablissementModule,
     // ✅ Modules supplémentaires (commentés pour l’instant)

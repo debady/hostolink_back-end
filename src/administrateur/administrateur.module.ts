@@ -7,10 +7,12 @@ import { AdministrateurController } from './administrateur.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
+import { GestionUtilisateurModule } from './Gest_utilisateurs/gestion_utilisateur.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Administrateur, Image]),
+    GestionUtilisateurModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
