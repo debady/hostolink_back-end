@@ -104,6 +104,16 @@ export class AdministrateurController {
     return this.adminService.modifierAdministrateur(id, dto);
   }
 
+  @Get()
+  @UseGuards(JwtAdminGuard)
+  async recupererAdmins(@Request() req) {
+    if (req.user.role !== 'super_admin') {
+      throw new UnauthorizedException('Accès réservé au super administrateur.');
+    }
+    return this.adminService.recupererTousLesAdmins();
+  }
+
+
 
 
 

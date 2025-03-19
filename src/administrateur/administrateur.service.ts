@@ -197,6 +197,14 @@ export class AdministrateurService {
     return { message: 'Informations administrateur modifiées avec succès.', admin };
   }
   
+  async recupererTousLesAdmins() {
+    const [admins, nombre] = await this.adminRepository.findAndCount();
+  
+    return {
+      nombre_admins: nombre,
+      administrateurs: admins,
+    };
+  }
   
   
 }
