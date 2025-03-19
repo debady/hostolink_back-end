@@ -123,11 +123,39 @@ export class AdministrateurController {
     if (req.user.role !== 'super_admin') {
       throw new UnauthorizedException('Accès réservé au super administrateur.');
     }
-
-    
-
     return this.adminService.getAdminById(id);
   }
+
+
+  @Patch(':id/mot-de-passe')
+  @UseGuards(JwtAdminGuard)
+  async modifierMotDePasse(
+    @Param('id') id: number,
+    @Body('nouveau_mot_de_passe') nouveauMotDePasse: string,
+    @Request() req,
+  ) {
+    if (req.user.role !== 'super_admin') {
+      throw new UnauthorizedException('Accès réservé au super administrateur.');
+    }
+
+    return this.adminService.modifierMotDePasseAdmin(id, nouveauMotDePasse);
+  }
+
+
+  @Patch(':id/permissions')
+  @UseGuards(JwtAdminGuard)
+  async attribuerPermissions(
+    @Param('id') id: number,
+    @Body('permissions') permissions: Record<string, any>,
+    @Request() req,
+  ) {
+    if (req.user.role !== 'super_admin') {
+      throw new UnauthorizedException('Accès réservé au super administrateur.');
+    }
+
+    return this.adminService.modifierPermissionsAdmin(id, permissions);
+  }
+
 
 
 

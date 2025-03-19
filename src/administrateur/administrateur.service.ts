@@ -228,6 +228,45 @@ export class AdministrateurService {
       administrateurs: adminsAvecAvatar,
     };
   }
+
+  async modifierMotDePasseAdmin(id: number, nouveauMotDePasse: string) {
+    if (!nouveauMotDePasse || nouveauMotDePasse.length < 6) {
+      throw new BadRequestException('Le mot de passe doit contenir au moins 6 caractères.');
+    }
+  
+    const admin = await this.adminRepository.findOneBy({ id_admin_gestionnaire: id });
+  
+    if (!admin) {
+      throw new NotFoundException("Administrateur non trouvé.");
+    }
+  
+    const hash = await bcrypt.hash(nouveauMotDePasse, await bcrypt.genSalt());
+  
+    admin.mot_de_passe = hash;
+    admin.date_modification = new Date();
+  
+    await this.adminRepository.save(admin);
+  
+    return { message: 'Mot de passe modifié avec succès.' };
+  }
+
+
+  async modifierPermissionsAdmin(id: number, permissions: Record<string, any>) {
+    const admin = await this.adminRepository.findOneBy({ id_admin_gestionnaire: id });
+  
+    if (!admin) {
+      throw new NotFoundException("Administrateur non trouvé.");
+    }
+  
+    admin.permissions = permissions;
+    admin.date_modification = new Date();
+  
+    await this.adminRepository.save(admin);
+  
+    return { message: 'Permissions mises à jour avec succès.', permissions };
+  }
+  
+  
   
   
   
