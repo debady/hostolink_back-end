@@ -6,9 +6,12 @@ import { JwtStrategy } from './jwt.strategy';
 import { UserModule } from '../utilisateur/user.module'; 
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller'; 
+import { JwtAdminStrategy } from './jwt-admin.strategy';
+import { AdministrateurModule } from 'src/administrateur/administrateur.module';
 
 @Module({
   imports: [
+    AdministrateurModule,
     ConfigModule, 
     UserModule, 
     PassportModule.register({ defaultStrategy: 'jwt' }), 
@@ -22,7 +25,7 @@ import { AuthController } from './auth.controller';
     }),
   ],
   controllers: [AuthController], 
-  providers: [AuthService, JwtStrategy], 
+  providers: [AuthService, JwtStrategy,JwtAdminStrategy], 
   exports: [AuthService, JwtStrategy, PassportModule, JwtModule], 
 })
 export class AuthModule {}

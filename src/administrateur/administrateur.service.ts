@@ -6,7 +6,6 @@ import { Administrateur } from './entities/administrateur.entity';
 import { CreateAdministrateurDto } from './dto/create-administrateur.dto';
 import { LoginAdministrateurDto } from './dto/login-administrateur.dto';
 import { JwtService } from '@nestjs/jwt';
-import { UpdateAdministrateurDto } from './dto/update-administrateur.dto';
 
 @Injectable()
 export class AdministrateurService {
@@ -17,35 +16,29 @@ export class AdministrateurService {
   ) {}
 
   async inscrireAdministrateur(dto: CreateAdministrateurDto) {
-    // Vérifier si l'email ou le téléphone existent déjà
     const existant = await this.adminRepository.findOne({
       where: [{ email: dto.email }, { telephone: dto.telephone }],
     });
     if (existant) throw new ConflictException('Email ou téléphone déjà utilisé.');
 
-    // Vérifier la validité du mot de passe
     if (!dto.mot_de_passe || dto.mot_de_passe.length < 6) {
       throw new BadRequestException('Le mot de passe doit contenir au moins 6 caractères.');
     }
 
-    // Hachage du mot de passe
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(dto.mot_de_passe, salt);
 
-    // Définir le rôle par défaut si non fourni
     const role = dto.role || 'admin';
 
-    // Création de l'administrateur avec le nom de l'image
     const administrateur = this.adminRepository.create({
       ...dto,
       mot_de_passe: hash,
       role,
-      nom_image: dto.nom_image || undefined, // ✅ Ajout du champ `nom_image`
+      nom_image: dto.nom_image || undefined,
     });
 
     try {
       const nouvelAdmin = await this.adminRepository.save(administrateur);
-
       return {
         message: 'Administrateur inscrit avec succès',
         administrateur: {
@@ -53,11 +46,10 @@ export class AdministrateurService {
           email: nouvelAdmin.email,
           telephone: nouvelAdmin.telephone,
           role: nouvelAdmin.role,
-          nom_image: nouvelAdmin.nom_image, // ✅ Retourne le nom de l'image
+          nom_image: nouvelAdmin.nom_image,
         },
       };
     } catch (error) {
-      console.error('Erreur lors de l’inscription :', error);
       throw new Error('Une erreur est survenue lors de l’inscription.');
     }
   }
@@ -66,41 +58,61 @@ export class AdministrateurService {
     if (!dto.email && !dto.telephone) {
       throw new BadRequestException('Vous devez fournir soit un email, soit un numéro de téléphone.');
     }
-  
-    // Rechercher l'admin par email ou téléphone
-    const admin = await this.adminRepository.findOne({
-      where: [
-        { email: dto.email },
-        { telephone: dto.telephone }
-      ].filter(condition => Object.values(condition)[0]), // Filtrer pour éviter des valeurs null
-    });
-  
+
+    let admin;
+    if (dto.email) {
+      admin = await this.adminRepository.findOneBy({ email: dto.email });
+    } else if (dto.telephone) {
+      admin = await this.adminRepository.findOneBy({ telephone: dto.telephone });
+    }
+
     if (!admin) {
       throw new UnauthorizedException('Identifiants incorrects');
     }
-  
-    // Vérifier le mot de passe
+
     const isPasswordValid = await bcrypt.compare(dto.mot_de_passe, admin.mot_de_passe);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Identifiants incorrects');
     }
-  
-    // Générer le token JWT
+
     const payload = { id: admin.id_admin_gestionnaire, role: admin.role };
     const token = this.jwtService.sign(payload);
-  
+
     return {
       message: 'Connexion réussie',
       administrateur: {
         id: admin.id_admin_gestionnaire,
         email: admin.email,
         telephone: admin.telephone,
-        role: admin.role
+        role: admin.role,
       },
-      access_token: token
+      access_token: token,
     };
   }
-  
 
+  async getAdminById(id: number) {
+    const admin = await this.adminRepository.findOne({
+      where: { id_admin_gestionnaire: id },
+      select: [
+        'id_admin_gestionnaire',
+        'email',
+        'telephone',
+        'role',
+        'permissions',
+        'statut',
+        'dernier_connexion',
+        'date_creation',
+        'date_modification',
+        'nom_image',
+      ],
+    });
+  
+    if (!admin) {
+      throw new NotFoundException('Administrateur non trouvé.');
+    }
+  
+    return admin;
+  }
   
 }
+

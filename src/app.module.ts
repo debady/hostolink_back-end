@@ -23,7 +23,6 @@ import { AdministrateurModule } from './administrateur/administrateur.module';
 
 @Module({
   imports: [
-    // configuration globale
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
 
     //connexion à la base de données PostgreSQL
