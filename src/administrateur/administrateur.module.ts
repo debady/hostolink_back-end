@@ -6,7 +6,6 @@ import { AdministrateurService } from './administrateur.service';
 import { AdministrateurController } from './administrateur.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { v2 as cloudinary } from 'cloudinary';
 import { GestionUtilisateurModule } from './Gest_utilisateurs/gestion_utilisateur.module';
 
 @Module({
@@ -40,6 +39,6 @@ import { GestionUtilisateurModule } from './Gest_utilisateurs/gestion_utilisateu
     },
     
   ],
-  exports: [AdministrateurService, JwtModule],
+  exports: [AdministrateurService, JwtModule,TypeOrmModule],
 })
 export class AdministrateurModule {}

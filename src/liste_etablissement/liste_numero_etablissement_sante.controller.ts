@@ -9,26 +9,20 @@ import { CloudinaryService } from 'src/upload/cloudinary.service';
 
 @Controller('liste-numero-vert')
 export class ListeNumeroEtablissementSanteController {
-  listeNumeroRepo: any;
-  listeNumeroEtablissementSanteService: any;
+
 
   constructor(private readonly listeService: ListeNumeroEtablissementSanteService,
-    private readonly cloudinaryService: CloudinaryService, ) {}
+  private readonly cloudinaryService: CloudinaryService, ) {}
 
-  @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async create(
-      @UploadedFile() file: Express.Multer.File,
-      @Body() dto: CreateListeNumeroVertEtablissementSanteDto,
-  ) {
-      let imageUrl = dto.image; // Conserve l'image si déjà fournie
-  
-      if (file) {
-          imageUrl = await this.cloudinaryService.uploadImage(file); // Upload si image envoyée
-      }
-  
-      return await this.listeService.create({ ...dto, image: imageUrl });
-  }
+ // ✅ Créer un numéro vert (avec upload d’image en option)
+ @Post()
+ @UseInterceptors(FileInterceptor('file'))
+ async create(
+   @UploadedFile() file: Express.Multer.File,
+   @Body() dto: CreateListeNumeroVertEtablissementSanteDto,
+ ) {
+   return await this.listeService.create(dto, file);
+ }
   
   
   // ✅ Récupérer tous les numéros verts

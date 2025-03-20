@@ -7,7 +7,7 @@ export class UploadController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 
   @Post('upload-image')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('file'))
   async uploadLogo(@UploadedFile() file: Express.Multer.File) {
     console.log('Requête reçue pour upload', file);
     

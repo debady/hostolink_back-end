@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsString, IsNumber, IsInt } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber, IsInt, IsEnum } from 'class-validator';
+import { TypeEtablissementEnum } from '../entities/liste_numero_vert_etablissement_sante.entity';
 
 export class CreateListeNumeroVertEtablissementSanteDto {
   @IsInt()
@@ -10,9 +11,9 @@ export class CreateListeNumeroVertEtablissementSanteDto {
   @IsString()
   contact: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  image: string; // URL de l'image
+  image?: string; // ✅ Image doit être une chaîne
 
   @IsOptional()
   @IsString()
@@ -36,8 +37,12 @@ export class CreateListeNumeroVertEtablissementSanteDto {
   @IsString()
   site_web?: string;
   
-  @IsNotEmpty() 
+  @IsNotEmpty()
+  @IsEnum(TypeEtablissementEnum, { message: "Le type d'établissement doit être 'hopital', 'clinique' ou 'pharmacie'" })
+  type_etablissement: TypeEtablissementEnum;
+  
+  @IsNotEmpty()
   @IsString()
-  type_etablissement: string;
+  categorie: string;
 
 }

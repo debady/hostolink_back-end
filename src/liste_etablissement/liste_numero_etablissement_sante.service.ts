@@ -1,48 +1,98 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ListeNumeroEtablissementSante } from './entities/liste_numero_vert_etablissement_sante.entity';
+import { ListeNumeroEtablissementSante, TypeEtablissementEnum } from './entities/liste_numero_vert_etablissement_sante.entity';
 import { CreateListeNumeroVertEtablissementSanteDto } from './dto/create-liste-numero-vert-etablissement-sante.dto';
 import { ResponseListeNumeroVertEtablissementSanteDto } from './dto/response_liste_numero_vert_etablissement_sante.dto';
 import { CloudinaryService } from 'src/upload/cloudinary.service';
-
-
+import { Administrateur } from 'src/administrateur/entities/administrateur.entity';
 
 @Injectable()
 export class ListeNumeroEtablissementSanteService {
- 
   constructor(
     @InjectRepository(ListeNumeroEtablissementSante)
     private readonly listeNumeroRepo: Repository<ListeNumeroEtablissementSante>,
+    
+    @InjectRepository(Administrateur)
+    private readonly adminRepo: Repository<Administrateur>,
+    
     private readonly cloudinaryService: CloudinaryService, 
   ) {}
 
+  /**
+   * ✅ Créer un numéro vert
+   */
   async create(dto: CreateListeNumeroVertEtablissementSanteDto, file?: Express.Multer.File) {
-    let imageUrl: string = dto.image || ''; // Garde l'URL de l'image si elle est déjà fournie
+    let imageUrl = '';
 
-    // ✅ Si un fichier est envoyé, on l'upload sur Cloudinary
+
+    // ✅ Vérifie que `categorie` et `type_etablissement` sont bien renseignés
+    const categoriesValides = ['hopital', 'clinique', 'pharmacie'];
+    if (!categoriesValides.includes(dto.categorie.toLowerCase())) {
+      throw new BadRequestException(`La catégorie '${dto.categorie}' n'est pas valide.`);
+    }
+
+    if (!Object.values(TypeEtablissementEnum).includes(dto.type_etablissement as TypeEtablissementEnum)) {
+      throw new BadRequestException(`Le type d'établissement doit être 'hopital', 'clinique' ou 'pharmacie'.`);
+    }
+
+    // ✅ Vérifier si une image est envoyée, et l'uploader sur Cloudinary
     if (file) {
       try {
         imageUrl = await this.cloudinaryService.uploadImage(file);
       } catch (error) {
-        throw new InternalServerErrorException('Erreur lors de l’upload de l’image sur Cloudinary.');
+        throw new InternalServerErrorException('Échec de l’upload de l’image sur Cloudinary.');
       }
     }
-
-    // ✅ Création de l'entrée en base de données
+   // ✅ Vérifier si l'administrateur existe
+   const admin = await this.adminRepo.findOne({ where: { id_admin_gestionnaire: dto.id_admin_gestionnaire } });
+   if (!admin) {
+     throw new NotFoundException(`Administrateur avec l'ID ${dto.id_admin_gestionnaire} non trouvé.`);
+   }
+    
+    // ✅ Créer l'entité avec l'URL Cloudinary
     const newNumero = this.listeNumeroRepo.create({
       ...dto,
-      image: imageUrl,
-      id_admin_gestionnaire: dto.id_admin_gestionnaire || null, // Permet d'accepter NULL
+      image: imageUrl,  // Stocker l'URL Cloudinary dans la base de données
+      type_etablissement: dto.type_etablissement.toLowerCase() as TypeEtablissementEnum,
+      administrateur: admin, // Associer à l'administrateur
     });
 
     return await this.listeNumeroRepo.save(newNumero);
   }
+   /**
+   * ✅ Récupérer tous les numéros verts avec URL Cloudinary
+   */
+   async findAll(): Promise<ResponseListeNumeroVertEtablissementSanteDto[]> {
+    const numeros = await this.listeNumeroRepo.find({ relations: ['administrateur'] });
+    return numeros.map(numero => this.mapToResponseDto(numero));
+  }
 
-    // ✅ Méthode pour récupérer les numéros verts avec filtre
+  /**
+   * ✅ Récupérer un numéro vert par ID avec URL Cloudinary
+   */
+  async findOne(id: number): Promise<ResponseListeNumeroVertEtablissementSanteDto> {
+    if (!id || isNaN(id)) {
+      throw new Error('ID invalide. Un entier valide est requis.');
+    }
+
+    const numero = await this.listeNumeroRepo.findOne({
+      where: { id_liste_num_etablissement_sante: id },
+      relations: ['administrateur'],
+    });
+
+    if (!numero) {
+      throw new NotFoundException(`Numéro vert avec l'ID ${id} non trouvé`);
+    }
+
+    return this.mapToResponseDto(numero);
+  }
+  /**
+   * ✅ Récupérer les établissements par catégorie
+   */
   async findByCategory(categorie: string): Promise<ResponseListeNumeroVertEtablissementSanteDto[]> {
     if (!categorie || categorie.toLowerCase() === 'tous') {
-      return this.findAll(); // Si aucune catégorie n'est précisée, retourner tout
+      return this.findAll(); // Retourner tout si aucune catégorie n'est précisée
     }
 
     const categoriesValides = ['hopital', 'clinique', 'pharmacie'];
@@ -53,205 +103,29 @@ export class ListeNumeroEtablissementSanteService {
 
     const numeros = await this.listeNumeroRepo.find({
       where: { categorie: categorie.toLowerCase() },
+      relations: ['administrateur'],
     });
 
     return numeros.map(numero => this.mapToResponseDto(numero));
   }
 
-
-
-
-   // ✅ Ajouter la récupération de tous les numéros verts
-   async findAll(): Promise<ResponseListeNumeroVertEtablissementSanteDto[]> {
-    const numeros = await this.listeNumeroRepo.find();
-    return numeros.map(numero => ({
+  /**
+   * ✅ Mapper un enregistrement en DTO de réponse
+   */
+  private mapToResponseDto(numero: ListeNumeroEtablissementSante): ResponseListeNumeroVertEtablissementSanteDto {
+    return {
       id_liste_num_etablissement_sante: numero.id_liste_num_etablissement_sante,
-      id_admin_gestionnaire: numero.id_admin_gestionnaire || null, // Gérer les valeurs null
-      contact: numero.contact,
-      image: numero.image,
+      id_admin_gestionnaire: numero.administrateur.id_admin_gestionnaire ,// Vérifie si admin est présent
       nom_etablissement: numero.nom_etablissement,
+      contact: numero.contact,
+      image: numero.image , // Gère le cas où l'image est absente
       presentation: numero.presentation,
       adresse: numero.adresse,
       latitude: numero.latitude,
       longitude: numero.longitude,
-      site_web: numero.site_web,
       type_etablissement: numero.type_etablissement,
       categorie: numero.categorie,
-      created_at: new Date(),
-    }));
+      site_web: numero.site_web ,
+    };
   }
-  
-  
-   // ✅ Récupérer un numéro vert par ID
-  async findOne(id: number): Promise<ResponseListeNumeroVertEtablissementSanteDto> {
-   if (!id || isNaN(id)) {
-   throw new Error('ID invalide. Un entier valide est requis.');
-  }
-
-
-  const numero = await this.listeNumeroRepo.findOne({ // ✅ Correction ici
-     where: { id_liste_num_etablissement_sante: id },
-  });
-
-  if (!numero) {
-    throw new NotFoundException(`Numéro vert avec l'ID ${id} non trouvé`);
-  }
-
-  return {
-      id_liste_num_etablissement_sante: numero.id_liste_num_etablissement_sante,
-      id_admin_gestionnaire: numero.id_admin_gestionnaire || null,
-      contact: numero.contact,
-      image: numero.image,
-      nom_etablissement: numero.nom_etablissement,
-      presentation: numero.presentation,
-      adresse: numero.adresse,
-      latitude: numero.latitude,
-      longitude: numero.longitude,
-      site_web: numero.site_web,
-      type_etablissement: numero.type_etablissement,
-      categorie: numero.categorie,
-      created_at: new Date(),
-  };
 }
-// ✅ Mapper un enregistrement en DTO de réponse
-private mapToResponseDto(numero: ListeNumeroEtablissementSante): ResponseListeNumeroVertEtablissementSanteDto {
-  return {
-    id_liste_num_etablissement_sante: numero.id_liste_num_etablissement_sante,
-    id_admin_gestionnaire: numero.id_admin_gestionnaire || null,
-    contact: numero.contact,
-    image: numero.image,  
-    nom_etablissement: numero.nom_etablissement,
-    presentation: numero.presentation,
-    adresse: numero.adresse,
-    latitude: numero.latitude,
-    longitude: numero.longitude,
-    site_web: numero.site_web ,
-    type_etablissement: numero.type_etablissement,
-    categorie: numero.categorie,  
-    created_at: new Date(),  
-  };
-}
-  
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { Injectable, NotFoundException } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { UpdateListeNumeroVertEtablissementSanteDto } from './dto/update-liste-numero-vert-etablissement-sante.dto';
-// import { CreateListeNumeroVertEtablissementSanteDto } from './dto/create-liste-numero-vert-etablissement-sante.dto';
-// import { ListeNumeroVertEtablissementSante } from './entities/liste_numero_vert_etablissement_sante.entity';
-// @Injectable()
-// export class ListeNumeroVertEtablissementSanteService {
-//   constructor(
-//     @InjectRepository(ListeNumeroVertEtablissementSante)
-//     private readonly listeNumeroVertRepository: Repository<ListeNumeroVertEtablissementSante>,
-//   ) {}
-
-//   async create(createListeNumeroVertDto: CreateListeNumeroVertEtablissementSanteDto): Promise<ListeNumeroVertEtablissementSante> {
-//     const etablissement = this.listeNumeroVertRepository.create(createListeNumeroVertDto);
-//     return await this.listeNumeroVertRepository.save(etablissement);
-//   }
-
-//   async findAll(): Promise<ListeNumeroVertEtablissementSante[]> {
-//     return await this.listeNumeroVertRepository.find();
-//   }
-
-//   async findOne(id: number): Promise<ListeNumeroVertEtablissementSante> {
-//     const etablissement = await this.listeNumeroVertRepository.findOne({ where: { id: id } });
-//     if (!etablissement) {
-//       throw new NotFoundException(`Établissement avec l'ID ${id} non trouvé`);
-//     }
-//     return etablissement;
-//   }
-  
-
-//   async findByCategory(type: string): Promise<ListeNumeroVertEtablissementSante[]> {
-//     return await this.listeNumeroVertRepository.find({  where: { type_etablissement: type }});
-//   }
-  
-
-//   async update(id: number, updateListeNumeroVertDto: UpdateListeNumeroVertEtablissementSanteDto): Promise<ListeNumeroVertEtablissementSante> {
-//     await this.findOne(id);
-//     await this.listeNumeroVertRepository.update(id, updateListeNumeroVertDto);
-//     return this.findOne(id);
-//   }
-
-//   async partialUpdate(id: number, updateListeNumeroVertDto: Partial<UpdateListeNumeroVertEtablissementSanteDto>): Promise<ListeNumeroVertEtablissementSante> {
-//     await this.findOne(id);
-//     await this.listeNumeroVertRepository.update(id, updateListeNumeroVertDto);
-//     return this.findOne(id);
-//   }
-
-//   async remove(id: number): Promise<void> {
-//     await this.findOne(id);
-//     await this.listeNumeroVertRepository.delete(id);
-//   }
-// }

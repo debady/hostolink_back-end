@@ -16,11 +16,17 @@ import { NotificationsModule } from './notifications/notifications.module';
 // Images & Établissements de Santé
 import { ImageModule } from './image/image.module';
 import { Image } from './image/entities/image.entity';
+import { ListeNumeroEtablissementSanteModule } from './liste_etablissement/liste_numero_etablissement_sante.module';
+import { CloudinaryModule } from './upload/cloudinary.module';
+import { ListeNumeroEtablissementSante } from './liste_etablissement/entities/liste_numero_vert_etablissement_sante.entity';
+import { AdministrateurModule } from './administrateur/administrateur.module';
+import { Administrateur } from './administrateur/entities/administrateur.entity';
+import { AnnonceModule } from './annonce/annonce.module';
+import { Annonce } from './annonce/entities/annonce.entity';
 // import { UserEtablissementModule } from './user-etablissement/user-etablissement.module';
 
 
-import { AdministrateurModule } from './administrateur/administrateur.module';
-import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
+
 
 @Module({
   imports: [
@@ -33,19 +39,24 @@ import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/ges
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
-      database: process.env.DATABASE_NAME || 'hostolink_bd',
+      database: process.env.DATABASE_NAME || 'hostolink_bds_master',
       autoLoadEntities: false,
       synchronize: false, 
-      entities: [User, Commentaire,Otp,Publication,Partage,Image,EtablissementSante,], 
+       entities: [User,Otp,Image, ListeNumeroEtablissementSante, Administrateur,Annonce ], 
   }),
   UserModule,
   AuthModule,
   ImageModule,
-  PublicationModule,
-  CommentaireModule,
-  PartageModule,
-  EtablissementSanteModule, 
-  EtablissementSanteModule
+  ListeNumeroEtablissementSanteModule,
+  CloudinaryModule,
+  NotificationsModule,
+  AdministrateurModule,
+  AnnonceModule
+  // PublicationModule,
+  // CommentaireModule,
+  // PartageModule,
+  // EtablissementSanteModule, 
+  // EtablissementSanteModule
   ],
 })
 export class AppModule {}
