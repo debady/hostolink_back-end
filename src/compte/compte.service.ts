@@ -1,109 +1,110 @@
-// src/compte/compte.service.ts
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { Compte } from './entitie/compte.entity';
-import { CreateCompteDto } from './dto/compte.dto';
+import { Compte, TypeUserEnum } from './entitie/compte.entity';
 
 @Injectable()
 export class CompteService {
   constructor(
     @InjectRepository(Compte)
-    private compteRepository: Repository<Compte>,
+    private readonly compteRepository: Repository<Compte>,
   ) {}
 
-  async create(createCompteDto: CreateCompteDto) {
-    // Vérifier que l'un des deux ID est fourni
-    if (!createCompteDto.id_user && !createCompteDto.id_user_etablissement_sante) {
-      throw new BadRequestException('L\'identifiant de l\'utilisateur ou de l\'établissement est requis');
-    }
-
-    // Vérifier qu'un compte n'existe pas déjà
-    const existingCompte = await this.compteRepository.findOne({
-      where: [
-        { id_user: createCompteDto.id_user },
-        { id_user_etablissement_sante: createCompteDto.id_user_etablissement_sante }
-      ]
-    });
-
+  /**
+   * Crée un compte utilisateur automatiquement
+   * @param id_user UUID de l'utilisateur
+   * @returns Le compte créé
+   */
+  async createUserCompte(id_user: string): Promise<Compte> {
+    // Vérifier si un compte existe déjà pour cet utilisateur
+    const existingCompte = await this.compteRepository.findOne({ where: { id_user } });
+    
     if (existingCompte) {
-      throw new BadRequestException('Un compte existe déjà pour cet utilisateur ou établissement');
+      // Un compte existe déjà, donc on le retourne simplement
+      console.log(`Un compte existe déjà pour l'utilisateur ${id_user}`);
+      return existingCompte;
     }
-
-    // Générer un numéro de compte unique
-    let numeroCompte: string;
-    if (createCompteDto.type_user === 'utilisateur') {
-      numeroCompte = 'USR-' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000);
-    } else {
-      numeroCompte = 'ETB-' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000);
-    }
-
+    
+    // Génère un numéro de compte de format USER-XXXX-XXXX-XXXX
+    const numeroCompte = `USER-${this.generateAccountNumber()}`;
+    
     const newCompte = this.compteRepository.create({
-      ...createCompteDto,
-      numero_compte: numeroCompte
+      id_user,
+      type_user: TypeUserEnum.UTILISATEUR,  // Utiliser l'énumération au lieu d'une chaîne de caractères
+      numero_compte: numeroCompte,
+      solde_compte: 0,
+      solde_bonus: 0,
+      cumule_mensuel: 0,
+      plafond: 100000, // Valeur par défaut
+      devise: 'XOF',
+      statut: 'actif',
+      date_creation_compte: new Date(),
+      date_modification: new Date(),
     });
 
     return this.compteRepository.save(newCompte);
   }
 
-  async findAll() {
-    return this.compteRepository.find();
+  /**
+   * Récupère le compte d'un utilisateur
+   * @param id_user UUID de l'utilisateur
+   * @returns Le compte de l'utilisateur ou null si aucun compte n'existe
+   */
+  async getUserCompte(id_user: string): Promise<Compte | null> {
+    return this.compteRepository.findOne({ where: { id_user } });
   }
 
-  async findCompteById(id: number) {
-    const compte = await this.compteRepository.findOne({
-      where: { id_compte: id }
-    });
-
-    if (!compte) {
-      throw new NotFoundException(`Compte avec ID ${id} non trouvé`);
-    }
-
-    return compte;
-  }
-
-  async findCompteByUser(userId: string) {
-    const compte = await this.compteRepository.findOne({
-      where: { id_user: userId }
-    });
-
-    if (!compte) {
-      throw new NotFoundException(`Compte pour l'utilisateur avec ID ${userId} non trouvé`);
-    }
-
-    return compte;
-  }
-
-  async findCompteByEtablissement(etablissementId: number) {
-    const compte = await this.compteRepository.findOne({
-      where: { id_user_etablissement_sante: etablissementId }
-    });
-
-    if (!compte) {
-      throw new NotFoundException(`Compte pour l'établissement avec ID ${etablissementId} non trouvé`);
-    }
-
-    return compte;
-  }
-
-  async updateSolde(compteId: number, montant: number) {
-    const compte = await this.findCompteById(compteId);
+  /**
+   * Génère un numéro de compte aléatoire au format XXXX-XXXX-XXXX
+   */
+  private generateAccountNumber(): string {
+    // Utilise UUID pour générer un identifiant unique et prend les 12 premiers caractères
+    const uuid = uuidv4().replace(/-/g, '').substring(0, 12);
     
-    // Vérifier si le solde sera négatif après mise à jour
-    if (compte.solde_compte + montant < 0) {
-      throw new BadRequestException('Solde insuffisant pour cette opération');
+    // Formate en XXXX-XXXX-XXXX
+    return `${uuid.substring(0, 4)}-${uuid.substring(4, 8)}-${uuid.substring(8, 12)}`;
+  }
+
+  /* 
+   * CODE POUR LES ÉTABLISSEMENTS DE SANTÉ (À IMPLÉMENTER PLUS TARD)
+   * Décommentez ce code quand le module d'établissement de santé sera développé
+   */
+  /*
+  async createEtablissementCompte(id_user_etablissement_sante: number): Promise<Compte> {
+    // Vérifier si un compte existe déjà pour cet établissement
+    const existingCompte = await this.compteRepository.findOne({ 
+      where: { id_user_etablissement_sante } 
+    });
+    
+    if (existingCompte) {
+      // Un compte existe déjà, donc on le retourne simplement
+      console.log(`Un compte existe déjà pour l'établissement ${id_user_etablissement_sante}`);
+      return existingCompte;
     }
     
-    compte.solde_compte += montant;
-    compte.date_modification = new Date();
+    // Génère un numéro de compte de format ETAB-XXXX-XXXX-XXXX
+    const numeroCompte = `ETAB-${this.generateAccountNumber()}`;
     
-    return this.compteRepository.save(compte);
+    const newCompte = this.compteRepository.create({
+      id_user_etablissement_sante,
+      type_user: TypeUserEnum.ETABLISSEMENT,  // Utiliser l'énumération au lieu d'une chaîne de caractères
+      numero_compte: numeroCompte,
+      solde_compte: 0,
+      solde_bonus: 0,
+      cumule_mensuel: 0,
+      plafond: 500000, // Plafond plus élevé pour les établissements
+      devise: 'XOF',
+      statut: 'actif',
+      date_creation_compte: new Date(),
+      date_modification: new Date(),
+    });
+
+    return this.compteRepository.save(newCompte);
   }
 
-  async remove(id: number) {
-    const compte = await this.findCompteById(id);
-    return this.compteRepository.remove(compte);
+  async getEtablissementCompte(id_user_etablissement_sante: number): Promise<Compte | null> {
+    return this.compteRepository.findOne({ where: { id_user_etablissement_sante } });
   }
+  */
 }
-

@@ -26,9 +26,6 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: true })
   pays?: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  photo_profile?: string;
-
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   date_inscription: Date;
 

@@ -1,20 +1,22 @@
 // src/compte/dto/create-compte.dto.ts
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber } from 'class-validator';
+/**
+ * DTOs pour les comptes des utilisateurs et établissements de santé
+ */
 
+// DTO pour créer un compte (utilisé en interne)
 export class CreateCompteDto {
-  @IsEnum(['utilisateur', 'etablissement'])
-  @IsNotEmpty()
+  solde_compte?: number;
+  solde_bonus?: number;
+  cumule_mensuel?: number;
+  plafond?: number;
+  mode_paiement_preferentiel?: string;
   type_user: string;
-
-  @IsString()
-  @IsNotEmpty()
-  devise: string;
-
-  @IsOptional()
-  @IsUUID()
+  devise?: string;
   id_user?: string;
-
-  @IsOptional()
-  @IsNumber()
   id_user_etablissement_sante?: number;
+}
+
+// DTO pour la mise à jour du mode de paiement préférentiel
+export class UpdateModePaiementDto {
+  mode_paiement_preferentiel: string;
 }

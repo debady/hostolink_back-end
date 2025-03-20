@@ -4,6 +4,8 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../utilisateur/user.service';
 
+
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -27,11 +29,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: { id_user: string }) {
     console.log('🔐 Validation du payload JWT :', payload);
 
-    const user = await this.userService.findUserById(payload.id_user);
-
+    const user = await this.userService.getUserById(payload.id_user);
     if (!user) {
       console.warn(`❌ Utilisateur non trouvé avec l'id : ${payload.id_user}`);
-      throw new UnauthorizedException('Utilisateur non trouvé');
+      return null; // Retourne null pour éviter l'erreur
     }
 
     console.log(`✅ JWT validé pour l'utilisateur : ${user.id_user}`);

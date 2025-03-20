@@ -2,6 +2,8 @@ si les coordonnée sont deja utiliser pas d'eereur mais generation d'otp
 ednpoint de temps de trop generer de otp 
 code a  4 chifffre ou 6 chiffre 
 
+PROBLEME DE VERIF LE PIUN 
+
 
 📍 PHASE 2 : INSTALLATION DES LIBRAIRIES
     npm install nodemailer axios
@@ -23,3 +25,6 @@ ALTER TABLE utilisateur ADD COLUMN dernier_otp_envoye TIMESTAMP NULL;
 ```
 
 🚀 **Objectif :** Empêcher qu’un OTP soit envoyé trop souvent à un même utilisateur.
+
+-- 
+https://collection.cloudinary.com/dhrrk7vsd/387f34fb0827d86134e0d6d720f22e23

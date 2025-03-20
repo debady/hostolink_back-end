@@ -3,10 +3,6 @@ import { Vonage } from '@vonage/server-sdk';
 import { Auth } from '@vonage/auth';
 import * as dotenv from 'dotenv';
 
-console.log("📌 Vonage API Key :", process.env.VONAGE_API_KEY);
-console.log("📌 Vonage API Secret :", process.env.VONAGE_API_SECRET);
-
-
 dotenv.config();
 
 @Injectable()

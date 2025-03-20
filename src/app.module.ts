@@ -1,28 +1,28 @@
 // ---------------------LOCAL ---------------------
 
-import { UserModule } from './utilisateur/user.module'; // ✅ Module utilisateur
-import { User } from './utilisateur/entities/user.entity'; // ✅ Entité utilisateur
-import { AuthModule } from './auth/auth.module'; // ✅ Module d'authentification
+import { UserModule } from './utilisateur/user.module'; 
+import { User } from './utilisateur/entities/user.entity'; 
+import { AuthModule } from './auth/auth.module'; 
 import { Module } from '@nestjs/common'; 
-import { TypeOrmModule } from '@nestjs/typeorm'; // ✅ ORM TypeORM pour PostgreSQL
-import { ConfigModule } from '@nestjs/config'; // ✅ Gestion des variables d’environnement
-import { Otp } from './code_verif_otp/entities/otp.entity'; // ✅ Entité OTP
-import { NotificationsModule } from './notifications/notifications.module'; // ✅ Module des notifications (emails, SMS)
+import { TypeOrmModule } from '@nestjs/typeorm'; 
+import { ConfigModule } from '@nestjs/config'; 
+import { Otp } from './code_verif_otp/entities/otp.entity'; 
+import { NotificationsModule } from './notifications/notifications.module'; 
+import { ImageModule } from './image/image.module';
+import { Image } from './image/entities/image.entity';
+import { Compte } from './compte/entitie/compte.entity';
 import { CompteModule } from './compte/compte.module';
 import { QrCodeModule } from './qr-code/qr-code.module';
-import { Compte } from './compte/entitie/compte.entity';
-// import { EtablissementSanteModule } from './localisation_etablissement_sante/etablissement_sante.module';
+import { QrCodeDynamique } from './qr-code/entitie/qr_code_dynamique.entity';
+import { QrCodeStatique } from './qr-code/entitie/qr_code_statique.entity';
+
 
 @Module({
   imports: [
-    // ✅ Chargement des variables d'environnement depuis `.env`
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-
-    // ✅ Module gérant les notifications (email OTP)
     NotificationsModule,
     // EtablissementSanteModule,
 
-    // ✅ Connexion à la base de données PostgreSQL via TypeORM
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
@@ -32,19 +32,17 @@ import { Compte } from './compte/entitie/compte.entity';
       database: process.env.DATABASE_NAME || 'hostolink_bd',
       autoLoadEntities: false, // ❌ Désactivé pour éviter le chargement automatique des entités
       synchronize: false, // ❌ Désactivé pour éviter les pertes de données accidentelles
-      entities: [User, Otp, Compte], // ✅ Déclaration explicite des entités utilisées
+      entities: [User, Otp, Compte, Image, QrCodeDynamique, QrCodeStatique], // ✅ Déclaration explicite des entités utilisées
     }),
 
     // ✅ Modules principaux de l’application
     UserModule, // ✅ Module de gestion des utilisateurs
     AuthModule, // ✅ Module d'authentification
+    ImageModule,
     CompteModule,
     QrCodeModule,
-    // EtablissementModule,
-    
 
     // ✅ Modules supplémentaires (commentés pour l’instant)
-    // ImageModule, // ✅ Gestion des images
     // PublicationModule, // ✅ Gestion des publications
     // CommentaireModule, // ✅ Gestion des commentaires
     // PartageModule, // ✅ Gestion des partages

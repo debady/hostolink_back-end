@@ -1,33 +1,40 @@
-// src/compte/entities/compte.entity.ts
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { User } from 'src/utilisateur/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Check, OneToOne, JoinColumn } from 'typeorm';
+
+// Énumération pour les types d'utilisateurs
+export enum TypeUserEnum {
+  UTILISATEUR = 'utilisateur',
+  ETABLISSEMENT = 'etablissement',
+}
 
 @Entity('compte')
+@Check(`type_user IN ('${TypeUserEnum.UTILISATEUR}', '${TypeUserEnum.ETABLISSEMENT}')`)
 export class Compte {
-  @PrimaryGeneratedColumn('increment')
+  @PrimaryGeneratedColumn()
   id_compte: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'integer', default: 0 })
   solde_compte: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'integer', default: 0 })
   solde_bonus: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'integer', default: 0 })
   cumule_mensuel: number;
 
-  @Column({ default: 100000 })
+  @Column({ type: 'integer', default: 1000000 })
   plafond: number;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   mode_paiement_preferentiel: string;
 
-  @Column({ length: 20 })
-  type_user: string;
+  @Column({ type: 'varchar', length: 20 })
+  type_user: TypeUserEnum;
 
-  @Column({ length: 10, default: 'XOF'})
+  @Column({ type: 'varchar', length: 10, default: 'XOF' })
   devise: string;
 
-  @Column({ length: 50, nullable: true, unique: true })
+  @Column({ type: 'varchar', length: 50, nullable: true, unique: true })
   numero_compte: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -36,12 +43,17 @@ export class Compte {
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   date_modification: Date;
 
-  @Column({ length: 20, default: 'actif' })
+  @Column({ type: 'varchar', length: 20, default: 'actif' })
   statut: string;
 
-  @Column({ nullable: true, type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true })
   id_user: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'integer', nullable: true })
   id_user_etablissement_sante: number;
+
+  // Relation avec User (optionnelle mais utile pour les jointures)
+  @OneToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'id_user' })
+  user: User;
 }

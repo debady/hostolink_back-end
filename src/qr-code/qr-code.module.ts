@@ -1,29 +1,34 @@
-// src/qr-code/qr-code.module.ts
-import { Module } from '@nestjs/common';
+
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
-import { QrCodeController } from './qr-code.controller';
 import { QrCodeService } from './qr-code.service';
-import { QrCodeStatique } from './entitie/qr_code_statique.entity';
+import { QrCodeController } from './qr-code.controller';
 import { QrCodeDynamique } from './entitie/qr_code_dynamique.entity';
+import { QrCodeStatique } from './entitie/qr_code_statique.entity';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CleanupService } from './cleanup.service';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UserModule } from 'src/utilisateur/user.module';
-import { QrCodeJwtService } from './qr-code-jwt/qr-code-jwt.service';
-import { CompteModule } from 'src/compte/compte.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([QrCodeStatique, QrCodeDynamique]),
-    JwtModule.register({}),
-    ConfigModule,
-    UserModule,
-    // EtablissementModule,
-    CompteModule,
+    TypeOrmModule.forFeature([QrCodeDynamique, QrCodeStatique]),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_QR_SECRET', 'qr_code_secret_key'),
+        signOptions: { expiresIn: '1h' }, // Valeur par défaut
+      }),
+    }),
+    forwardRef(() => UserModule),
+    ScheduleModule.forRoot(), // Nécessaire pour les tâches programmées
+    // Décommentez quand le module d'établissement de santé sera disponible
+    // forwardRef(() => EtablissementSanteModule),
   ],
   controllers: [QrCodeController],
-  providers: [QrCodeService, QrCodeJwtService],
-  exports: [QrCodeService, QrCodeJwtService]
+  providers: [QrCodeService, CleanupService],
+  exports: [QrCodeService]
 })
 export class QrCodeModule {}
-
-
