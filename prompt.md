@@ -21,82 +21,7 @@
 
 
 - la base de donnéee
-    hostolink_bd=# \dt
-                        Liste des relations
-    SchÚma |               Nom                | Type  | PropriÚtaire
-    --------+----------------------------------+-------+--------------
-    public | annonce                          | table | postgres
-    public | carte_bancaire                   | table | postgres
-    public | commentaire                      | table | postgres
-    public | compte                           | table | postgres
-    public | contacts_enregistres             | table | postgres
-    public | etablissement_sante              | table | postgres
-    public | liker                            | table | postgres
-    public | liste_numero_etablissement_sante | table | postgres
-    public | localisation                     | table | postgres
-    public | message                          | table | postgres
-    public | migrations                       | table | postgres
-    public | notification                     | table | postgres
-    public | partages                         | table | postgres
-    public | publication                      | table | postgres
-    public | publicite                        | table | postgres
-    public | qr_code_paiement                 | table | postgres
-    public | role_permission                  | table | postgres
-    public | thematiques                      | table | postgres
-    public | transaction                      | table | postgres
-    public | utilisateur                      | table | postgres
-    public | verification_compte              | table | postgres
-    public | verification_identite            | table | postgres
-    (22 lignes)
-
-
-    hostolink_bd=# \d utilisateur
-                                                    Table ½ public.utilisateur ╗
-        Colonne      |            Type             | Collationnement | NULL-able |                  Par dÚfaut
-    -------------------+-----------------------------+-----------------+-----------+----------------------------------------------
-    id_user           | integer                     |                 | not null  | nextval('utilisateur_id_user_seq'::regclass)
-    nom               | character varying           |                 |           |
-    prenom            | character varying           |                 |           |
-    email             | character varying           |                 |           |
-    telephone         | character varying           |                 |           |
-    pays              | character varying           |                 |           |
-    photo_profile     | character varying           |                 |           |
-    mdp               | character varying           |                 |           |
-    date_inscription  | timestamp without time zone |                 |           | CURRENT_TIMESTAMP
-    code_confirmation | character varying(10)       |                 |           |
-    Index :
-        "utilisateur_pkey" PRIMARY KEY, btree (id_user)
-        "UQ_80273015241cbddf8152908bd5b" UNIQUE CONSTRAINT, btree (telephone)
-        "UQ_e1136325a6b28e2a02b81b2f5e1" UNIQUE CONSTRAINT, btree (email)
-    RÚfÚrencÚ par :
-        TABLE "carte_bancaire" CONSTRAINT "carte_bancaire_ibfk_1" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "commentaire" CONSTRAINT "commentaire_ibfk_2" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "compte" CONSTRAINT "compte_ibfk_1" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "contacts_enregistres" CONSTRAINT "contacts_enregistres_ibfk_1" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "contacts_enregistres" CONSTRAINT "contacts_enregistres_ibfk_2" FOREIGN KEY (id_contact_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "liker" CONSTRAINT "liker_ibfk_2" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "message" CONSTRAINT "message_ibfk_1" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user)
-        TABLE "partages" CONSTRAINT "partages_ibfk_2" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "publication" CONSTRAINT "publication_ibfk_1" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "qr_code_paiement" CONSTRAINT "qr_code_paiement_ibfk_1" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "verification_compte" CONSTRAINT "verification_compte_ibfk_1" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-        TABLE "verification_identite" CONSTRAINT "verification_identite_ibfk_1" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-
-
-hostolink_bd=# \d otp
-                                            Table ½ public.otp ╗
-    Colonne   |            Type             | Collationnement | NULL-able |           Par dÚfaut
-    ------------+-----------------------------+-----------------+-----------+---------------------------------
-    id         | integer                     |                 | not null  | nextval('otp_id_seq'::regclass)
-    user_id    | integer                     |                 | not null  |
-    otp_code   | character varying(6)        |                 | not null  |
-    expires_at | timestamp without time zone |                 | not null  |
-    is_valid   | boolean                     |                 |           | true
-    Index :
-        "otp_pkey" PRIMARY KEY, btree (id)
-    Contraintes de clÚs ÚtrangÞres :
-        "fk_otp_user" FOREIGN KEY (user_id) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-
+   *** a faire ***
 
 
 les Endpoints 
@@ -218,5 +143,5 @@ database:
     postgres
 
 user:
-postgres
+    postgres
 

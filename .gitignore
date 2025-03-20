@@ -59,5 +59,11 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # mes ignores
 src/main2.ts
 src/app.module2.ts
-
 src/etablissement
+src/Module_admin
+
+src/localisation_etablissement_sante
+# src/image
+src/commentaire
+src/partage
+src/publication
