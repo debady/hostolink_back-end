@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../utilisateur/entities/user.entity';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
-import { SmsService } from '../firebase_notifications/sms.service';
+import { SmsService } from '../notifications/sms.service';
+
 
 @Injectable()
 export class OtpService {
@@ -18,7 +19,7 @@ export class OtpService {
     private readonly userRepository: Repository<User>,
 
     // private readonly emailService: EmailService,
-    private readonly smsService: SmsService,
+    private readonly smsService: SmsService
 
 
   ) {}
@@ -56,6 +57,7 @@ export class OtpService {
       await this.otpRepository.save(otp);
 
       if (moyen_envoyer === MoyenEnvoiEnum.SMS && identifier) {
+        // await this.smsService.sendOtpSms(identifier, otpCode);
         await this.smsService.sendOtpSms(identifier, otpCode);
         console.log(`📤 Envoi du SMS en cours vers ${Number} avec l'OTP ${otpCode}`);
 
