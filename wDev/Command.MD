@@ -114,3 +114,11 @@ DECOMMIT UN FICHIER SUIVI PAR GIT
 
 VOIR L'ETAT DES CES PROJET GOOGLE CLOUD
     https://console.cloud.google.com/iam-admin/projects
+
+
+
+    ---- https://account.africastalking.com/ ---
+
+    atsk_9cb676c636c08f6cad76b4f83d16c7abc61ed8b542f3a7aa43ea08394b7d7444e736c91d
+
+Mb4rrL17e

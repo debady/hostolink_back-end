@@ -119,7 +119,6 @@ export class AdministrateurService {
       throw new NotFoundException('Administrateur non trouvé.');
     }
 
-    // ✅ ajoute exactement ce bloc ci-dessous
     const avatar = await this.imageRepository.findOne({
       where: { id_admin_gestionnaire: id, motif: ImageMotifEnum.AVATAR_ADMIN },
     });
