@@ -80,69 +80,72 @@ export class UserController {
 
   // ✅ Vérification du PIN de connexion
   @Post('verify-pin')
-  async verifyPin(@Body() body: { identifier: string; pin: string }) {
-    if (!body.identifier?.trim() || !body.pin?.trim()) {
-      throw new BadRequestException('Identifiant et PIN requis');
-    }
+    async verifyPin(@Body() body: { identifier: string; pin: string }) {
+      if (!body.identifier?.trim() || !body.pin?.trim()) {
+        throw new BadRequestException('Identifiant et PIN requis');
+      }
 
-    try {
-      const isValid = await this.userService.verifyUserPin(
-        body.identifier.trim(), 
-        body.pin.trim()
-      );
-      
-      return isValid 
-        ? { success: true, message: 'PIN valide' } 
-        : { success: false, message: 'PIN incorrect' };
-    } catch (error) {
-      console.error("❌ Erreur verify-pin:", error);
-      throw new InternalServerErrorException("Erreur lors de la vérification du PIN");
-    }
+      try {
+        const isValid = await this.userService.verifyUserPin(
+          body.identifier.trim(), 
+          body.pin.trim()
+        );
+        
+        return isValid 
+          ? { success: true, message: 'PIN valide' } 
+          : { success: false, message: 'PIN incorrect' };
+      } catch (error) {
+        console.error("❌ Erreur verify-pin:", error);
+        throw new InternalServerErrorException("Erreur lors de la vérification du PIN");
+      }
   }
 
   // ✅ Vérification d'un OTP
   @Post('verify-otp')
-  async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
-    try {
-      console.log(`📩 Vérification OTP pour ${body.identifier}`);
-      
-      const isValid = await this.userService.verifyConfirmationCode(
-        body.identifier.trim(), 
-        body.otpCode.trim()
-      );
-      
-      if (isValid) { // ✅ Vérification correcte car `isValid` est un booléen
-        await this.userService.updateUserVerificationStatus(body.identifier.trim());
-        console.log(`✅ Compte vérifié pour ${body.identifier}`);
-      }
-      
+    async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
+      try {
+        console.log(`📩 Vérification OTP pour ${body.identifier}`);
+        
+        const isValid = await this.userService.verifyConfirmationCode(
+          body.identifier.trim(), 
+          body.otpCode.trim()
+        );
+        
+        if (isValid) { 
+          await this.userService.updateUserVerificationStatus(body.identifier.trim());
+          console.log(`✅ Compte vérifié pour ${body.identifier}`);
+        }
+        
 
-      return isValid;
-    } catch (error) {
-      console.error("❌ Erreur verify-otp:", error);
-      throw new InternalServerErrorException(error.message || "Erreur lors de la vérification de l'OTP");
-    }
+        return isValid;
+      } catch (error) {
+        console.error("❌ Erreur verify-otp:", error);
+        throw new InternalServerErrorException(error.message || "Erreur lors de la vérification de l'OTP");
+      }
   }
 
   // ✅ Récupérer les infos de l'utilisateur connecté
   @Get('user/me')
-  @UseGuards(JwtAuthGuard)
-  async getMe(@Req() req: AuthenticatedRequest) {
-    console.log(`📌 Récupération des infos utilisateur pour id_user : ${req.user.id_user}`);
-    return this.userService.getUserById(req.user.id_user);
+    @UseGuards(JwtAuthGuard)
+    async getMe(@Req() req: AuthenticatedRequest) {
+      console.log(`📌 Récupération des infos utilisateur pour id_user : ${req.user.id_user}`);
+      return this.userService.getUserById(req.user.id_user);
   }
 
   // ✅ Mise à jour du profil utilisateur avec gestion de l'image de profil
+
   @Patch('/update-profile')
-  @UseGuards(JwtAuthGuard) // 🔒 Protège l’endpoint avec JWT
-  @UseInterceptors(FileInterceptor('file')) // ✅ Intercepte le fichier uploadé
-  async updateProfile(
-    @Req() req: AuthenticatedRequest, 
-    @Body() updateProfileDto: UpdateProfileDto, 
-    @UploadedFile() file?: Express.Multer.File // ✅ Prend en charge le fichier
-  ) {
-    const id_user = req.user.id_user; // ✅ Récupération automatique de id_user via JWT
-    console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
-    return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
+    @UseGuards(JwtAuthGuard) 
+    @UseInterceptors(FileInterceptor('file'))
+
+    async updateProfile(
+      @Req() req: AuthenticatedRequest, 
+      @Body() updateProfileDto: UpdateProfileDto, 
+      @UploadedFile() file?: Express.Multer.File
+
+    ) {
+      const id_user = req.user.id_user; 
+      console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
+      return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
   }
 }

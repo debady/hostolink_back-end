@@ -4,16 +4,16 @@ import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { OtpModule } from '../code_verif_otp/otp.module';
-import { ImageService } from 'src/image/image.service';  // ✅ Import de ImageService
-import { Image } from 'src/image/entities/image.entity';  // ✅ Import de Image
+import { ImageService } from 'src/image/image.service'; 
+import { Image } from 'src/image/entities/image.entity'; 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Image]),  // ✅ Ajout de Image dans forFeature
-    forwardRef(() => OtpModule),  // ✅ Utilisation de forwardRef pour éviter la dépendance circulaire
+    TypeOrmModule.forFeature([User, Image]), 
+    forwardRef(() => OtpModule), 
   ],
   controllers: [UserController],
-  providers: [UserService, ImageService],  // ✅ Ajout de ImageService dans providers
-  exports: [UserService],  // ✅ Exporte UserService pour d'autres modules
+  providers: [UserService, ImageService], 
+  exports: [UserService], 
 })
 export class UserModule {}

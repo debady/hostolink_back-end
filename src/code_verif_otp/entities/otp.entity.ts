@@ -2,7 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 import { User } from '../../utilisateur/entities/user.entity';
 
 export enum MoyenEnvoiEnum {
-  TELEPHONE = 'telephone',
+  // TELEPHONE = 'telephone',
+  SMS = 'SMS',
   EMAIL = 'email',
 }
 

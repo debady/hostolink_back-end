@@ -110,3 +110,7 @@ DECOMMIT UN FICHIER SUIVI PAR GIT
     git rm --cached .env
     git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch .env' --prune-empty --tag-name-filter cat -- --all
     git push origin --force --all
+
+
+VOIR L'ETAT DES CES PROJET GOOGLE CLOUD
+    https://console.cloud.google.com/iam-admin/projects

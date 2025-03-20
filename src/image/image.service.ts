@@ -20,19 +20,19 @@ export class ImageService {
     });
   }
 
+  // uploade new img clounidiary
   async uploadImage(
     file: Express.Multer.File,
-    id_user: string, // ✅ Correction : UUID
+    id_user: string, 
     motif: ImageMotifEnum,
     type_user?: string,
-    id_user_etablissement_sante?: number,
   ): Promise<Image> {
     if (!file || !file.buffer) {
       throw new InternalServerErrorException('Le fichier est invalide ou non reçu');
     }
 
     try {
-      // 🔄 Supprimer l'ancienne image de profil avant d'ajouter la nouvelle
+      // 🔄 Sup ancienne ajouter nouvelle
       if (motif === ImageMotifEnum.PROFILE) {
         const existingImage = await this.imageRepository.findOne({ where: { id_user, motif } });
 
@@ -43,17 +43,18 @@ export class ImageService {
 
           // ✅ Supprimer l'ancienne image Cloudinary
           await cloudinary.uploader.destroy(publicId);
+
           // ✅ Supprimer l'entrée en base
           await this.imageRepository.delete(existingImage.id_image);
         }
       }
 
-      // 🔄 Upload de la nouvelle image sur Cloudinary avec optimisation
+      // 🔄 Upload nouvelle Cloudinary optimisation
       const result: UploadApiResponse = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
-            folder: 'dossier_hostolink_preset', // 📂 Dossier de stockage Cloudinary
-            transformation: [{ quality: "auto", fetch_format: "auto" }] // 🔄 Optimisation automatique
+            folder: 'dossier_hostolink_preset',
+            transformation: [{ quality: "auto", fetch_format: "auto" }] 
           },
           (error, result) => (error ? reject(error) : resolve(result!)),
         );
@@ -64,7 +65,7 @@ export class ImageService {
         throw new InternalServerErrorException('Erreur lors du téléversement sur Cloudinary');
       }
 
-      // ✅ Enregistrement de la nouvelle image en base de données
+      // insert new img ds la bd
       const newImage = this.imageRepository.create({
         url_image: result.secure_url,
         id_user,
@@ -79,6 +80,7 @@ export class ImageService {
     }
   }
 
+  // search par id img
   async getImageById(id: string): Promise<{ success: boolean; image?: Image; message?: string }> {
     const image = await this.imageRepository.findOne({ where: { id_image: id } });
 
@@ -89,10 +91,12 @@ export class ImageService {
     return { success: true, image };
   }
 
+  // recup all images
   async getAllImages(): Promise<Image[]> {
     return await this.imageRepository.find();
   }
 
+  //  sup img par id cloudninary
   async deleteImage(id: string): Promise<{ success: boolean; message: string }> {
     const image = await this.imageRepository.findOneBy({ id_image: id });
 
@@ -101,17 +105,15 @@ export class ImageService {
     }
 
     try {
-      // ✅ Extraire correctement le `publicId` de Cloudinary avant suppression
       const urlParts = image.url_image.split('/');
       const publicIdWithExtension = urlParts[urlParts.length - 1];
       const publicId = publicIdWithExtension.split('.')[0];
 
-      // ✅ Supprimer l'image de Cloudinary
       await cloudinary.uploader.destroy(publicId);
 
-      // ✅ Supprimer l'image de la base de données
       await this.imageRepository.delete(id);
       return { success: true, message: 'Image supprimée avec succès' };
+
     } catch (error) {
       console.error('❌ Erreur lors de la suppression de l’image:', error);
       throw new InternalServerErrorException('Impossible de supprimer l’image');

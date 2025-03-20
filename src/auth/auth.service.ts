@@ -6,7 +6,7 @@ import { User } from '../utilisateur/entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  generateJwt(arg0: { id: number; }) {
+  generateJwt(_arg0: { id: number; }) {
     throw new Error('Method not implemented.');
   }
   constructor(

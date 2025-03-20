@@ -3,12 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../utilisateur/entities/user.entity';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
-import { EmailService } from '../notifications/email.service';
-import { SmsService } from '../notifications/sms.service';
+import { SmsService } from '../firebase_notifications/sms.service';
 
 @Injectable()
 export class OtpService {
-  sendOtp(arg0: { identifier: any; }) {
+  sendOtp(_arg0: { identifier: any; }) {
     throw new Error('Method not implemented.');
   }
   constructor(
@@ -18,8 +17,10 @@ export class OtpService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
-    private readonly emailService: EmailService,
+    // private readonly emailService: EmailService,
     private readonly smsService: SmsService,
+
+
   ) {}
 
   async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
@@ -43,7 +44,7 @@ export class OtpService {
       })
       .execute();
 
-
+      // a dev admin
         const otp = this.otpRepository.create({
           otp_code: otpCode,
           expires_at: expirationDate,
@@ -52,14 +53,16 @@ export class OtpService {
           id_user: user ? user.id_user : undefined,
         });
         
-        
       await this.otpRepository.save(otp);
 
-      if (moyen_envoyer === MoyenEnvoiEnum.TELEPHONE && identifier) {
+      if (moyen_envoyer === MoyenEnvoiEnum.SMS && identifier) {
         await this.smsService.sendOtpSms(identifier, otpCode);
+        console.log(`📤 Envoi du SMS en cours vers ${Number} avec l'OTP ${otpCode}`);
+
 
       } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL && identifier) {
-        await this.emailService.sendOtpEmail(identifier, otpCode);
+        // await this.emailService.sendOtpEmail(identifier, otpCode);
+        console.log("code envoyer par email à dev")
       }
 
       console.log(`✅ Envoi d'un OTP à ${identifier} via ${moyen_envoyer}`);
@@ -70,6 +73,7 @@ export class OtpService {
     }
   }
 
+  // verif otp
   async verifyOtp(identifier: string, otpCode: string): Promise<{ success: boolean; message: string }> {
     try {
       identifier = identifier.trim();
@@ -79,7 +83,6 @@ export class OtpService {
         where: [{ email: identifier }, { telephone: identifier }],
       });
 
-
       const otp = await this.otpRepository.findOne({
         where: [
           ...(user ? [{ user: user, otp_code: otpCode, is_valid: true }] : []),
@@ -87,7 +90,6 @@ export class OtpService {
         relations: ['user'],
       });
       
-
       if (!otp || new Date() > otp.expires_at) {
         return { success: false, message: "Code OTP incorrect ou expiré" };
       }

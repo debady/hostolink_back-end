@@ -24,7 +24,7 @@ export class UserService {
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
 
-    @Inject(forwardRef(() => ImageService)) // ✅ Correction de l'injection circulaire
+    @Inject(forwardRef(() => ImageService))
     private readonly imageService: ImageService
   ) {}
 
@@ -132,12 +132,12 @@ export class UserService {
 }
 
 
-  // ✅ Trouve un utilisateur par email ou téléphone
-  async findUserByIdentifier(identifier: string): Promise<User | null> {
-    return await this.userRepository.findOne({
-      where: [{ email: identifier }, { telephone: identifier }],
-    });
-  }
+// ✅ Trouve un utilisateur par email ou téléphone A ECRIS SON ENDPOINT 
+async findUserByIdentifier(identifier: string): Promise<User | null> {
+  return await this.userRepository.findOne({
+    where: [{ email: identifier }, { telephone: identifier }],
+  });
+}
 
 // ✅ Vérifier un code OTP et activer le compte
 async verifyConfirmationCode(identifier: string, code: string): Promise<boolean> {
