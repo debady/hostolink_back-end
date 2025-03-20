@@ -18,11 +18,14 @@ export default new DataSource({
   type: 'postgres',
   host: 'localhost',
   port: 5432,
-  username: 'dev_sohapigroup',
-  password: 'mdp_dev_sohapigroup',
-  database: 'hostolink_bd',
+  username: 'postgres',
+  password: 'NGUESSAN',
+  database: 'hostolink_bds',
   entities: [
-    'dist/**/*.entity{.ts,.js}'
+    'src/**/*.entity.ts',
+    
   ],
-  synchronize: true,
+  synchronize: false,
+  logging: true,
+
 });

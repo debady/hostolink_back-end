@@ -16,6 +16,9 @@ import { Publication } from './publication/entities/publication.entity';
 import { Partage } from './partage/entities/partage.entity';
 import { Image } from './image/entities/image.entity';
 import { EtablissementSante } from './etablissement_sante/entities/etablissement_sante.entity';
+import { ListeNumeroEtablissementSanteModule } from './liste_etablissement/liste_numero_etablissement_sante.module';
+import { ListeNumeroEtablissementSante } from './liste_etablissement/entities/liste_numero_vert_etablissement_sante.entity';
+import { CloudinaryModule } from './upload/cloudinary.module';
 
 
 @Module({
@@ -28,10 +31,10 @@ import { EtablissementSante } from './etablissement_sante/entities/etablissement
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
-      database: process.env.DATABASE_NAME || 'hostolink_bd',
+      database: process.env.DATABASE_NAME || 'hostolink_bds',
       autoLoadEntities: false,
       synchronize: false, 
-      entities: [User, Commentaire,Otp,Publication,Partage,Image,EtablissementSante,], 
+      entities: [User, Commentaire,Otp,Publication,Partage,Image,EtablissementSante, ListeNumeroEtablissementSante], 
   }),
   UserModule,
   AuthModule,
@@ -40,7 +43,9 @@ import { EtablissementSante } from './etablissement_sante/entities/etablissement
   CommentaireModule,
   PartageModule,
   EtablissementSanteModule, 
-  EtablissementSanteModule
+  EtablissementSanteModule,
+  ListeNumeroEtablissementSanteModule,
+  CloudinaryModule
     
   ],
 })
