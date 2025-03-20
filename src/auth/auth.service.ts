@@ -7,6 +7,9 @@ import { User } from '../utilisateur/entities/user.entity';
 
 @Injectable()
 export class AuthService {
+  generateJwt(arg0: { id: number; }) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
@@ -42,7 +45,7 @@ export class AuthService {
     console.log(`✅ Connexion réussie pour : ${user.id_user}, Token généré : ${access_token}`);
 
     console.log('✅ Connexion réussie, Token généré:', access_token);
-    return { user, access_token }; // <- Important : retourne l'utilisateur complet avec le token
+    return { user, access_token }; 
     }
 
 

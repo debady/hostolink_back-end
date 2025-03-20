@@ -1,9 +1,9 @@
 import { Otp } from 'src/code_verif_otp/entities/otp.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Image } from '../../image/entities/image.entity';
 
 @Entity('utilisateur')  
 export class User {
-  [x: string]: any;
 
   @PrimaryGeneratedColumn('uuid')
   id_user: string;
@@ -45,4 +45,10 @@ export class User {
 
   @Column('geometry', { spatialFeatureType: 'Point', srid: 4326, nullable: true })
   position?: string;
+
+  @OneToMany(() => Image, (image) => image.user, { cascade: true })
+  images?: Image[];
+
+  @Column({ type: 'boolean', default: true }) // Par défaut, l'utilisateur est actif
+  actif: boolean;
 }

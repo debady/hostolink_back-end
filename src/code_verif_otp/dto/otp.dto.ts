@@ -29,4 +29,7 @@ export class VerifyOtpDto {
 
   @IsUUID("4", { message: "L'ID utilisateur doit être un UUID valide." })
   id_user?: string;
+
+  @IsNotEmpty()
+  id_user_etablissement_sante?: number;
 }

@@ -19,8 +19,26 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw new UnauthorizedException('Accès non autorisé. Token invalide ou expiré.');
     }
 
-    console.log(`✅ Utilisateur authentifié : ${user.id_user}`);
+    console.log(`✅ Utilisateur authentifié : ${user.id_user || user.id_admin_gestionnaire}`);
 
     return user;
+  }
+}
+
+@Injectable()
+export class JwtAdminGuard extends AuthGuard('jwt-admin') {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const result = (await super.canActivate(context)) as boolean;
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    if (!user || user.role !== 'super_admin') {
+      console.warn('❌ Utilisateur non autorisé : pas un administrateur');
+      throw new UnauthorizedException('Accès refusé. Vous devez être un administrateur.');
+    }
+
+    console.log(`✅ Administrateur authentifié : ${user.id_admin_gestionnaire}`);
+
+    return result;
   }
 }

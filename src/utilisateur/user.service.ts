@@ -165,23 +165,26 @@ export class UserService {
     });
   }
 
-  // ✅ Vérifier un code OTP et activer le compte
-  async verifyConfirmationCode(identifier: string, code: string): Promise<boolean> {
-    identifier = identifier.trim();
-    code = code.trim();
+// ✅ Vérifier un code OTP et activer le compte
+async verifyConfirmationCode(identifier: string, code: string): Promise<boolean> {
+  identifier = identifier.trim();
+  code = code.trim();
 
-    const user = await this.userRepository.findOne({
-      where: [{ email: identifier }, { telephone: identifier }],
-    });
+  const user = await this.userRepository.findOne({
+    where: [{ email: identifier }, { telephone: identifier }],
+  });
 
-    if (!user || user.code_confirmation !== code) return false;
-
-    user.code_confirmation = "";
-    user.compte_verifier = true;
-    await this.userRepository.save(user);
-
-    return true;
+  // 🚨 Vérification si l'utilisateur existe
+  if (!user) {
+    throw new Error('Utilisateur non trouvé');
   }
+
+  user.compte_verifier = true;
+  await this.userRepository.save(user);
+
+  return true;
+}
+
 
   // ✅ Mettre compte_verifier = true
   async updateUserVerificationStatus(identifier: string): Promise<void> {

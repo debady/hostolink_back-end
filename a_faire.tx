@@ -28,3 +28,21 @@ ALTER TABLE utilisateur ADD COLUMN dernier_otp_envoye TIMESTAMP NULL;
 
 -- 
 https://collection.cloudinary.com/dhrrk7vsd/387f34fb0827d86134e0d6d720f22e23
+
+liste d'endpoints supplémentaires à développer pour le module **Administrateurs** :
+
+
+
+
+
+
+
+
+
+7. **Gérer les permissions spécifiques d'un administrateur**
+   ```
+   PATCH /administrateurs/:id/permissions
+   ```
+
+
+Ces endpoints supplémentaires rendront ton module administrateur complet, sécurisé et flexible.

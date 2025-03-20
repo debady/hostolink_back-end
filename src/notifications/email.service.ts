@@ -14,7 +14,7 @@ export class EmailService {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587', 10),
-      secure: false, // false pour TLS, true pour SSL
+      secure: false,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD,
@@ -28,7 +28,7 @@ export class EmailService {
       to: email,
       subject: 'Votre code OTP - Hostolink',
       text: `Votre code OTP est : ${otp}. Il expire dans 5 minutes.`,
-      html: `<p>Votre code OTP est : <strong>${otp}</strong>. Il expire dans <strong>5 minutes <br>Module utilisateur ok avec otp email</br> </strong>.</p>`,
+      html: `<p>Votre code OTP est : <strong>${otp}</strong>. Il expire dans <strong>5 minutes</strong>.</p>`,
     };
 
     try {
@@ -41,8 +41,8 @@ export class EmailService {
   }
 
   async testSendEmail() {
-    const testEmail = "debadychatue@gmail.com"; // Remplace par ton email personnel
-    const otpCode = "8945"; // Un OTP de test
+    const testEmail = "debadychatue@gmail.com"; 
+    const otpCode = "8945";
     await this.sendOtpEmail(testEmail, otpCode);
   }
   
