@@ -3,9 +3,6 @@
 CONNEXION A LA BD SUPABASE
     psql "postgresql://postgres.skwupmsitzsxukbmnkwv:mdp_dev_sohapigroup@aws-0-eu-west-3.pooler.supabase.com:5432/postgres?sslmode=require"
 
-EXPOERTER LA BD SUPABASE 
-    pg_restore -U postgres -h aws-0-eu-west-3.pooler.supabase.com -d postgres -v "C:/Users/NGUESSAN.DESKTOP-38E6PIP/Desktop/SohapiGroup/hostolink_back-end/base_donnees/hostolink_bd_supabase-v1.0.0.0.1.backup"
-
 Exporter  
     pg_dump -U postgres -d hostolink_bd -F p -f "C:\Users\NGUESSAN.DESKTOP-38E6PIP\Desktop\SohapiGroup\hostolink_back-end\base_donnees\hostolink_bd.sql"
     
