@@ -102,4 +102,11 @@ SUPPRIMER TOUTES LES ADMIN DE LA BD
 
 SUPPRIMER LA CONTRAINT D'ENUM DE role 
     ALTER TABLE administrateurs ALTER COLUMN role TYPE VARCHAR(50);
+    
 DROP TYPE IF EXISTS role_admin_enum;
+
+DECOMMIT UN FICHIER SUIVI PAR GIT
+    placer son nom dans .gitignore
+    git rm --cached .env
+    git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch .env' --prune-empty --tag-name-filter cat -- --all
+    git push origin --force --all

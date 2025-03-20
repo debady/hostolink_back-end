@@ -53,8 +53,6 @@ export class OtpService {
         });
         
         
-        
-
       await this.otpRepository.save(otp);
 
       if (moyen_envoyer === MoyenEnvoiEnum.TELEPHONE && identifier) {
