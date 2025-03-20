@@ -77,8 +77,10 @@ export class UserService {
       // ✅ Créer automatiquement un QR code statique pour le nouvel utilisateur
       await this.qrCodeService.createStaticQrForNewUser(savedUser.id_user);
 
+
+
       // ✅ Créer automatiquement un QR code dynamique avec une durée de 60s
-      await this.qrCodeService.createDynamicQrForUser(savedUser.id_user, 60); // 60 secondes
+      await this.qrCodeService.createDynamicQrForUser(savedUser.id_user,); // 60 secondes
 
 
       return { success: true, id_user: savedUser.id_user, message: "Utilisateur inscrit, redirection vers la définition du mot de passe." };

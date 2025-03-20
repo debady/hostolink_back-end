@@ -131,16 +131,16 @@ export class OtpService {
         where: [{ email: identifier }, { telephone: identifier }],
       });
 
-      // ✅ Vérifier si un OTP a déjà été envoyé récemment (limite de 2 minutes)
-      const maintenant = new Date();
-      if (user && user.dernier_otp_envoye) {
-        const dernierOtp = new Date(user.dernier_otp_envoye).getTime();
-        const tempsEcoule = new Date().getTime() - dernierOtp;
+      // // ✅ Vérifier si un OTP a déjà été envoyé récemment (limite de 2 minutes)
+      // const maintenant = new Date();
+      // if (user && user.dernier_otp_envoye) {
+      //   const dernierOtp = new Date(user.dernier_otp_envoye).getTime();
+      //   const tempsEcoule = new Date().getTime() - dernierOtp;
         
-        if (tempsEcoule < 2 * 60 * 1000) {
-          throw new BadRequestException(`Trop de demandes d'OTP. Attendez encore ${Math.ceil((120000 - tempsEcoule) / 1000)} secondes.`);
-        }
-      }
+      //   if (tempsEcoule < 2 * 60 * 1000) {
+      //     throw new BadRequestException(`Trop de demandes d'OTP. Attendez encore ${Math.ceil((120000 - tempsEcoule) / 1000)} secondes.`);
+      //   }
+      // }
       
       
 

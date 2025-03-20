@@ -113,7 +113,7 @@ export class QrCodeController {
     
     if (activeQrCodes.length === 0) {
       // Si aucun QR code actif n'est trouvé, générer un nouveau QR code dynamique
-      const newQrCode = await this.qrCodeService.createDynamicQrForUser(id_user, 30);
+      const newQrCode = await this.qrCodeService.createDynamicQrForUser(id_user,);
       const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(newQrCode.token);
       
       return {

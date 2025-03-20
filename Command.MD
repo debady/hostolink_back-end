@@ -58,12 +58,22 @@ Créer une base de données PostgreSQL dans un conteneur Docker est un excellent
     Lancez un conteneur PostgreSQL en spécifiant un mot de passe pour l'utilisateur postgres :
                             docker run --name nom_de_votre_conteneur -e POSTGRES_PASSWORD=mot_de_passe -d nom_de_votre_bd
 
-*--------------Se connecter au conteneur
+*-------------- Se connecter au conteneur
     Vous pouvez accéder au conteneur en exécutant cette commande :
                             docker exec -it nom_de_votre_conteneur bash
+    Une fois à l'intérieur du conteneur, vous pouvez accéder à PostgreSQL :
+                            psql -U postgres
+
+*-------------- Créer une base de données
+    Une fois connecté à PostgreSQL, créez une base de données avec une commande SQL :
+                            CREATE DATABASE nom_de_la_base;
+
+Cela devrait vous permettre de configurer et d'utiliser une base PostgreSQL dans votre conteneur Docker. Si vous avez des questions ou rencontrez un problème, je suis là pour vous aider !
 
 
+*------------------------------NOTE POUR IMPORTER UNE BASE DE DONNEE POSTGRESQL AVEC INSTALLATION DE POSTGIS VIA DOCKER-----------------------------*
 
+    Pour importer une base de données avec PostGIS dans un conteneur Docker, vous pouvez suivre ces étapes :
 
 *------------------------------NOTE POUR LA GEOLOCALISATION -----------------------------*
 

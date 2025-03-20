@@ -1,5 +1,4 @@
-
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -7,6 +6,13 @@ import { ConfigService } from '@nestjs/config';
 import * as QRCode from 'qrcode';
 import { QrCodeDynamique } from './entitie/qr_code_dynamique.entity';
 import { QrCodeStatique } from './entitie/qr_code_statique.entity';
+import { QrCodePayload, QrCodePayloadUser, QrCodeType, RecipientType } from './interface_qr_code/qr-code-payload.interface';
+import { CompteService } from 'src/compte/compte.service';
+import { Compte } from 'src/compte/entitie/compte.entity';
+import { UserService } from 'src/utilisateur/user.service';
+import { User } from 'src/utilisateur/entities/user.entity';
+
+
 
 @Injectable()
 export class QrCodeService {
@@ -19,40 +25,75 @@ export class QrCodeService {
     
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+
+    @Inject(forwardRef(() => CompteService))
+    private readonly compteService: CompteService,
+
+    @Inject(forwardRef(() => UserService)) // Ajout du service utilisateur
+    private readonly userService: UserService
+
+    // Commenté pour les établissements de santé
+    // @Inject(forwardRef(() => EtablissementService))
+    // private readonly etablissementService: EtablissementService,
   ) {}
 
-  /**
-   * Génère un token JWT pour un QR code
-   * @param id_user ID de l'utilisateur
-   * @param isDynamic Si true, le token est pour un QR code dynamique (expirant), sinon statique
-   * @param expiresIn Durée d'expiration en secondes (pour les codes dynamiques)
-   * @returns Token JWT
-   */
-  private generateToken(id_user: string, isDynamic: boolean, expiresIn?: number): string {
-    const payload = {
-      sub: id_user,
-      type: isDynamic ? 'dynamic' : 'static',
-      user_type: 'utilisateur',
-      iat: Math.floor(Date.now() / 1000),
-    };
-
+  //  * Génère un token JWT pour un QR code avec un payload complet
+  //  * @param payload Informations complètes pour le QR code
+  private generateTokenWithPayload(payload: QrCodePayload): string {
     const options: any = {
       secret: this.configService.get<string>('JWT_QR_SECRET', 'qr_code_secret_key'),
     };
     
-    if (isDynamic && expiresIn) {
-      options.expiresIn = `${expiresIn}s`;
+    // Ajouter l'expiration si applicable
+    if (payload.expiresAt) {
+      const expiresInSeconds = Math.floor((payload.expiresAt - payload.timestamp) / 1000);
+      if (expiresInSeconds > 0) {
+        options.expiresIn = `${expiresInSeconds}s`;
+      }
     }
 
     return this.jwtService.sign(payload, options);
   }
 
-  /**
-   * Crée automatiquement un QR code statique pour un utilisateur lors de son inscription
-   * @param id_user ID de l'utilisateur
-   * @returns Le QR code statique créé
-   */
-  async createStaticQrForNewUser(id_user: string): Promise<QrCodeStatique> {
+  //  * Génère un payload pour un QR code utilisateur
+  //  * @param isDynamic Si true, crée un payload pour QR code dynamique
+  private createUserPayload(
+    id_user: string, 
+    isDynamic: boolean, 
+    expiresIn?: number,
+    additionalInfo?: { 
+      accountNumber?: string, 
+      currency?: string, 
+      // amount?: number, 
+      // description?: string 
+    }
+  ): QrCodePayloadUser {
+
+    const timestamp = Date.now();
+    
+    const payload: QrCodePayloadUser = {
+      recipientType: RecipientType.USER,
+      recipientId: id_user,
+      qrType: isDynamic ? QrCodeType.DYNAMIC : QrCodeType.STATIC,
+      timestamp,
+      ...additionalInfo
+    };
+    
+    // Ajouter l'expiration pour les QR codes dynamiques
+    if (isDynamic && expiresIn) {
+      payload.expiresAt = timestamp + (expiresIn * 1000);
+    }
+    
+    return payload;
+  }
+
+
+  //  * Crée automatiquement un QR code statique pour un utilisateur lors de son inscription
+  //  * @returns Le QR code statique créé
+  async createStaticQrForNewUser(
+    id_user: string, 
+    accountNumber?: string
+  ): Promise<QrCodeStatique> {
     // Vérifier si un QR code statique existe déjà
     const existingQrCode = await this.qrCodeStatiqueRepository.findOne({
       where: { id_user }
@@ -62,8 +103,9 @@ export class QrCodeService {
       return existingQrCode;
     }
     
-    // Générer le token JWT
-    const token = this.generateToken(id_user, false);
+    // Créer le payload et générer le token JWT
+    const payload = this.createUserPayload(id_user, false, undefined, { accountNumber });
+    const token = this.generateTokenWithPayload(payload);
     
     // Créer l'entrée QR code statique
     const qrCode = this.qrCodeStatiqueRepository.create({
@@ -75,30 +117,42 @@ export class QrCodeService {
     return this.qrCodeStatiqueRepository.save(qrCode);
   }
 
-  /**
-   * Récupère le QR code statique d'un utilisateur
-   * @param id_user ID de l'utilisateur
-   * @returns Le QR code statique ou null si aucun n'existe
-   */
+  //  * Récupère le QR code statique d'un utilisateur
   async getUserStaticQrCode(id_user: string): Promise<QrCodeStatique | null> {
     return this.qrCodeStatiqueRepository.findOne({
       where: { id_user, statut: 'actif' }
     });
   }
 
-  /**
-   * Crée un QR code dynamique pour un utilisateur (utilisé à la demande)
-   * @param id_user ID de l'utilisateur
-   * @param expiresIn Durée de validité en secondes (défaut: 60)
-   * @returns Le QR code dynamique créé
-   */
-  async createDynamicQrForUser(id_user: string, expiresIn: number = 30): Promise<QrCodeDynamique> {
-    // Générer le token JWT avec expiration
-    const token = this.generateToken(id_user, true, expiresIn);
+  //  * Crée un QR code dynamique pour un utilisateur
+  //  * @returns Le QR code dynamique créé
+  async createDynamicQrForUser(
+    id_user: string, 
+    accountNumber?: string,
+    expiresIn: number = 60,
+    currency?: string,
+    // amount?: number,
+    // description?: string
+  ): Promise<QrCodeDynamique> {
+    // Créer le payload avec toutes les informations
+    const payload = this.createUserPayload(
+      id_user, 
+      true, 
+      expiresIn, 
+      { 
+        accountNumber,
+        currency, 
+        // amount, 
+        // description 
+      }
+    );
+    
+    // Générer le token JWT
+    const token = this.generateTokenWithPayload(payload);
     
     // Calculer la date d'expiration
-    const dateExpiration = new Date();
-    dateExpiration.setSeconds(dateExpiration.getSeconds() + expiresIn);
+// Calculer la date d'expiration
+const dateExpiration = new Date(payload.expiresAt || Date.now() + (expiresIn * 1000));
     
     // Créer l'entrée QR code dynamique
     const qrCode = this.qrCodeDynamiqueRepository.create({
@@ -111,11 +165,7 @@ export class QrCodeService {
     return this.qrCodeDynamiqueRepository.save(qrCode);
   }
 
-  /**
-   * Met à jour le statut des QR codes dynamiques expirés pour un utilisateur
-   * @param id_user ID de l'utilisateur (optionnel)
-   * @returns Nombre de QR codes mis à jour
-   */
+  //  * Met à jour le statut des QR codes dynamiques expirés pour un utilisateur
   async updateExpiredQrCodesStatus(id_user?: string): Promise<number> {
     const now = new Date();
     
@@ -137,12 +187,8 @@ export class QrCodeService {
     return result.affected || 0;
   }
 
-  /**
-   * Supprime les QR codes dynamiques expirés depuis longtemps
-   * @param days Nombre de jours à conserver après expiration (défaut: 7)
-   * @returns Nombre de QR codes supprimés
-   */
-  async deleteOldExpiredQrCodes(days: number = 7): Promise<number> {
+  //  * Supprime les QR codes dynamiques expirés depuis longtemps
+  async deleteOldExpiredQrCodes(days: number = 1): Promise<number> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
     
@@ -154,12 +200,9 @@ export class QrCodeService {
     return result.affected || 0;
   }
 
-  /**
-   * Vérifie la validité d'un token JWT de QR code
-   * @param token Token JWT à vérifier
-   * @returns Payload décodé si valide
-   */
-  verifyToken(token: string): any {
+  //  * Vérifie la validité d'un token JWT de QR code
+  //  * @returns Payload décodé si valide
+  verifyToken(token: string): QrCodePayload {
     try {
       return this.jwtService.verify(token, {
         secret: this.configService.get<string>('JWT_QR_SECRET', 'qr_code_secret_key'),
@@ -169,19 +212,17 @@ export class QrCodeService {
     }
   }
 
-  /**
-   * Valide un QR code à partir du token JWT
-   * @param token Token JWT du QR code
-   * @returns Informations sur le propriétaire du QR code
-   */
+  //  * Valide un QR code à partir du token JWT
+  //  * @returns Informations complètes sur le QR code et son propriétaire
   async validateQrCode(token: string): Promise<any> {
     try {
       // Vérifier le token
-      const payload = this.verifyToken(token);
+      const payload = this.verifyToken(token) as QrCodePayload;
       
       // Déduire le type de QR code à partir du payload
-      const isDynamic = payload.type === 'dynamic';
-      const id_user = payload.sub;
+      const isDynamic = payload.qrType === QrCodeType.DYNAMIC;
+      const id_user = payload.recipientType === RecipientType.USER ? payload.recipientId as string : undefined;
+      const id_etablissement = payload.recipientType === RecipientType.ETABLISSEMENT ? payload.recipientId as number : undefined;
       
       // Chercher le QR code dans la bonne table
       let qrCode;
@@ -213,12 +254,44 @@ export class QrCodeService {
       if (qrCode.statut !== 'actif') {
         throw new BadRequestException('QR code inactif');
       }
+
+    // ✅ Récupérer uniquement nom, prénom et numéro de compte
+    let userInfo: { identifiant: string; nom: string; prenom: string; numero_compte: string } | null = null;
+
+    if (id_user) {
+      const user = await this.userService.getUserById(id_user); // Récupérer nom & prénom
+      const compte = await this.compteService.getUserCompte(id_user); // Récupérer numéro de compte
+
+      if (user && compte) {
+        userInfo = {
+          identifiant: user.id_user,
+          nom: user.nom,
+          prenom: user.prenom,
+          numero_compte: compte.numero_compte
+        };
+      }
+    }// /* else if (payload.recipientType === RecipientType.ETABLISSEMENT && id_etablissement) {
+    //   // Récupérer les informations du compte de l'établissement
+    //   accountInfo = await this.compteService.getEtablissementCompte(id_etablissement);
       
-      // Retourner les informations sur le propriétaire du QR code
+    //   // Récupérer les informations de l'établissement
+    //   const etablissement = await this.etablissementService.findOne(id_etablissement);
+    //   if (etablissement) {
+    //     userInfo = {
+    //       nom: etablissement.nom,
+    //       adresse: etablissement.adresse,
+    //       telephone: etablissement.telephone,
+    //       email: etablissement.email
+    //     };
+    //   }
+    // } */
+ 
+      // Retourner les informations complètes
       return {
-        id_user: qrCode.id_user,
-        id_user_etablissement_sante: qrCode.id_user_etablissement_sante,
-        type: isDynamic ? 'dynamic' : 'static',
+        ...payload,
+        id_qrcode: qrCode.id_qrcode,
+        creation_date: qrCode.date_creation,
+        utilisateur: userInfo // Ajoute `nom`, `prenom` et `numero_compte` uniquement si trouvé
       };
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
@@ -228,11 +301,7 @@ export class QrCodeService {
     }
   }
 
-  /**
-   * Génère une représentation image d'un QR code à partir du token
-   * @param token Token JWT à encoder dans le QR
-   * @returns URL de l'image en data URL
-   */
+  //  * Génère une représentation image d'un QR code à partir du token
   async generateQrCodeImage(token: string): Promise<string> {
     try {
       return await QRCode.toDataURL(token);
@@ -241,13 +310,15 @@ export class QrCodeService {
     }
   }
 
-  /**
-   * Rafraîchit ou crée un QR code dynamique pour un utilisateur
-   * @param id_user ID de l'utilisateur
-   * @param expiresIn Durée de validité en secondes (défaut: 30 secondes)
-   * @returns Le nouveau QR code dynamique
-   */
-  async refreshUserDynamicQrCode(id_user: string, expiresIn: number = 30): Promise<QrCodeDynamique> {
+  //  * Rafraîchit ou crée un QR code dynamique pour un utilisateur
+  async refreshUserDynamicQrCode(
+    id_user: string, 
+    accountNumber,
+    expiresIn: number = 60,
+    currency?: string,
+    // amount?: number,
+    // description?: string
+  ): Promise<QrCodeDynamique> {
     console.log(`Rafraîchissement du QR code dynamique pour l'utilisateur ${id_user}`);
     
     try {
@@ -260,18 +331,14 @@ export class QrCodeService {
       console.log(`${updateResult.affected} QR codes désactivés`);
       
       // Créer un nouveau QR code dynamique
-      return this.createDynamicQrForUser(id_user, expiresIn);
+      return this.createDynamicQrForUser(id_user, accountNumber, expiresIn, currency, );
     } catch (error) {
       console.error('Erreur lors du rafraîchissement du QR code:', error);
       throw new BadRequestException('Impossible de rafraîchir le QR code: ' + error.message);
     }
   }
 
-  /**
-   * Récupère les QR codes dynamiques actifs d'un utilisateur spécifique
-   * @param id_user ID de l'utilisateur
-   * @returns Liste des QR codes dynamiques de l'utilisateur
-   */
+  //  * Récupère les QR codes dynamiques actifs d'un utilisateur spécifique
   async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
     // D'abord mettre à jour le statut des QR codes expirés
     await this.updateExpiredQrCodesStatus(id_user);
@@ -287,11 +354,8 @@ export class QrCodeService {
     });
   }
 
-  /**
-   * Récupère tous les QR codes (statiques et dynamiques) d'un utilisateur spécifique
-   * @param id_user ID de l'utilisateur
-   * @returns Objet contenant les QR codes statiques et dynamiques
-   */
+  //  * Récupère tous les QR codes (statiques et dynamiques) d'un utilisateur spécifique
+  //  * @returns Objet contenant les QR codes statiques et dynamiques
   async getAllUserQrCodes(id_user: string): Promise<{ static: QrCodeStatique[], dynamic: QrCodeDynamique[] }> {
     // D'abord mettre à jour le statut des QR codes expirés
     await this.updateExpiredQrCodesStatus(id_user);
@@ -319,12 +383,7 @@ export class QrCodeService {
     };
   }
 
-  /**
-   * Récupère un QR code spécifique (statique ou dynamique) par son ID
-   * @param id_qrcode ID du QR code
-   * @param type Type du QR code ('static' ou 'dynamic')
-   * @returns Le QR code demandé
-   */
+  //  * Récupère un QR code spécifique (statique ou dynamique) par son ID
   async getQrCodeById(id_qrcode: number, type: 'static' | 'dynamic'): Promise<QrCodeStatique | QrCodeDynamique | null> {
     if (type === 'static') {
       return this.qrCodeStatiqueRepository.findOne({
@@ -349,29 +408,41 @@ export class QrCodeService {
   }
 
   /* 
-   * Méthodes pour les établissements de santé (à décommenter plus tard)
-   */
-  /*
-  private generateTokenForEtablissement(id_etablissement: number, isDynamic: boolean, expiresIn?: number): string {
-    const payload = {
-      sub: id_etablissement.toString(),
-      type: isDynamic ? 'dynamic' : 'static',
-      user_type: 'etablissement',
-      iat: Math.floor(Date.now() / 1000),
-    };
-
-    const options: any = {
-      secret: this.configService.get<string>('JWT_QR_SECRET', 'qr_code_secret_key'),
+  //  * Méthodes pour les établissements de santé (à décommenter plus tard)
+  //  * Génère un payload pour un QR code établissement
+  private createEtablissementPayload(
+    id_etablissement: number, 
+    isDynamic: boolean, 
+    expiresIn?: number,
+    additionalInfo?: { 
+      accountNumber?: string, 
+      currency?: string, 
+      // amount?: number, 
+      // description?: string 
+    }
+  ): QrCodePayloadEtablissement {
+    const timestamp = Date.now();
+    
+    const payload: QrCodePayloadEtablissement = {
+      recipientType: RecipientType.ETABLISSEMENT,
+      recipientId: id_etablissement,
+      qrType: isDynamic ? QrCodeType.DYNAMIC : QrCodeType.STATIC,
+      timestamp,
+      ...additionalInfo
     };
     
+    // Ajouter l'expiration pour les QR codes dynamiques
     if (isDynamic && expiresIn) {
-      options.expiresIn = `${expiresIn}s`;
+      payload.expiresAt = timestamp + (expiresIn * 1000);
     }
-
-    return this.jwtService.sign(payload, options);
+    
+    return payload;
   }
 
-  async createStaticQrForNewEtablissement(id_etablissement: number): Promise<QrCodeStatique> {
+  async createStaticQrForNewEtablissement(
+    id_etablissement: number,
+    accountNumber?: string
+  ): Promise<QrCodeStatique> {
     // Vérifier si un QR code statique existe déjà
     const existingQrCode = await this.qrCodeStatiqueRepository.findOne({
       where: { id_user_etablissement_sante: id_etablissement }
@@ -381,8 +452,9 @@ export class QrCodeService {
       return existingQrCode;
     }
     
-    // Générer le token JWT
-    const token = this.generateTokenForEtablissement(id_etablissement, false);
+    // Créer le payload et générer le token JWT
+    const payload = this.createEtablissementPayload(id_etablissement, false, undefined, { accountNumber });
+    const token = this.generateTokenWithPayload(payload);
     
     // Créer l'entrée QR code statique
     const qrCode = this.qrCodeStatiqueRepository.create({
@@ -394,13 +466,32 @@ export class QrCodeService {
     return this.qrCodeStatiqueRepository.save(qrCode);
   }
 
-  async createDynamicQrForEtablissement(id_etablissement: number, expiresIn: number = 30): Promise<QrCodeDynamique> {
-    // Générer le token JWT avec expiration
-    const token = this.generateTokenForEtablissement(id_etablissement, true, expiresIn);
+  async createDynamicQrForEtablissement(
+    id_etablissement: number, 
+    expiresIn: number = 60,
+    accountNumber,
+    currency?: string,
+    // amount?: number,
+    // description?: string
+  ): Promise<QrCodeDynamique> {
+    // Créer le payload avec toutes les informations
+    const payload = this.createEtablissementPayload(
+      id_etablissement, 
+      true, 
+      expiresIn, 
+      { 
+        accountNumber,
+        currency, 
+        // amount, 
+        // description 
+      }
+    );
+    
+    // Générer le token JWT
+    const token = this.generateTokenWithPayload(payload);
     
     // Calculer la date d'expiration
-    const dateExpiration = new Date();
-    dateExpiration.setSeconds(dateExpiration.getSeconds() + expiresIn);
+    const dateExpiration = new Date(payload.expiresAt);
     
     // Créer l'entrée QR code dynamique
     const qrCode = this.qrCodeDynamiqueRepository.create({
@@ -419,7 +510,14 @@ export class QrCodeService {
     });
   }
 
-  async refreshEtablissementDynamicQrCode(id_etablissement: number, expiresIn: number = 30): Promise<QrCodeDynamique> {
+  async refreshEtablissementDynamicQrCode(
+    id_etablissement: number, 
+    expiresIn: number = 60,
+    accountNumber,
+    currency?: string,
+    // amount?: number,
+    // description?: string
+  ): Promise<QrCodeDynamique> {
     console.log(`Rafraîchissement du QR code dynamique pour l'établissement ${id_etablissement}`);
     
     // Désactiver tous les QR codes dynamiques actifs de cet établissement
@@ -429,7 +527,7 @@ export class QrCodeService {
     );
     
     // Créer un nouveau QR code dynamique
-    return this.createDynamicQrForEtablissement(id_etablissement, expiresIn);
+    return this.createDynamicQrForEtablissement(id_etablissement, expiresIn, accountNumber, currency, );
   }
 
   async getEtablissementDynamicQrCodes(id_etablissement: number): Promise<QrCodeDynamique[]> {

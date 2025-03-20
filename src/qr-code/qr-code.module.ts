@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CleanupService } from './cleanup.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UserModule } from 'src/utilisateur/user.module';
+import { CompteModule } from 'src/compte/compte.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { UserModule } from 'src/utilisateur/user.module';
       }),
     }),
     forwardRef(() => UserModule),
-    ScheduleModule.forRoot(), // Nécessaire pour les tâches programmées
+    ScheduleModule.forRoot(),
+    forwardRef(() => CompteModule), // Nécessaire pour les tâches programmées
     // Décommentez quand le module d'établissement de santé sera disponible
     // forwardRef(() => EtablissementSanteModule),
   ],
