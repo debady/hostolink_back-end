@@ -10,9 +10,11 @@
     "migration:generate": "npm run typeorm migration:generate -- -d src/data-source",
     "migration:run": "npm run typeorm migration:run -- -d src/data-source",
     "migration:revert": "npm run typeorm migration:revert -- -d src/data-source",
-    "build": "nest build",
+    "build": "rimraf dist && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "node --max-old-space-size=512 dist/src/main.js",
+
+
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -51,6 +53,7 @@
     "passport-jwt": "^4.0.1",
     "pg": "^8.14.1",
     "reflect-metadata": "^0.2.2",
+    "rimraf": "^6.0.1",
     "rxjs": "^7.8.1",
     "uuid": "^11.1.0"
   },
