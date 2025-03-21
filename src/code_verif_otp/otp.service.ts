@@ -87,6 +87,7 @@ export class OtpService {
       }
 
       console.log(`✅ Envoi d'un OTP à ${identifier} via ${moyen_envoyer}`);
+      console.log(`📤 OTP envoyer à ${identifier} est ${otpCode}`);
       return { success: true, otp: otpCode };
 
     } catch (error) {

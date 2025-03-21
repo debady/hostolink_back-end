@@ -17,6 +17,10 @@ import { Otp } from './code_verif_otp/entities/otp.entity';
 import { ImageModule } from './image/image.module';
 import { Image } from './image/entities/image.entity';
 
+// ✅ transaction interne
+import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
+import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
+
 // ✅ Administrateur
 import { AdministrateurModule } from './administrateur/administrateur.module';
 import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
@@ -47,7 +51,9 @@ import { OtpService } from './code_verif_otp/otp.service';
     AdministrateurModule,
     GestionUtilisateurModule,
     OtpModule, 
-    SmsModule
+    SmsModule, 
+    TransactionInterneModule, 
+    TransactionFraisModule,
   ],
   providers: [OtpService],
   exports: [OtpService],
@@ -76,6 +82,8 @@ export class AppModule {}
 // import { PartageModule } from './partage/partage.module';
 // import { UserEtablissementModule } from './user-etablissement/user-etablissement.module';
 // import { AdministrateurModule } from './administrateur/administrateur.module';
+// import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
+// import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
 
 
 // @Module({
