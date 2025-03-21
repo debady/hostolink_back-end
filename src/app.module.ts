@@ -15,49 +15,66 @@ import { Otp } from './code_verif_otp/entities/otp.entity';
 // ✅ Images & Établissements de Santé
 import { ImageModule } from './image/image.module';
 import { Image } from './image/entities/image.entity';
+import { ListeNumeroEtablissementSanteModule } from './liste_etablissement/liste_numero_etablissement_sante.module';
+import { CloudinaryModule } from './upload/cloudinary.module';
+import { ListeNumeroEtablissementSante } from './liste_etablissement/entities/liste_numero_vert_etablissement_sante.entity';
+import { AdministrateurModule } from './administrateur/administrateur.module';
+import { Administrateur } from './administrateur/entities/administrateur.entity';
+import { AnnonceModule } from './annonce/annonce.module';
+import { Annonce } from './annonce/entities/annonce.entity';
+
+import { Thematique } from './thematique_discussion/entities/thematique.entity';
+import { ThematiqueDiscussionModule } from './thematique_discussion/thematique_discussion.module';
+import { MessageThematique } from './thematique_discussion/entities/message_thematique.entity';
+import { FirebaseModule } from './thematique_discussion/firebase/firebase.module';
+
+import { forwardRef } from '@nestjs/common';
+import { SmsModule } from './sms/sms.module';
 
 // ✅ transaction interne
 import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
 import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
-
-// ✅ Administrateur
-import { AdministrateurModule } from './administrateur/administrateur.module';
-import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
-import { Administrateur } from './administrateur/entities/administrateur.entity';
-import { SmsModule } from './sms/sms.module';
-import { OtpService } from './code_verif_otp/otp.service';
 import { NotificationsModule } from './notifications/notifications.module';
+import { OtpService } from './code_verif_otp/otp.service';
+
+
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
+    forwardRef(() => SmsModule),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
 
+    //connexion à la base de données PostgreSQL
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DATABASE_HOST,
-      port: Number(process.env.DATABASE_PORT),
-      username: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-      autoLoadEntities: true,
-      synchronize: false,
-      entities: [User, Otp, Image, Administrateur],
-    }),
+      host: process.env.DATABASE_HOST || 'localhost',
+      port: Number(process.env.DATABASE_PORT) || 5432,
+      username: process.env.DATABASE_USER || 'postgres',
+      password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
+      database: process.env.DATABASE_NAME || 'hostolink_bd',
+      autoLoadEntities: false,
+      synchronize: false, 
+       entities: [User,Otp,Image, ListeNumeroEtablissementSante, Administrateur,Annonce, MessageThematique, Thematique], 
+  }),
+  UserModule,
+  AuthModule,
+  ImageModule,
+  ListeNumeroEtablissementSanteModule,
+  CloudinaryModule,
+  NotificationsModule,
+  AdministrateurModule,
+  AnnonceModule,
+  ThematiqueDiscussionModule,
+  FirebaseModule,
+  OtpModule,
+  TransactionFraisModule,
+  TransactionInterneModule
 
-    // Modules de l'app
-    UserModule,
-    AuthModule,
-    ImageModule,
-    AdministrateurModule,
-    GestionUtilisateurModule,
-    OtpModule,
-    SmsModule,
-    NotificationsModule,
-    TransactionInterneModule,
-    TransactionFraisModule,
+  // PublicationModule,
+  // CommentaireModule,
+  // PartageModule,
+  // EtablissementSanteModule, 
+  // EtablissementSanteModule
   ],
   providers: [OtpService],
   exports: [OtpService],

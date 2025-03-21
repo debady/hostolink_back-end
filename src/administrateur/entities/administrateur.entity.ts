@@ -1,4 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Annonce } from 'src/annonce/entities/annonce.entity';
+import { ListeNumeroEtablissementSante } from 'src/liste_etablissement/entities/liste_numero_vert_etablissement_sante.entity';
+import { Thematique } from 'src/thematique_discussion/entities/thematique.entity';
+
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
 
 @Entity('administrateurs')
 export class Administrateur {
@@ -31,5 +35,16 @@ export class Administrateur {
 
   @CreateDateColumn({ type: 'timestamp' })
   date_modification: Date;
+
+  // ✅ Relation avec liste_numero_vert_etablissement_sante
+  @OneToMany(() => ListeNumeroEtablissementSante, (liste) => liste.administrateur, { cascade: true })
+  liste_numero_vert: ListeNumeroEtablissementSante[];
+  listeNumeroEtablissementSante: any;
+
+  @OneToMany(() => Annonce, (annonce) => annonce.id_admin_gestionnaire)
+  annonces: Annonce[];
+
+  @OneToMany(() => Thematique, (thematique) => thematique.administrateur)
+  thematiques_crees: Thematique[];
 
 }

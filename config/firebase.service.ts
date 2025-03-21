@@ -11,10 +11,10 @@ export class FirebaseService implements OnModuleInit {
 
   private initializeFirebase() {
     if (!admin.apps.length) {
-        const serviceAccountPath = process.env.FIREBASE_CREDENTIALS;
+        const serviceAccountPath = process.env.FIREBASE_CREDENTIAL_PATH;
 
         if (!serviceAccountPath) {
-          throw new Error('🔥 FIREBASE_CREDENTIALS n’est pas défini dans le fichier .env');
+          throw new Error('🔥 FIREBASE_CREDENTIAL_PATH n’est pas défini dans le fichier .env');
         }
         
         const absoluteServiceAccountPath = path.join(__dirname, '../../', serviceAccountPath);
