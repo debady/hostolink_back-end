@@ -7,3 +7,5 @@ le code de mise a jour du champ compte verifier de la table utilisateur a ete su
 - créer un dossier avec les données  d'un user (simple ou es ) sur clouniray et inserer ces photo renommé
 - endpoint qui permet a l'user lui même de changer son mdp
 - verifier que l'utilisateur a compte verif a true avant de continuer a se connecter
+- revoir endpoint d'envoi d'email et sms
+
