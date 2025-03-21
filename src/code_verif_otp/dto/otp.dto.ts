@@ -24,7 +24,7 @@ export class VerifyOtpDto {
 
   @IsNotEmpty()
   @IsString()
-  @Matches(/^\d{4,6}$/, { message: "Le code OTP doit être un nombre de 4 à 6 chiffres." })
+  @Matches(/^\d{4}$/, { message: "Le code OTP doit être un nombre de 4 chiffres." })
   otpCode: string;
 
   @IsUUID("4", { message: "L'ID utilisateur doit être un UUID valide." })

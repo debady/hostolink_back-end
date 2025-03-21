@@ -1,9 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../utilisateur/entities/user.entity';
-// import { UserEtablissementSante } from '../../user-etablissement/entities/user_etablissement.entity';
 
 export enum MoyenEnvoiEnum {
-  TELEPHONE = 'telephone',
+  // TELEPHONE = 'telephone',
+  SMS = 'SMS',
   EMAIL = 'email',
 }
 
@@ -30,12 +30,5 @@ export class Otp {
 
   @Column({ type: 'boolean', default: true })
   is_valid: boolean;
-
-  // @Column({ type: 'integer', nullable: true })
-  // id_user_etablissement_sante: number;
-
-  // @ManyToOne(() => UserEtablissementSante, { onDelete: 'CASCADE', nullable: true })
-  // @JoinColumn({ name: 'id_user_etablissement_sante' })
-  // userEtablissementSante: UserEtablissementSante;
   
 }

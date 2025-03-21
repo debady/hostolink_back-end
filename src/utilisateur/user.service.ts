@@ -29,6 +29,7 @@ export class UserService {
     private readonly imageRepository: Repository<Image>,
 
     @Inject(forwardRef(() => ImageService))
+<<<<<<< HEAD
     private readonly imageService: ImageService,
     
     @Inject(forwardRef(() => CompteService))
@@ -36,6 +37,9 @@ export class UserService {
 
     @Inject(forwardRef(() => QrCodeService))
     private readonly qrCodeService: QrCodeService
+=======
+    private readonly imageService: ImageService
+>>>>>>> 6f4439418bd059065ab6f03f91af07e745c9672d
   ) {}
 
   // ✅ Vérifie si un utilisateur existe (email ou téléphone)
@@ -160,12 +164,12 @@ export class UserService {
     };
   }
 
-  // ✅ Trouve un utilisateur par email ou téléphone
-  async findUserByIdentifier(identifier: string): Promise<User | null> {
-    return await this.userRepository.findOne({
-      where: [{ email: identifier }, { telephone: identifier }],
-    });
-  }
+// ✅ Trouve un utilisateur par email ou téléphone A ECRIS SON ENDPOINT 
+async findUserByIdentifier(identifier: string): Promise<User | null> {
+  return await this.userRepository.findOne({
+    where: [{ email: identifier }, { telephone: identifier }],
+  });
+}
 
 // ✅ Vérifier un code OTP et activer le compte
 async verifyConfirmationCode(identifier: string, code: string): Promise<boolean> {

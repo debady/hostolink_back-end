@@ -4,34 +4,33 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
-// Utilisateurs & Authentification
+// ✅ Utilisateurs & Authentification
 import { UserModule } from './utilisateur/user.module';
 import { User } from './utilisateur/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 
-// OTP & Notifications
+// ✅ OTP & Notifications
+import { OtpModule } from './code_verif_otp/otp.module'; 
 import { Otp } from './code_verif_otp/entities/otp.entity';
-import { NotificationsModule } from './notifications/notifications.module';
 
-// Images & Établissements de Santé
+// ✅ Images & Établissements de Santé
 import { ImageModule } from './image/image.module';
 import { Image } from './image/entities/image.entity';
-import { Compte } from './compte/entitie/compte.entity';
-import { CompteModule } from './compte/compte.module';
-import { QrCodeModule } from './qr-code/qr-code.module';
-import { QrCodeDynamique } from './qr-code/entitie/qr_code_dynamique.entity';
-import { QrCodeStatique } from './qr-code/entitie/qr_code_statique.entity';
-// import { UserEtablissementModule } from './user-etablissement/user-etablissement.module';
 
-
+// ✅ Administrateur
 import { AdministrateurModule } from './administrateur/administrateur.module';
 import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
+import { Administrateur } from './administrateur/entities/administrateur.entity';
+
+// ✅ Firebase Messaging & SMS
+import { SmsService } from './firebase_notifications/sms.service'; 
+import { FirebaseService } from 'config/firebase.service';
+import { FirebaseNotificationsModule } from './firebase_notifications/firebase_notifications.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
 
-    //connexion à la base de données PostgreSQL
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
@@ -39,28 +38,22 @@ import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/ges
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'mdp_dev_sohapigroup',
       database: process.env.DATABASE_NAME || 'hostolink_bd',
-      autoLoadEntities: true, // ❌ Désactivé pour éviter le chargement automatique des entités
-      synchronize: false, // ❌ Désactivé pour éviter les pertes de données accidentelles
-      entities: [User, Otp, Compte,  Image, QrCodeDynamique, QrCodeStatique], // ✅ Déclaration explicite des entités utilisées
+      autoLoadEntities: true, 
+      synchronize: false, 
+      entities: [User, Otp, Image, Administrateur], 
     }),
 
-    // ✅ Modules principaux de l’application
-    // ✅ Modules principaux de l'application
-    UserModule, // ✅ Module de gestion des utilisateurs
-    AuthModule, // ✅ Module d'authentification
-    ImageModule,
-    CompteModule,
-    QrCodeModule,
-    NotificationsModule,
+    UserModule, 
+    AuthModule, 
+    ImageModule, 
     AdministrateurModule,
-    GestionUtilisateurModule
-    
-    // UserEtablissementModule,
-    // ✅ Modules supplémentaires (commentés pour l’instant)
-    // PublicationModule, // ✅ Gestion des publications
-    // CommentaireModule, // ✅ Gestion des commentaires
-    // PartageModule, // ✅ Gestion des partages
-    // EtablissementSanteModule, // ✅ Gestion des établissements de santé
+    GestionUtilisateurModule,
+    OtpModule, 
+    FirebaseNotificationsModule
+  ],
+  providers: [
+    FirebaseService, 
+    SmsService, 
   ],
   // controllers: [TransactionController],
 })
@@ -69,6 +62,13 @@ export class AppModule {}
 
 
 // // ----------en ligne ------------------
+
+    
+    // UserEtablissementModule,
+    // PublicationModule, 
+    // CommentaireModule, 
+    // PartageModule, 
+    // EtablissementSanteModule, 
 
 // import { Module } from '@nestjs/common';
 // import { TypeOrmModule } from '@nestjs/typeorm';

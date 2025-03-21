@@ -20,7 +20,6 @@ export class AuthController {
     }
 
     try {
-      // ⚠️ Appel de validateUser, qui doit retourner l'utilisateur complet + token
       const result = await this.authService.validateUser(body.identifier.trim(), body.password.trim());
 
       if (!result) {
@@ -29,8 +28,6 @@ export class AuthController {
       }
 
       console.log(`✅ Connexion réussie pour : ${result.user.email}`);
-
-      // Vérifier si le compte utilisateur est vérifié
       if (!result.user.compte_verifier) {
         console.warn(`⚠️ Compte non vérifié pour : ${result.user.email}`);
       }
@@ -38,7 +35,7 @@ export class AuthController {
       return {
         success: true,
         message: 'Connexion réussie',
-        token: result.access_token, // Utilise le token généré par authService
+        token: result.access_token, 
       };
 
     } catch (error) {

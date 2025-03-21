@@ -2,6 +2,9 @@ si les coordonnée sont deja utiliser pas d'eereur mais generation d'otp
 ednpoint de temps de trop generer de otp 
 code a  4 chifffre ou 6 chiffre 
 
+il y'a possibilité de creer un dossier pour chaque utilisateur automatiquement sur cloudinary du coup le faire 
+le code de mise a jour du champ compte verifier de la table utilisateur a ete supprimer revoir 
+
 PROBLEME DE VERIF LE PIUN 
 
 
@@ -29,20 +32,6 @@ ALTER TABLE utilisateur ADD COLUMN dernier_otp_envoye TIMESTAMP NULL;
 -- 
 https://collection.cloudinary.com/dhrrk7vsd/387f34fb0827d86134e0d6d720f22e23
 
-liste d'endpoints supplémentaires à développer pour le module **Administrateurs** :
 
 
 
-
-
-
-
-
-
-7. **Gérer les permissions spécifiques d'un administrateur**
-   ```
-   PATCH /administrateurs/:id/permissions
-   ```
-
-
-Ces endpoints supplémentaires rendront ton module administrateur complet, sécurisé et flexible.

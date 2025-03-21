@@ -132,8 +132,10 @@ SUPPRIMER TOUTES LES ADMIN DE LA BD
 
 SUPPRIMER LA CONTRAINT D'ENUM DE role 
     ALTER TABLE administrateurs ALTER COLUMN role TYPE VARCHAR(50);
+    
 DROP TYPE IF EXISTS role_admin_enum;
 
+<<<<<<< HEAD:Command.MD
 
 
 ------------------------------- MODULE QR CODE --------------------
@@ -210,3 +212,14 @@ Indexes:
 Foreign-key constraints:
     "fk_qr_code_paiement_statique_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
     "fk_qr_code_utilisateur" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
+=======
+DECOMMIT UN FICHIER SUIVI PAR GIT
+    placer son nom dans .gitignore
+    git rm --cached .env
+    git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch .env' --prune-empty --tag-name-filter cat -- --all
+    git push origin --force --all
+
+
+VOIR L'ETAT DES CES PROJET GOOGLE CLOUD
+    https://console.cloud.google.com/iam-admin/projects
+>>>>>>> 6f4439418bd059065ab6f03f91af07e745c9672d:wDev/Command.MD
