@@ -23,9 +23,8 @@ import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/ges
 import { Administrateur } from './administrateur/entities/administrateur.entity';
 
 // ✅ Firebase Messaging & SMS
-import { SmsService } from './firebase_notifications/sms.service'; 
 import { FirebaseService } from 'config/firebase.service';
-import { FirebaseNotificationsModule } from './firebase_notifications/firebase_notifications.module';
+import { OtpService } from './code_verif_otp/otp.service';
 
 @Module({
   imports: [
@@ -49,12 +48,9 @@ import { FirebaseNotificationsModule } from './firebase_notifications/firebase_n
     AdministrateurModule,
     GestionUtilisateurModule,
     OtpModule, 
-    FirebaseNotificationsModule
+    
   ],
-  providers: [
-    FirebaseService, 
-    SmsService, 
-  ],
+ 
   // controllers: [TransactionController],
 })
 export class AppModule {}

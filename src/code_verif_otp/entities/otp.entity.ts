@@ -16,8 +16,8 @@ export class Otp {
   @JoinColumn({ name: 'id_user' })  
   user: User;
 
-  @Column({ type: 'uuid', nullable: true })
-  id_user: string;
+  // @Column({ type: 'uuid', nullable: true })
+  // id_user: string;
 
   @Column({ type: 'varchar', length: 6, nullable: false })
   otp_code: string;

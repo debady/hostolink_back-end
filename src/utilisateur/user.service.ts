@@ -21,26 +21,24 @@ import { QrCodeService } from 'src/qr-code/qr-code.service';
 
 @Injectable()
 export class UserService {
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-
+  
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
-
+  
     @Inject(forwardRef(() => ImageService))
-<<<<<<< HEAD
     private readonly imageService: ImageService,
-    
+  
     @Inject(forwardRef(() => CompteService))
     private readonly compteService: CompteService,
-
+  
     @Inject(forwardRef(() => QrCodeService))
     private readonly qrCodeService: QrCodeService
-=======
-    private readonly imageService: ImageService
->>>>>>> 6f4439418bd059065ab6f03f91af07e745c9672d
   ) {}
+  
 
   // ✅ Vérifie si un utilisateur existe (email ou téléphone)
   async checkUserExistence(identifier: string): Promise<boolean> {

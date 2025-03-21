@@ -4,13 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../utilisateur/entities/user.entity';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
-<<<<<<< HEAD
-import { EmailService } from '../notifications/email.service';
-import { SmsService } from '../notifications/sms.service';
-import { response } from 'express';
-=======
-import { SmsService } from '../firebase_notifications/sms.service';
->>>>>>> 6f4439418bd059065ab6f03f91af07e745c9672d
 
 @Injectable()
 export class OtpService {
@@ -24,10 +17,7 @@ export class OtpService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
-    // private readonly emailService: EmailService,
-    private readonly smsService: SmsService,
-
-
+  
   ) {}
 
   async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
@@ -52,68 +42,6 @@ export class OtpService {
       expirationDate.setMinutes(expirationDate.getMinutes() + 5);
 
       await this.otpRepository.createQueryBuilder()
-<<<<<<< HEAD
-        .delete()
-        .from(Otp)
-        .where("id_user = :id_user AND is_valid = true", { id_user: user.id_user })
-        .execute();
-  
-      console.log(`✅ Ancien(s) OTP supprimé(s). Enregistrement du nouvel OTP...`);
-  
-      // ✅ Enregistrer le nouvel OTP
-      const otp = this.otpRepository.create({
-        user: user,  // ✅ Assure la bonne relation
-        otp_code: otpCode,
-        expires_at: expirationDate,
-        is_valid: true,
-        moyen_envoyer: moyen_envoyer, // ✅ Suppression du `.toLowerCase()`
-      });
-  
-      await this.otpRepository.save(otp);
-
-      if (moyen_envoyer === MoyenEnvoiEnum.TELEPHONE) {
-        if (user.telephone) {
-          await this.smsService.sendOtpSms(user.telephone, otpCode);
-          console.log(`✅ SMS OTP envoyé à ${user.telephone}`);
-          console.log("📌 Réponse Vonage :", JSON.stringify(response, null, 2));
-
-        } else {
-          console.error(`❌ Erreur : Impossible d'envoyer l'OTP par SMS, l'utilisateur ${identifier} n'a pas de numéro de téléphone.`);
-        }
-      }
-      
-
-      // ✅ Mettre à jour la date du dernier OTP envoyé
-      const maintenant = new Date();
-     // ✅ Mettre à jour la date du dernier OTP envoyé si l'utilisateur existe
-        if (user) {
-          user.dernier_otp_envoye = new Date();
-          await this.userRepository.update(user.id_user, { dernier_otp_envoye: () => `'${new Date().toISOString()}'` });
-        }
-
-      
-
-
-      // ✅ ENVOI DE L'OTP PAR EMAIL SI `EMAIL` EST CHOISI
-      if (moyen_envoyer === MoyenEnvoiEnum.EMAIL) {
-        try {
-          if (moyen_envoyer === MoyenEnvoiEnum.EMAIL && user.email) {
-            try {
-              await this.emailService.sendOtpEmail(user.email, otpCode);
-              console.log(`✅ Email OTP envoyé à ${user.email}`);
-            } catch (error) {
-              console.error(`❌ Erreur lors de l'envoi de l'email OTP à ${user.email} :`, error);
-            }
-          } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL && !user.email) {
-            console.error(`❌ Erreur : Impossible d'envoyer l'OTP, l'utilisateur ${identifier} n'a pas d'email.`);
-          }
-          
-          
-          console.log(`✅ Email OTP envoyé à ${user.email}`);
-        } catch (error) {
-          console.error("❌ Erreur lors de l'envoi de l'email OTP :", error);
-        }
-=======
       .delete()
       .from(Otp)
       .where("id_user = :id_user", {
@@ -122,25 +50,33 @@ export class OtpService {
       .execute();
 
       // a dev admin
+        // const otp = this.otpRepository.create({
+        //   otp_code: otpCode,
+        //   expires_at: expirationDate,
+        //   is_valid: true,
+        //   moyen_envoyer: moyen_envoyer,
+        //   id_user: user ? user.id_user : undefined,
+        // });
+
         const otp = this.otpRepository.create({
           otp_code: otpCode,
           expires_at: expirationDate,
           is_valid: true,
           moyen_envoyer: moyen_envoyer,
-          id_user: user ? user.id_user : undefined,
+          user: user ?? null, // ou simplement user si toujours défini
         });
+        
         
       await this.otpRepository.save(otp);
 
       if (moyen_envoyer === MoyenEnvoiEnum.SMS && identifier) {
-        await this.smsService.sendOtpSms(identifier, otpCode);
+        // await this.smsService.sendOtpSms(identifier, otpCode);
         console.log(`📤 Envoi du SMS en cours vers ${Number} avec l'OTP ${otpCode}`);
 
 
       } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL && identifier) {
         // await this.emailService.sendOtpEmail(identifier, otpCode);
         console.log("code envoyer par email à dev")
->>>>>>> 6f4439418bd059065ab6f03f91af07e745c9672d
       }
 
   
@@ -156,11 +92,7 @@ export class OtpService {
   }
   
 
-<<<<<<< HEAD
-  // ✅ Vérifier un OTP
-=======
   // verif otp
->>>>>>> 6f4439418bd059065ab6f03f91af07e745c9672d
   async verifyOtp(identifier: string, otpCode: string): Promise<{ success: boolean; message: string }> {
     try {
       identifier = identifier.trim();
@@ -170,29 +102,6 @@ export class OtpService {
         where: [{ email: identifier }, { telephone: identifier }],
       });
 
-<<<<<<< HEAD
-      // // ✅ Vérifier si un OTP a déjà été envoyé récemment (limite de 2 minutes)
-      // const maintenant = new Date();
-      // if (user && user.dernier_otp_envoye) {
-      //   const dernierOtp = new Date(user.dernier_otp_envoye).getTime();
-      //   const tempsEcoule = new Date().getTime() - dernierOtp;
-        
-      //   if (tempsEcoule < 2 * 60 * 1000) {
-      //     throw new BadRequestException(`Trop de demandes d'OTP. Attendez encore ${Math.ceil((120000 - tempsEcoule) / 1000)} secondes.`);
-      //   }
-      // }
-      
-      
-
-
-      if (!user) {
-        console.error(`❌ Échec : Utilisateur non trouvé pour ${identifier}`);
-        throw new BadRequestException("Utilisateur non trouvé");
-      }
-
-      // ✅ Récupérer l'OTP valide et non expiré
-=======
->>>>>>> 6f4439418bd059065ab6f03f91af07e745c9672d
       const otp = await this.otpRepository.findOne({
         where: [
           ...(user ? [{ user: user, otp_code: otpCode, is_valid: true }] : []),
@@ -200,13 +109,7 @@ export class OtpService {
         relations: ['user'],
       });
       
-<<<<<<< HEAD
-
-      if (!otp) {
-        console.warn(`❌ Code OTP invalide ou expiré pour ${identifier}`);
-=======
       if (!otp || new Date() > otp.expires_at) {
->>>>>>> 6f4439418bd059065ab6f03f91af07e745c9672d
         return { success: false, message: "Code OTP incorrect ou expiré" };
       }
 

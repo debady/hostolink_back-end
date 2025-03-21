@@ -5,6 +5,8 @@ import { Image } from './entities/image.entity';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
 import { ImageMotifEnum } from './entities/image.entity';
+import { Writable } from 'stream';
+
 
 @Injectable()
 export class ImageService {
