@@ -10,7 +10,7 @@ export class UpdateAdministrateurDto {
   telephone?: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(4)
   @IsOptional()
   mot_de_passe?: string;
 

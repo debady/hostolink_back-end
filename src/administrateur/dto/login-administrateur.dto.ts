@@ -11,6 +11,6 @@ export class LoginAdministrateurDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
+  @MinLength(4)
   mot_de_passe: string;
 }

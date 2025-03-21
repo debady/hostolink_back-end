@@ -23,6 +23,7 @@ import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/ges
 import { Administrateur } from './administrateur/entities/administrateur.entity';
 import { SmsModule } from './sms/sms.module';
 import { OtpService } from './code_verif_otp/otp.service';
+import { NotificationsModule } from './notifications/notifications.module';
 
 
 @Module({
@@ -47,7 +48,8 @@ import { OtpService } from './code_verif_otp/otp.service';
     AdministrateurModule,
     GestionUtilisateurModule,
     OtpModule, 
-    SmsModule
+    SmsModule,
+    NotificationsModule
   ],
   providers: [OtpService],
   exports: [OtpService],

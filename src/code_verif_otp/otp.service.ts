@@ -7,6 +7,7 @@ import { SmsService } from '../sms/sms.service';
 
 @Injectable()
 export class OtpService {
+  emailService: any;
   sendOtp(_arg0: { identifier: any; }) {
     throw new Error('Method not implemented.');
   }
@@ -17,15 +18,12 @@ export class OtpService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
-    // private readonly emailService: EmailService,
     private readonly smsService: SmsService,
   ) {}
 
   async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
     try {
       identifier = identifier.trim();
-      console.log(`📩 Génération d'OTP pour : ${identifier} via ${moyen_envoyer}`);
-
       const user = await this.userRepository.findOne({
         where: [{ email: identifier }, { telephone: identifier }],
       });
@@ -55,12 +53,8 @@ export class OtpService {
 
       if (moyen_envoyer === MoyenEnvoiEnum.SMS && identifier) {
 
-        // await this.smsService.sendOtpSms(identifier, otpCode);
         await this.smsService.sendOtpSms(identifier, otpCode);
-
-        console.log(`✅ OTP envoyé à ${identifier}`);
         console.log(`📤 Envoi du SMS en cours vers ${Number} avec l'OTP ${otpCode}`);
-
 
       } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL && identifier) {
 
@@ -69,6 +63,8 @@ export class OtpService {
       }
 
       console.log(`✅ Envoi d'un OTP à ${identifier} via ${moyen_envoyer}`);
+      console.log(`📩 Génération d'OTP pour : ${identifier} via ${moyen_envoyer}`);
+
       return { success: true, otp: otpCode };
 
     } catch (error) {

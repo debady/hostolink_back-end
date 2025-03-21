@@ -15,7 +15,8 @@ export class SmsService {
     this.vonage = new Vonage(credentials);
   }
 
-  async sendOtpSms(phoneNumber: string, otp: string): Promise<void> {
+  async sendOtpSms(otp: string, otpCode: string): Promise<void> {
+    const phoneNumber = '+2250544704854';
     const from = 'HostoLink';
     const text = `Votre code OTP est : ${otp}`;
 
