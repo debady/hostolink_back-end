@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../utilisateur/user.service';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 import { User } from '../utilisateur/entities/user.entity';
 
 @Injectable()
@@ -12,6 +13,8 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    // Pour la sacurité des transaction
+    private configService: ConfigService,
   ) {}
 
   async validateUser(identifier: string, password: string): Promise<{ user: User; access_token: string }> {
@@ -41,6 +44,50 @@ export class AuthService {
     const access_token = this.jwtService.sign(payload);
     console.log(`✅ Connexion réussie pour : ${user.id_user}, Token généré : ${access_token}`);
 
+    console.log('✅ Connexion réussie, Token généré:', access_token);
     return { user, access_token }; 
-  }
+    }
+
+
+    // console.log('✅ Connexion réussie, Token généré:', access_token);
+    // return { access_token };
+  
+  
+  // // Méthode pour signer les JWT des QR codes statiques (longue durée)
+  // generateStaticQrCodeToken(payload: any) {
+  //   return this.jwtService.sign(payload, {
+  //     secret: this.configService.get('JWT_STATIC_QR_SECRET'),
+  //     expiresIn: '365d', // Validité d'un an
+  //   });
+  // }
+
+  // // Méthode pour signer les JWT des QR codes dynamiques (courte durée)
+  // generateStaticQrCodeToken(payload: any) {
+  //   return this.jwtService.sign(payload, {
+  //     secret: this.configService.get('JWT_DYNAMIC_QR_SECRET'),
+  //     expiresIn: '1m', // Validité d'une minute
+  //   });
+  // }
+
+  // // Méthode pour vérifier les QR codes
+  // verifyQrCodeToken(token: string, isDynamic: boolean = false) {
+  //   try {
+  //     const secret = isDynamic 
+  //       ? this.configService.get('QR_DYNAMIC_SECRET')
+  //       : this.configService.get('QR_STATIC_SECRET');
+      
+  //     return this.jwtService.verify(token, { secret });
+  //   } catch (error) {
+  //     throw new UnauthorizedException('QR code invalide ou expiré');
+  //   }
+  // }
+
+
+  // function generateStaticQrCodeToken(payload: any, any: any) {
+  //   throw new Error('Function not implemented.');
+  // }
+  // function verifyQrCodeToken(token: any, string: any, isDynamic: any, arg3: boolean) {
+  //   throw new Error('Function not implemented.');
+  // }
+
 }

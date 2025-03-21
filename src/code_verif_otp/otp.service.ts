@@ -1,3 +1,4 @@
+
 import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -27,8 +28,16 @@ export class OtpService {
       const user = await this.userRepository.findOne({
         where: [{ email: identifier }, { telephone: identifier }],
       });
-
-      const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+  
+      if (!user) {
+        console.error(`❌ Échec : Utilisateur non trouvé pour ${identifier}`);
+        throw new BadRequestException("Utilisateur non trouvé");
+      }
+  
+      // ✅ Générer un OTP (4 à 6 chiffres)
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  
+      // ✅ Définir l'expiration à 5 minutes
       const expirationDate = new Date();
       expirationDate.setMinutes(expirationDate.getMinutes() + 5);
 
@@ -41,13 +50,22 @@ export class OtpService {
       .execute();
 
       // a dev admin
+        // const otp = this.otpRepository.create({
+        //   otp_code: otpCode,
+        //   expires_at: expirationDate,
+        //   is_valid: true,
+        //   moyen_envoyer: moyen_envoyer,
+        //   id_user: user ? user.id_user : undefined,
+        // });
+
         const otp = this.otpRepository.create({
           otp_code: otpCode,
           expires_at: expirationDate,
           is_valid: true,
           moyen_envoyer: moyen_envoyer,
-          id_user: user ? user.id_user : undefined,
+          user: user ?? null, // ou simplement user si toujours défini
         });
+        
         
       await this.otpRepository.save(otp);
 
@@ -63,14 +81,22 @@ export class OtpService {
       }
 
       console.log(`✅ Envoi d'un OTP à ${identifier} via ${moyen_envoyer}`);
+<<<<<<< HEAD
       console.log(`📩 Génération d'OTP pour : ${identifier} via ${moyen_envoyer}`);
 
+=======
+      console.log(`📤 OTP envoyer à ${identifier} est ${otpCode}`);
+>>>>>>> dc839cd4a0201c68eb4c61c2f6da90826c73ff80
       return { success: true, otp: otpCode };
 
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new InternalServerErrorException("Erreur lors de la génération de l'OTP");
     }
   }
+  
 
   // verif otp
   async verifyOtp(identifier: string, otpCode: string): Promise<{ success: boolean; message: string }> {
@@ -93,11 +119,23 @@ export class OtpService {
         return { success: false, message: "Code OTP incorrect ou expiré" };
       }
 
+      // ✅ Vérifier si l'OTP est expiré
+      if (new Date() > otp.expires_at) {
+        otp.is_valid = false;
+        await this.otpRepository.save(otp);
+        console.warn(`❌ Code OTP expiré pour ${identifier}`);
+        return { success: false, message: "Code OTP expiré" };
+      }
+
+      // ✅ Marquer l'OTP comme utilisé (désactivation)
       otp.is_valid = false;
       await this.otpRepository.save(otp);
 
-      return { success: true, message: "Code OTP validé" };
+      console.log(`✅ Code OTP validé avec succès pour ${identifier}`);
+
+      return { success: true, message: "Code OTP valide" };
     } catch (error) {
+      console.error("❌ Erreur lors de la vérification de l'OTP :", error);
       throw new InternalServerErrorException("Erreur lors de la vérification de l'OTP");
     }
   }

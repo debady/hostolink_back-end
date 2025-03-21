@@ -46,6 +46,36 @@ EXPORTER LA BD supababse
     pg_dump -U postgres.skwupmsitzsxukbmnkwv -h aws-0-eu-west-3.pooler.supabase.com -d postgres -f hostolink_bd_supabase.sql
 
 
+*------------------------------NOTE POUR CREER UNE BASE DE DONNEE POSTGRESQL VIA DOCKER-----------------------------*
+
+Créer une base de données PostgreSQL dans un conteneur Docker est un excellent choix ! Voici les étapes de base pour y parvenir :
+
+*-------------- Télécharger l'image PostgreSQL
+    Exécutez la commande suivante pour récupérer l'image officielle de PostgreSQL depuis Docker Hub :
+                      docker pull postgres
+
+
+*-------------- Créer et exécuter un conteneur PostgreSQL
+    Lancez un conteneur PostgreSQL en spécifiant un mot de passe pour l'utilisateur postgres :
+                            docker run --name nom_de_votre_conteneur -e POSTGRES_PASSWORD=mot_de_passe -d nom_de_votre_bd
+
+*-------------- Se connecter au conteneur
+    Vous pouvez accéder au conteneur en exécutant cette commande :
+                            docker exec -it nom_de_votre_conteneur bash
+    Une fois à l'intérieur du conteneur, vous pouvez accéder à PostgreSQL :
+                            psql -U postgres
+
+*-------------- Créer une base de données
+    Une fois connecté à PostgreSQL, créez une base de données avec une commande SQL :
+                            CREATE DATABASE nom_de_la_base;
+
+Cela devrait vous permettre de configurer et d'utiliser une base PostgreSQL dans votre conteneur Docker. Si vous avez des questions ou rencontrez un problème, je suis là pour vous aider !
+
+
+*------------------------------NOTE POUR IMPORTER UNE BASE DE DONNEE POSTGRESQL AVEC INSTALLATION DE POSTGIS VIA DOCKER-----------------------------*
+
+    Pour importer une base de données avec PostGIS dans un conteneur Docker, vous pouvez suivre ces étapes :
+
 *------------------------------NOTE POUR LA GEOLOCALISATION -----------------------------*
 
 TELECHARGER POSTGIS 
@@ -83,6 +113,84 @@ SUPPRIMER LA CONTRAINT D'ENUM DE role
     
 DROP TYPE IF EXISTS role_admin_enum;
 
+<<<<<<< HEAD:Command.MD
+
+
+------------------------------- MODULE QR CODE --------------------
+
+# Tables modifiés :
+
+    Table compte :
+
+           Column            |            Type             | Collation | Nullable |                  Default
+-----------------------------+-----------------------------+-----------+----------+-------------------------------------------
+ id_compte                   | integer                     |           | not null | nextval('compte_id_compte_seq'::regclass)
+ solde_compte                | integer                     |           |          | 0
+ solde_bonus                 | integer                     |           |          | 0
+ cumule_mensuel              | integer                     |           |          | 0
+ plafond                     | integer                     |           |          | 100000
+ mode_paiement_preferentiel  | character varying(50)       |           |          |
+ type_user                   | character varying(20)       |           | not null |
+ devise                      | character varying(10)       |           | not null | 'XOF'::character varying
+ numero_compte               | character varying(50)       |           |          |
+ date_creation_compte        | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+ date_modification           | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+ statut                      | character varying(20)       |           |          | 'actif'::character varying
+ id_user                     | uuid                        |           |          |
+ id_user_etablissement_sante | integer                     |           |          |
+Indexes:
+    "compte_pkey" PRIMARY KEY, btree (id_compte)
+    "compte_numero_compte_key" UNIQUE CONSTRAINT, btree (numero_compte)
+Check constraints:
+    "compte_type_user_check" CHECK (type_user::text = ANY (ARRAY['utilisateur'::character varying::text, 'etablissement'::character varying::text]))
+Foreign-key constraints:
+    "fk_compte_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
+    "fk_compte_utilisateur" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
+Referenced by:
+    TABLE "cartes_bancaires" CONSTRAINT "fk_cartes_bancaires_compte" FOREIGN KEY (id_compte) REFERENCES compte(id_compte) ON DELETE CASCADE
+    TABLE "transaction_externe" CONSTRAINT "fk_transaction_externe_compte" FOREIGN KEY (id_compte) REFERENCES compte(id_compte) ON DELETE CASCADE
+    TABLE "transaction_interne" CONSTRAINT "fk_transaction_interne_expediteur" FOREIGN KEY (id_compte_expediteur) REFERENCES compte(id_compte) ON DELETE CASCADE
+    TABLE "transaction_interne" CONSTRAINT "fk_transaction_interne_recepteur" FOREIGN KEY (id_compte_recepteur) REFERENCES compte(id_compte) ON DELETE CASCADE
+
+
+     Table qr_code_paiement_dynamique :
+
+           Column            |            Type             | Collation | Nullable |                       Default       
+-----------------------------+-----------------------------+-----------+----------+-----------------------------------------------------
+ id_qrcode                   | integer                     |           | not null | nextval('qr_code_paiement_id_qrcode_seq'::regclass)
+ qr_code_valeur              | text                        |           |          |
+ date_creation               | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+ date_expiration             | timestamp without time zone |           | not null |
+ statut                      | character varying(20)       |           |          | 'actif'::character varying
+ token                       | character varying(1000)     |           |          | NULL::character varying
+ id_user_etablissement_sante | integer                     |           |          |
+ id_user                     | uuid                        |           |          |
+Indexes:
+    "qr_code_paiement_pkey" PRIMARY KEY, btree (id_qrcode)
+Foreign-key constraints:
+    "fk_qr_code_dynamique_utilisateur" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
+    "fk_qr_code_paiement_dynamique_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
+    "fk_qr_code_paiement_utilisateur" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
+
+
+    Table qr_code_paiement_statique :
+
+           Column            |            Type             | Collation | Nullable |                           Default   
+-----------------------------+-----------------------------+-----------+----------+--------------------------------------------------------------
+ id_qrcode                   | integer                     |           | not null | nextval('qr_code_paiement_statique_id_qrcode_seq'::regclass)
+ qr_code_data                | text                        |           |          |
+ date_creation               | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+ statut                      | character varying(20)       |           |          | 'actif'::character varying
+ id_user_etablissement_sante | integer                     |           |          |
+ id_user                     | uuid                        |           |          |
+ date_expiration             | timestamp without time zone |           |          |
+ token                       | character varying(1000)     |           |          |
+Indexes:
+    "qr_code_paiement_statique_pkey" PRIMARY KEY, btree (id_qrcode)
+Foreign-key constraints:
+    "fk_qr_code_paiement_statique_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
+    "fk_qr_code_utilisateur" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
+
 DECOMMITER UN FICHIER SUIVI PAR GIT
     placer son nom dans .gitignore
     git rm --cached .env
@@ -104,6 +212,7 @@ VOIR L'ETAT DES CES PROJET GOOGLE CLOUD
 
 COMMANDE TEST API https://dashboard.nexmo.com/ 
     curl -X POST "https://rest.nexmo.com/sms/json" -d "api_key=607d95e2" -d "api_secret=2yxhopCqAC9LSxYE" -d "to=+2250502556104" -d "from=Vonage" -d "text=Test OTP de HostoLink"
+>>>>>>> 5664c4a69108cd7b4a94b7ada3f9e88d0c32aefc
 
 
 

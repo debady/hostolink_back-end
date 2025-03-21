@@ -17,6 +17,10 @@ import { Otp } from './code_verif_otp/entities/otp.entity';
 import { ImageModule } from './image/image.module';
 import { Image } from './image/entities/image.entity';
 
+// ✅ transaction interne
+import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
+import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
+
 // ✅ Administrateur
 import { AdministrateurModule } from './administrateur/administrateur.module';
 import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
@@ -35,7 +39,7 @@ import { NotificationsModule } from './notifications/notifications.module';
       host: process.env.DATABASE_HOST || 'localhost',
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
+      password: process.env.DATABASE_PASSWORD || 'mdp_dev_sohapigroup',
       database: process.env.DATABASE_NAME || 'hostolink_bd',
       autoLoadEntities: true, 
       synchronize: false, 
@@ -48,8 +52,14 @@ import { NotificationsModule } from './notifications/notifications.module';
     AdministrateurModule,
     GestionUtilisateurModule,
     OtpModule, 
+<<<<<<< HEAD
     SmsModule,
     NotificationsModule
+=======
+    SmsModule, 
+    TransactionInterneModule, 
+    TransactionFraisModule,
+>>>>>>> dc839cd4a0201c68eb4c61c2f6da90826c73ff80
   ],
   providers: [OtpService],
   exports: [OtpService],
@@ -77,6 +87,8 @@ export class AppModule {}
 // import { NotificationsModule } from './notifications/notifications.module';
 // import { OtpService } from './code_verif_otp/otp.service';
 // import { AdministrateurModule } from './administrateur/administrateur.module';
+// import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
+// import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
 
 
 // @Module({

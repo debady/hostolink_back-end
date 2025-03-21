@@ -472,18 +472,19 @@ CREATE TABLE public.compte (
     solde_compte integer DEFAULT 0,
     solde_bonus integer DEFAULT 0,
     cumule_mensuel integer DEFAULT 0,
-    plafond integer DEFAULT 100000,
+    plafond integer DEFAULT 1000000,
     mode_paiement_preferentiel character varying(50),
     type_user character varying(20) NOT NULL,
-    devise character varying(10) NOT NULL,
+    devise character varying(10) DEFAULT 'XOF'::character varying NOT NULL,
     numero_compte character varying(50),
     date_creation_compte timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     date_modification timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     statut character varying(20) DEFAULT 'actif'::character varying,
-    id_user_etablissement_sante integer,
     id_user uuid,
-    CONSTRAINT compte_type_user_check CHECK (((type_user)::text = ANY ((ARRAY['utilisateur'::character varying, 'etablissement'::character varying])::text[])))
+    id_user_etablissement_sante integer,
+    CONSTRAINT compte_type_user_check CHECK (((type_user)::text = ANY (ARRAY[('utilisateur'::character varying)::text, ('etablissement'::character varying)::text])))
 );
+
 
 
 ALTER TABLE public.compte OWNER TO postgres;
@@ -979,19 +980,13 @@ ALTER TABLE public.publicite OWNER TO postgres;
 
 CREATE TABLE public.qr_code_paiement_dynamique (
     id_qrcode integer NOT NULL,
-    id_utilisateur integer NOT NULL,
-    qr_code_valeur text NOT NULL,
+    qr_code_valeur text,
     date_creation timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     date_expiration timestamp without time zone NOT NULL,
     statut character varying(20) DEFAULT 'actif'::character varying,
-    token_securite character varying(64) DEFAULT NULL::character varying,
-    type_qrcode character varying(10) DEFAULT 'dynamique'::character varying NOT NULL,
-    historique boolean DEFAULT false,
-    transaction_id integer,
-    utilise boolean DEFAULT false,
+    token character varying(1000) DEFAULT NULL::character varying,
     id_user_etablissement_sante integer,
-    id_user uuid,
-    CONSTRAINT qr_code_paiement_dynamique_type_qrcode_check CHECK (((type_qrcode)::text = ANY ((ARRAY['statique'::character varying, 'dynamique'::character varying])::text[])))
+    id_user uuid
 );
 
 
@@ -1025,13 +1020,14 @@ ALTER SEQUENCE public.qr_code_paiement_id_qrcode_seq OWNED BY public.qr_code_pai
 
 CREATE TABLE public.qr_code_paiement_statique (
     id_qrcode integer NOT NULL,
-    id_utilisateur integer NOT NULL,
-    qr_code_data text NOT NULL,
+    qr_code_data text,
     date_creation timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     statut character varying(20) DEFAULT 'actif'::character varying,
-    id_user_etablissement_sante integer NOT NULL
+    id_user_etablissement_sante integer,
+    id_user uuid,
+    date_expiration timestamp without time zone,
+    token character varying(1000)
 );
-
 
 ALTER TABLE public.qr_code_paiement_statique OWNER TO postgres;
 

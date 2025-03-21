@@ -1,16 +1,7 @@
-import { 
-  Controller, 
-  Post, 
-  Body, 
-  BadRequestException, 
-  InternalServerErrorException, 
-  Get, 
-  UseGuards, 
-  Req, 
+import { Controller, Post, Body, BadRequestException, InternalServerErrorException, Get, UseGuards,  Req, 
   Patch, 
   UploadedFile, 
-  UseInterceptors 
-} from '@nestjs/common';
+  UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { CheckUserDto } from './dto/check-user.dto';
