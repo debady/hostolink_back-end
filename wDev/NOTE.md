@@ -103,17 +103,3 @@
     extension pgcrypto pour les criptage sécurisés
 
         CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
-
-
-
-
-
-
-
-
-
-
-
-
-

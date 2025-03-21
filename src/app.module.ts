@@ -1,5 +1,4 @@
 // ---------------------LOCAL ---------------------
-
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -29,37 +28,36 @@ import { SmsModule } from './sms/sms.module';
 import { OtpService } from './code_verif_otp/otp.service';
 import { NotificationsModule } from './notifications/notifications.module';
 
-
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
 
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DATABASE_HOST || 'localhost',
-      port: Number(process.env.DATABASE_PORT) || 5432,
-      username: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'mdp_dev_sohapigroup',
-      database: process.env.DATABASE_NAME || 'hostolink_bd',
-      autoLoadEntities: true, 
-      synchronize: false, 
-      entities: [User, Otp, Image, Administrateur], 
+      host: process.env.DATABASE_HOST,
+      port: Number(process.env.DATABASE_PORT),
+      username: process.env.DATABASE_USER,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_NAME,
+      autoLoadEntities: true,
+      synchronize: false,
+      entities: [User, Otp, Image, Administrateur],
     }),
 
-    UserModule, 
-    AuthModule, 
-    ImageModule, 
+    // Modules de l'app
+    UserModule,
+    AuthModule,
+    ImageModule,
     AdministrateurModule,
     GestionUtilisateurModule,
-    OtpModule, 
-<<<<<<< HEAD
+    OtpModule,
     SmsModule,
-    NotificationsModule
-=======
-    SmsModule, 
-    TransactionInterneModule, 
+    NotificationsModule,
+    TransactionInterneModule,
     TransactionFraisModule,
->>>>>>> dc839cd4a0201c68eb4c61c2f6da90826c73ff80
   ],
   providers: [OtpService],
   exports: [OtpService],
