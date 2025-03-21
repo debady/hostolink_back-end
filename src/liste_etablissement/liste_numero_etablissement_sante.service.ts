@@ -6,9 +6,11 @@ import { CreateListeNumeroVertEtablissementSanteDto } from './dto/create-liste-n
 import { ResponseListeNumeroVertEtablissementSanteDto } from './dto/response_liste_numero_vert_etablissement_sante.dto';
 import { CloudinaryService } from 'src/upload/cloudinary.service';
 import { Administrateur } from 'src/administrateur/entities/administrateur.entity';
+import { UpdateListeNumeroVertEtablissementSanteDto } from './dto/update-liste-numero-vert-etablissement-sante.dto';
 
 @Injectable()
 export class ListeNumeroEtablissementSanteService {
+  
   constructor(
     @InjectRepository(ListeNumeroEtablissementSante)
     private readonly listeNumeroRepo: Repository<ListeNumeroEtablissementSante>,
@@ -109,6 +111,49 @@ export class ListeNumeroEtablissementSanteService {
     return numeros.map(numero => this.mapToResponseDto(numero));
   }
 
+   /**
+   * ✅ Mettre à jour un numéro vert
+   */
+  async update(id: number, dto: UpdateListeNumeroVertEtablissementSanteDto, file?: Express.Multer.File) {
+    const numero = await this.listeNumeroRepo.findOne({ where: { id_liste_num_etablissement_sante: id } });
+
+    if (!numero) {
+      throw new NotFoundException(`Numéro vert avec l'ID ${id} non trouvé.`);
+    }
+
+    let imageUrl = numero.image; // Conserve l'image actuelle si aucune nouvelle image n'est envoyée
+
+    if (file) {
+      try {
+        imageUrl = await this.cloudinaryService.uploadImage(file);
+      } catch (error) {
+        throw new InternalServerErrorException('Erreur lors de l’upload de l’image sur Cloudinary.');
+      }
+    }
+
+    await this.listeNumeroRepo.update(id, {
+      ...dto,
+      image: imageUrl,
+      type_etablissement: dto.type_etablissement as TypeEtablissementEnum, 
+    });
+
+    return { message: 'Établissement mis à jour avec succès', id };
+  }
+
+  async remove(id: number): Promise<{ message: string }> {
+    const numero = await this.listeNumeroRepo.findOne({ where: { id_liste_num_etablissement_sante: id } });
+  
+    if (!numero) {
+      throw new NotFoundException(`Numéro vert avec l'ID ${id} non trouvé.`);
+    }
+  
+    await this.listeNumeroRepo.delete(id);
+  
+    return { message: `Numéro vert avec l'ID ${id} supprimé avec succès.` };
+  }
+  
+
+
   /**
    * ✅ Mapper un enregistrement en DTO de réponse
    */
@@ -128,4 +173,6 @@ export class ListeNumeroEtablissementSanteService {
       site_web: numero.site_web ,
     };
   }
+  
+  
 }

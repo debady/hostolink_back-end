@@ -23,6 +23,12 @@ import { AdministrateurModule } from './administrateur/administrateur.module';
 import { Administrateur } from './administrateur/entities/administrateur.entity';
 import { AnnonceModule } from './annonce/annonce.module';
 import { Annonce } from './annonce/entities/annonce.entity';
+
+import { Thematique } from './thematique_discussion/entities/thematique.entity';
+import { ThematiqueDiscussionModule } from './thematique_discussion/thematique_discussion.module';
+import { MessageThematique } from './thematique_discussion/entities/message_thematique.entity';
+import { FirebaseModule } from './thematique_discussion/firebase/firebase.module';
+
 // import { UserEtablissementModule } from './user-etablissement/user-etablissement.module';
 
 
@@ -42,7 +48,7 @@ import { Annonce } from './annonce/entities/annonce.entity';
       database: process.env.DATABASE_NAME || 'hostolink_bds_master',
       autoLoadEntities: false,
       synchronize: false, 
-       entities: [User,Otp,Image, ListeNumeroEtablissementSante, Administrateur,Annonce ], 
+       entities: [User,Otp,Image, ListeNumeroEtablissementSante, Administrateur,Annonce, MessageThematique, Thematique], 
   }),
   UserModule,
   AuthModule,
@@ -51,7 +57,9 @@ import { Annonce } from './annonce/entities/annonce.entity';
   CloudinaryModule,
   NotificationsModule,
   AdministrateurModule,
-  AnnonceModule
+  AnnonceModule,
+  ThematiqueDiscussionModule,
+  FirebaseModule
   // PublicationModule,
   // CommentaireModule,
   // PartageModule,

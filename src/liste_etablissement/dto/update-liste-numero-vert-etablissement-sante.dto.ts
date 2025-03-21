@@ -1,40 +1,43 @@
-// import { IsOptional, IsString, IsNumber, IsEnum } from 'class-validator';
-// import { TypeEtablissement } from '../entities/liste_numero_vert_etablissement_sante.entity';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
 
-// export class UpdateListeNumeroVertEtablissementSanteDto {
-//   @IsOptional()
-//   @IsString()
-//   nom_etablissement?: string;
+export class UpdateListeNumeroVertEtablissementSanteDto {
+  @IsOptional()
+  @IsString()
+  nom_etablissement?: string;
 
-//   @IsOptional()
-//   @IsString()
-//   contact?: string;
+  @IsOptional()
+  @IsString()
+  contact?: string;
 
-//   @IsOptional()
-//   @IsString()
-//   image?: string;
+  @IsOptional()
+  @IsString()
+  presentation?: string;
 
-//   @IsOptional()
-//   @IsString()
-//   presentation?: string;
+  @IsOptional()
+  @IsString()
+  adresse?: string;
 
-//   @IsOptional()
-//   @IsString()
-//   adresse?: string;
+  @IsOptional()
+  @IsNumber()
+  latitude?: number;
 
-//   @IsOptional()
-//   @IsNumber()
-//   latitude?: number;
+  @IsOptional()
+  @IsNumber()
+  longitude?: number;
 
-//   @IsOptional()
-//   @IsNumber()
-//   longitude?: number;
+  @IsOptional()
+  @IsString()
+  type_etablissement?: string;
 
-//   @IsOptional()
-//   @IsEnum(TypeEtablissement)
-//   type_etablissement?: TypeEtablissement;
+  @IsOptional()
+  @IsString()
+  categorie?: string;
 
-//   @IsOptional()
-//   @IsString()
-//   site_web?: string;
-// }
+  @IsOptional()
+  @IsString()
+  site_web?: string;
+
+  @IsOptional()
+  @IsString()
+  image?: string; // L'URL Cloudinary de l'image
+}

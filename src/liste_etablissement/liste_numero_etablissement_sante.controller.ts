@@ -1,9 +1,10 @@
-import { Controller, Post, Body, Get, Param, UseInterceptors, UploadedFile, Query, NotFoundException, ParseIntPipe, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseInterceptors, UploadedFile, Query, NotFoundException, ParseIntPipe, BadRequestException, Put, Delete } from '@nestjs/common';
 import { ListeNumeroEtablissementSanteService } from './liste_numero_etablissement_sante.service';
 import { CreateListeNumeroVertEtablissementSanteDto } from './dto/create-liste-numero-vert-etablissement-sante.dto';
 import { ResponseListeNumeroVertEtablissementSanteDto } from './dto/response_liste_numero_vert_etablissement_sante.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/upload/cloudinary.service';
+import { UpdateListeNumeroVertEtablissementSanteDto } from './dto/update-liste-numero-vert-etablissement-sante.dto';
 
 
 
@@ -45,7 +46,21 @@ export class ListeNumeroEtablissementSanteController {
     return this.listeService.findOne(id);
   }
 
- 
+  @Put(':id')
+  @UseInterceptors(FileInterceptor('file'))
+  async update(
+    @Param('id',ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: UpdateListeNumeroVertEtablissementSanteDto
+  ) {
+    return this.listeService.update(id, dto, file);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id', ParseIntPipe) id: number) {
+  return this.listeService.remove(id);
+}
+
   
 }
 

@@ -1,6 +1,8 @@
 import { Otp } from 'src/code_verif_otp/entities/otp.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { Image } from '../../image/entities/image.entity';
+import { MessageThematique } from 'src/thematique_discussion/entities/message_thematique.entity';
+
 
 @Entity('utilisateur')  
 export class User {
@@ -51,4 +53,11 @@ export class User {
 
   @Column({ type: 'boolean', default: true }) // Par défaut, l'utilisateur est actif
   actif: boolean;
+
+  @OneToMany(() => MessageThematique, (message) => message.expediteur)
+  messagesEnvoyes: MessageThematique[];
+
+  @Column({ nullable: true })
+  fcm_token: string;
+
 }
