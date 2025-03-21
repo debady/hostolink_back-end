@@ -67,6 +67,4 @@ src/localisation_etablissement_sante
 src/commentaire
 src/partage
 src/publication
-.env
-
 src/config/firebase-admin-sdk.json

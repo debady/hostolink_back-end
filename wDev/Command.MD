@@ -212,7 +212,7 @@ Indexes:
 Foreign-key constraints:
     "fk_qr_code_paiement_statique_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
     "fk_qr_code_utilisateur" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-=======
+
 DECOMMIT UN FICHIER SUIVI PAR GIT
     placer son nom dans .gitignore
     git rm --cached .env
@@ -222,4 +222,17 @@ DECOMMIT UN FICHIER SUIVI PAR GIT
 
 VOIR L'ETAT DES CES PROJET GOOGLE CLOUD
     https://console.cloud.google.com/iam-admin/projects
->>>>>>> 6f4439418bd059065ab6f03f91af07e745c9672d:wDev/Command.MD
+
+
+
+    ---- https://account.africastalking.com/ ---
+
+    atsk_9cb676c636c08f6cad76b4f83d16c7abc61ed8b542f3a7aa43ea08394b7d7444e736c91d
+
+Mb4rrL17e
+
+
+
+COMMANDE TEST API https://dashboard.nexmo.com/ 
+    curl -X POST "https://rest.nexmo.com/sms/json" -d "api_key=607d95e2" -d "api_secret=2yxhopCqAC9LSxYE" -d "to=+2250502556104" -d "from=Vonage" -d "text=Test OTP de HostoLink"
+>>>>>>> 5664c4a69108cd7b4a94b7ada3f9e88d0c32aefc
