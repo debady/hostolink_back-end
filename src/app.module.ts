@@ -21,10 +21,9 @@ import { Image } from './image/entities/image.entity';
 import { AdministrateurModule } from './administrateur/administrateur.module';
 import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
 import { Administrateur } from './administrateur/entities/administrateur.entity';
+import { SmsModule } from './sms/sms.module';
+import { OtpService } from './code_verif_otp/otp.service';
 
-// ✅ Firebase Messaging & SMS
-import { FirebaseService } from 'config/firebase.service';
-import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -48,8 +47,10 @@ import { NotificationsModule } from './notifications/notifications.module';
     AdministrateurModule,
     GestionUtilisateurModule,
     OtpModule, 
-    NotificationsModule
+    SmsModule
   ],
+  providers: [OtpService],
+  exports: [OtpService],
 })
 export class AppModule {}
 

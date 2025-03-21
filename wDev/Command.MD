@@ -122,3 +122,8 @@ VOIR L'ETAT DES CES PROJET GOOGLE CLOUD
     atsk_9cb676c636c08f6cad76b4f83d16c7abc61ed8b542f3a7aa43ea08394b7d7444e736c91d
 
 Mb4rrL17e
+
+
+
+COMMANDE TEST API https://dashboard.nexmo.com/ 
+    curl -X POST "https://rest.nexmo.com/sms/json" -d "api_key=607d95e2" -d "api_secret=2yxhopCqAC9LSxYE" -d "to=+2250502556104" -d "from=Vonage" -d "text=Test OTP de HostoLink"

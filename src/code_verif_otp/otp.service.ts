@@ -3,8 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../utilisateur/entities/user.entity';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
-import { SmsService } from '../notifications/sms.service';
-
+import { SmsService } from '../sms/sms.service';
 
 @Injectable()
 export class OtpService {
@@ -19,9 +18,7 @@ export class OtpService {
     private readonly userRepository: Repository<User>,
 
     // private readonly emailService: EmailService,
-    private readonly smsService: SmsService
-
-
+    private readonly smsService: SmsService,
   ) {}
 
   async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
@@ -57,19 +54,23 @@ export class OtpService {
       await this.otpRepository.save(otp);
 
       if (moyen_envoyer === MoyenEnvoiEnum.SMS && identifier) {
+
         // await this.smsService.sendOtpSms(identifier, otpCode);
         await this.smsService.sendOtpSms(identifier, otpCode);
+
+        console.log(`✅ OTP envoyé à ${identifier}`);
         console.log(`📤 Envoi du SMS en cours vers ${Number} avec l'OTP ${otpCode}`);
 
 
       } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL && identifier) {
+
         // await this.emailService.sendOtpEmail(identifier, otpCode);
         console.log("code envoyer par email à dev")
       }
 
       console.log(`✅ Envoi d'un OTP à ${identifier} via ${moyen_envoyer}`);
-
       return { success: true, otp: otpCode };
+
     } catch (error) {
       throw new InternalServerErrorException("Erreur lors de la génération de l'OTP");
     }
