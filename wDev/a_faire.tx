@@ -12,3 +12,34 @@ le code de mise a jour du champ compte verifier de la table utilisateur a ete su
 - trouver un moyen d'exporter la bd en ligne
 - comparer a celui du locale et ajuster
 - trouver un moyen pour modifier les tables ainsi qu'en locale qu'en ligne 
+
+
+
+----- MISE A NIVEAU BD MASTER -----
+
+suppression 
+    compte 
+    qr_code_paiement_statique
+    cartes_qr_code_dynamique 
+
+importer 
+    
+
+
+----------------REVU LIAISON  ENTRE LES  TABLE THEMATIQUE | MESSAGE DISCUTION SUR THEMATIQUE | TABLE UTILISATEUR | TABLE EXPERT ----
+
+CREATE TABLE expert_sante (
+    id_expert SERIAL PRIMARY KEY,
+    id_user_etablissement_sante INTEGER NOT NULL,
+    nom VARCHAR(100),
+    prenom VARCHAR(100),
+    domaine_expertise VARCHAR(255),
+    identifiant CHAR(6) UNIQUE NOT NULL,
+    mot_de_passe TEXT NOT NULL,
+    url_profile TEXT,
+
+    CONSTRAINT fk_expert_user_etablissement_sante
+        FOREIGN KEY (id_user_etablissement_sante)
+        REFERENCES user_etablissement_sante(id_user_etablissement_sante)
+        ON DELETE CASCADE
+);
