@@ -8,4 +8,7 @@ le code de mise a jour du champ compte verifier de la table utilisateur a ete su
 - endpoint qui permet a l'user lui même de changer son mdp
 - verifier que l'utilisateur a compte verif a true avant de continuer a se connecter
 - revoir endpoint d'envoi d'email et sms
-
+- lors de l'uploader de la photo de admin un dossier upload se creer en locale avec des fichiers lisible si on complète avec l'exetension
+- trouver un moyen d'exporter la bd en ligne
+- comparer a celui du locale et ajuster
+- trouver un moyen pour modifier les tables ainsi qu'en locale qu'en ligne 
