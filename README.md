@@ -1,5 +1,8 @@
-#                   INITIATION DU PROJET NETJS
 
+// DANS LA BASE DE DONNER
+J AI AJOUTE LE CHAMP CATEGORIE A LA TABLE LISTE NUMERO VERT ETABLISSEMENT SANTE
+
+#                   INITIATION DU PROJET NETJS
 # Hostolink Backend
 
 Bienvenue dans le backend de **Hostolink**, une API construite avec **NestJS**, **PostgreSQL**, et **Docker** pour gérer les fonctionnalités de paiement et d'épargne pour les soins de santé.

@@ -18,13 +18,7 @@
     hebergeur bd : supabase
     hebergeur back-end : render
 
-
-
-- la base de donnéee
-   *** a faire ***
-
-
-les Endpoints 
+-------------ENDPOINT DEV FONCTIONNELLES -----------
 
     ok - 1- MISSION : Vérifier si un utilisateur existe
     Méthode : POST
@@ -92,20 +86,11 @@ les Endpoints
         }
 
     
-    --------------------.env fonctionnelle -------------------------------------
-    # # ⚙️ Configuration de PostgreSQL
-    # DB_HOST=localhost
-    # DB_PORT=5432
-    # DB_USER=dev_sohapigroup
-    # DB_PASSWORD=mdp_dev_sohapigroup
-    # DB_NAME=hostolink_bd
-
-    # # Clé secrète pour JWT
-    # JWT_SECRET=MY_SECRET_KEY
+-------------.env  -------------
 
 
-    ---------------------------------------------------------
 
+-------------CLOUDINARY-------------
 API Secret 
         HEEz2vCv7MyxBRjCZScbXeUKgEw
 
@@ -119,29 +104,19 @@ API environment variable
 
 ----------SUPABASE--------------
 
-*prompt*
-    J'ai développé mon application flutter base de données postgres et back-end netjs comment héberger pour tester en attendant Je suis sur Windows je sais que je peux utilisé supabase donc montre explique tout
-
-
-projet name = hostolink
-mdp : mdp_dev_sohapigroup
-
-
+projet name
+    hostolink
+mdp
+    mdp_dev_sohapigroup
 
 Session pooler Supavisor
-------------------------------------------------------
-Url
-    postgresql://postgres.skwupmsitzsxukbmnkwv:[YOUR-PASSWORD]@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
+    Url : postgresql://postgres.skwupmsitzsxukbmnkwv:[YOUR-PASSWORD]@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
 
-host:
-    aws-0-eu-west-3.pooler.supabase.com
+    host: aws-0-eu-west-3.pooler.supabase.com
 
-port:
-    5432
+    port: 5432
 
-database:
-    postgres
+    database: postgres
 
-user:
-    postgres
+    user: postgres
 

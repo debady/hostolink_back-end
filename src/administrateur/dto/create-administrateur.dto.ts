@@ -10,7 +10,7 @@ export class CreateAdministrateurDto {
   telephone: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(4)
   @IsNotEmpty()
   mot_de_passe: string;
 

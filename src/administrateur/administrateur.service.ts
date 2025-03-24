@@ -32,8 +32,8 @@ export class AdministrateurService {
     });
     if (existant) throw new ConflictException('Email ou téléphone déjà utilisé.');
 
-    if (!dto.mot_de_passe || dto.mot_de_passe.length < 6) {
-      throw new BadRequestException('Le mot de passe doit contenir au moins 6 caractères.');
+    if (!dto.mot_de_passe || dto.mot_de_passe.length < 4) {
+      throw new BadRequestException('Le mot de passe doit contenir au moins 4caractères.');
     }
 
     const salt = await bcrypt.genSalt();
@@ -128,7 +128,6 @@ export class AdministrateurService {
       avatar_url: avatar ? avatar.url_image : null,
     };
 
-    return admin;
   }
 
   // ✅ Ajout méthode uploadAvatarAdmin
@@ -137,7 +136,7 @@ export class AdministrateurService {
     if (!admin) throw new NotFoundException('Administrateur non trouvé.');
   
     const uploadResult = await this.cloudinaryProvider.uploader.upload(avatar.path, {
-      folder: 'avatars_admin',
+      folder: 'dossier_hostolink_preset/avatars_admin',
       public_id: `admin_${id}_${Date.now()}`,
       overwrite: true,
     });

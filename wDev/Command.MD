@@ -1,20 +1,22 @@
 #                        COMMANDE A EXECUTER DANS LES TERMINALES
 
 CONNEXION A LA BD SUPABASE
-    psql "postgresql://postgres.skwupmsitzsxukbmnkwv:mdp_dev_sohapigroup@aws-0-eu-west-3.pooler.supabase.com:5432/postgres?sslmode=require"
+    (a revoir)
 
-Exporter  
+Exporter bd locale 
     pg_dump -U postgres -d hostolink_bd -F p -f "C:\Users\NGUESSAN.DESKTOP-38E6PIP\Desktop\SohapiGroup\hostolink_back-end\base_donnees\hostolink_bd.sql"
     
-Importer 
+Importer locale
     psql -U postgres -d hostolink_bd -f "C:\Users\NGUESSAN.DESKTOP-38E6PIP\Desktop\SohapiGroup\hostolink_back-end\base_donnees\hostolink-dev1.sql"
 
-EXPORTER LA BD
-    pg_dump -U postgres hostolink_bd > C:/Users/NGUESSAN.DESKTOP-38E6PIP/Desktop/SohapiGroup/hostolink_back-end/bd/hostolink_bd.sql
 
 UPLO9ADER UNE IMAGE SUR CLOUDINARY
 
-    curl -X POST "https://api.cloudinary.com/v1_1/dhrrk7vsd/image/upload" -F "file=@C:\Users\NGUESSAN.DESKTOP-38E6PIP\Desktop\SohapiGroup\hostolink_back-end\src\images\imgtes.PNG" -F "upload_preset=hostolink_preset"
+    curl -X POST "https://api.cloudinary.com/v1_1/dhrrk7vsd/image/upload" -F "file=@C:\Users\NGUESSAN.DESKTOP-38E6PIP\Desktop\SohapiGroup\hostolink_back-end\wDev\prompt.md" -F "upload_preset=hostolink_preset"
+
+    images grouper 
+        https://collection.cloudinary.com/dhrrk7vsd/387f34fb0827d86134e0d6d720f22e23
+    
 
 INSTALLER DEPENDANCE CLOUDINARY
     npm install @nestjs/platform-express multer multer-storage-cloudinary cloudinary uuid
@@ -23,8 +25,7 @@ INSTALLATION CERTIFICAT SUPABASE
     curl -o supabase-ca.pem https://curl.se/ca/cacert.pem
 
 VERIF TABLE DE LA BD supabase
-    curl -X GET "https://skwupmsitzsxukbmnkwv.supabase.co/rest/v1/" \
-  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68"
+    (a faire)
 
 TEST API supabase
     curl -X GET "https://skwupmsitzsxukbmnkwv.supabase.co/rest/v1/" -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrd3VwbXNpdHpzeHVrYm1ua3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDQ1NzksImV4cCI6MjA1NjU4MDU3OX0.6WDc8hTaer5058Q5RZv4jAdGeJqTwyiLKtnVyXf_a68"
@@ -95,30 +96,7 @@ TELECHARGER POSTGIS
             CREATE EXTENSION postgis_sfcgal; -- Pour la 3D
 
 
-*-  ------------------NOTE DE LA REVISION BD LOCALE---------------------*
-Clé primaire sur id_user dans utilisateur utilisateur_pkey référencées par d'autres tables
-
-    fk_compte_utilisateur (table compte)
-    fk_cartes_bancaires_utilisateur (table cartes_bancaires)
-    fk_code_verif_otp_utilisateur (table code_verif_otp)
-    fk_contacts_hostolink_utilisateur (table contacts_hostolink)
-    fk_contacts_hostolink_contact (table contacts_hostolink)
-    fk_notification_transaction_utilisateur (table notification_transaction)
-    fk_qr_code_paiement_utilisateur (table qr_code_paiement_dynamique)
-    fk_historique_transactions_utilisateur (table historique_transactions)
-    fk_cartes_qr_code_statique_utilisateur (table cartes_qr_code_statique)
-    fk_discussion_assistant_client_utilisateur (table discussion_assistant_client)
-    fk_message_assistant_client_utilisateur (table message_assistant_client)
-    fk_message_reseau_social_utilisateur (table message_reseau_social)
-    fk_partage_appli_utilisateur (table partage_appli)
-    fk_publication_utilisateur (table publication)
-    fk_reclamations_utilisateur (table reclamations)
-    fk_verification_kyc_utilisateur (table verification_kyc)
-    fk_cartes_physiques_utilisateur (table cartes_physiques)
-
-
-
-------------------------------- NOTE SECURITE ET CRYPTAGE --------------------
+------------------------- NOTE SECURITE ET CRYPTAGE --------------------
 
  
 # Notes importantes :
@@ -213,26 +191,86 @@ Foreign-key constraints:
     "fk_qr_code_paiement_statique_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
     "fk_qr_code_utilisateur" FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
 
-DECOMMIT UN FICHIER SUIVI PAR GIT
+DECOMMITER UN FICHIER SUIVI PAR GIT
     placer son nom dans .gitignore
     git rm --cached .env
     git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch .env' --prune-empty --tag-name-filter cat -- --all
     git push origin --force --all
 
+------------GOOGLE CLOUD ---------------
 
 VOIR L'ETAT DES CES PROJET GOOGLE CLOUD
     https://console.cloud.google.com/iam-admin/projects
 
 
+---- ENVOI SMS PAR https://account.africastalking.com/ ------
 
-    ---- https://account.africastalking.com/ ---
+    - atsk_9cb676c636c08f6cad76b4f83d16c7abc61ed8b542f3a7aa43ea08394b7d7444e736c91d 
+    - Mb4rrL17e
 
-    atsk_9cb676c636c08f6cad76b4f83d16c7abc61ed8b542f3a7aa43ea08394b7d7444e736c91d
-
-Mb4rrL17e
-
-
+-------------ENVOI SMS PAR https://dashboard.nexmo.com/ ------------
 
 COMMANDE TEST API https://dashboard.nexmo.com/ 
     curl -X POST "https://rest.nexmo.com/sms/json" -d "api_key=607d95e2" -d "api_secret=2yxhopCqAC9LSxYE" -d "to=+2250502556104" -d "from=Vonage" -d "text=Test OTP de HostoLink"
 >>>>>>> 5664c4a69108cd7b4a94b7ada3f9e88d0c32aefc
+
+
+
+------------- NOTE ENVOI OTP SMTP -------------
+    npm install nodemailer axios
+    npm install nodemailer
+    node test_email.js
+
+
+
+------------ NOTE NOTIFICATION PUSH FIREBASE ------------
+
+CREER UNE CLE PRIVE,TELECHARGER ,RENOME ,PLACER DANS 
+    /config
+    ajouter FIREBASE_CREDENTIALS=config/firebase-admin-sdk.json dans .env
+
+INSTALLER LA DEPENDANCE POUR ENVOI 
+    npm install firebase-admin
+
+CREER firebase.service.ts DANS config/ 
+    et ajouter son code
+    on ajouter son module dans app.module
+    lancer le server 
+
+------------------- SMS NOTE NONAGE --------------
+
+CREER SON COMPTE 
+VERIFIER PAR WHATSAPP 
+RECUP API CLE ET ID 
+INSTALLER LA DPCE 
+    npm install @vonage/server-sdk
+
+AJOUTER CES VR DS l'ENVIRON 
+
+
+
+----------------------------- SQL SUPABASE -----------------
+
+VOIR TOUTES LES LIAISONS DES TABLES 
+    SELECT 
+        tc.table_name AS table_name,
+        kcu.column_name AS column_name,
+        ccu.table_name AS foreign_table_name,
+        ccu.column_name AS foreign_column_name,
+        rc.update_rule AS on_update,
+        rc.delete_rule AS on_delete
+    FROM 
+        information_schema.table_constraints AS tc 
+    JOIN 
+        information_schema.key_column_usage AS kcu 
+        ON tc.constraint_name = kcu.constraint_name
+    JOIN 
+        information_schema.referential_constraints AS rc 
+        ON tc.constraint_name = rc.constraint_name
+    JOIN 
+        information_schema.constraint_column_usage AS ccu 
+        ON rc.unique_constraint_name = ccu.constraint_name
+    WHERE 
+        tc.constraint_type = 'FOREIGN KEY'
+    ORDER BY 
+        tc.table_name, kcu.column_name;

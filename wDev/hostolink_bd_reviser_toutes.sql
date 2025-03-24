@@ -32,20 +32,18 @@ COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types an
 
 
 --
--- Name: image_motif_enum; Type: TYPE; Schema: public; Owner: postgres
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
 --
 
-CREATE TYPE public.image_motif_enum AS ENUM (
-    'photo_profile',
-    'document_identiter_recto',
-    'document_identiter_verso',
-    'reseau_social',
-    'discussion_assistance',
-    'publicite'
-);
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 
-ALTER TYPE public.image_motif_enum OWNER TO postgres;
+--
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
 
 --
 -- Name: moyen_envoi_enum; Type: TYPE; Schema: public; Owner: postgres
@@ -58,19 +56,6 @@ CREATE TYPE public.moyen_envoi_enum AS ENUM (
 
 
 ALTER TYPE public.moyen_envoi_enum OWNER TO postgres;
-
---
--- Name: role_admin_enum; Type: TYPE; Schema: public; Owner: postgres
---
-
-CREATE TYPE public.role_admin_enum AS ENUM (
-    'super_admin',
-    'moderateur',
-    'support_technique'
-);
-
-
-ALTER TYPE public.role_admin_enum OWNER TO postgres;
 
 --
 -- Name: type_etablissement_enum; Type: TYPE; Schema: public; Owner: postgres
@@ -114,13 +99,13 @@ CREATE TABLE public.administrateurs (
     email character varying(255) NOT NULL,
     telephone character varying(20) NOT NULL,
     mot_de_passe character varying(255) NOT NULL,
-    photo_profil character varying(255),
-    role public.role_admin_enum NOT NULL,
+    role character varying(50) NOT NULL,
     permissions jsonb DEFAULT '{}'::jsonb,
     statut character varying(20) DEFAULT 'actif'::character varying,
     dernier_connexion timestamp without time zone,
     date_creation timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    date_modification timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    date_modification timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    compte_verifier character varying(255) DEFAULT false
 );
 
 
@@ -350,43 +335,6 @@ ALTER SEQUENCE public.cartes_physiques_id_commande_seq OWNED BY public.cartes_ph
 
 
 --
--- Name: cartes_qr_code_dynamique; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.cartes_qr_code_dynamique (
-    id_carte_qr integer NOT NULL,
-    id_utilisateur integer NOT NULL,
-    qr_code_unique text NOT NULL,
-    date_creation timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    statut character varying(20) DEFAULT 'actif'::character varying
-);
-
-
-ALTER TABLE public.cartes_qr_code_dynamique OWNER TO postgres;
-
---
--- Name: cartes_qr_code_id_carte_qr_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.cartes_qr_code_id_carte_qr_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.cartes_qr_code_id_carte_qr_seq OWNER TO postgres;
-
---
--- Name: cartes_qr_code_id_carte_qr_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.cartes_qr_code_id_carte_qr_seq OWNED BY public.cartes_qr_code_dynamique.id_carte_qr;
-
-
---
 -- Name: cartes_qr_code_statique; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -430,16 +378,38 @@ ALTER SEQUENCE public.cartes_qr_code_statique_id_carte_qr_statique_seq OWNED BY 
 
 CREATE TABLE public.code_verif_otp (
     id integer NOT NULL,
-    user_id integer NOT NULL,
     otp_code character varying(6) NOT NULL,
     expires_at timestamp without time zone NOT NULL,
     is_valid boolean DEFAULT true NOT NULL,
     moyen_envoyer public.moyen_envoi_enum NOT NULL,
-    id_user uuid
+    id_user uuid,
+    id_user_etablissement_sante integer,
+    CONSTRAINT check_id_user_or_etablissement CHECK ((((id_user IS NOT NULL) AND (id_user_etablissement_sante IS NULL)) OR ((id_user IS NULL) AND (id_user_etablissement_sante IS NOT NULL))))
 );
 
 
 ALTER TABLE public.code_verif_otp OWNER TO postgres;
+
+--
+-- Name: code_verif_otp_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.code_verif_otp_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.code_verif_otp_id_seq OWNER TO postgres;
+
+--
+-- Name: code_verif_otp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.code_verif_otp_id_seq OWNED BY public.code_verif_otp.id;
+
 
 --
 -- Name: commentaire; Type: TABLE; Schema: public; Owner: postgres
@@ -468,14 +438,14 @@ CREATE TABLE public.compte (
     plafond integer DEFAULT 100000,
     mode_paiement_preferentiel character varying(50),
     type_user character varying(20) NOT NULL,
-    devise character varying(10) NOT NULL,
+    devise character varying(10) DEFAULT 'XOF'::character varying NOT NULL,
     numero_compte character varying(50),
     date_creation_compte timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     date_modification timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     statut character varying(20) DEFAULT 'actif'::character varying,
-    id_user_etablissement_sante integer,
     id_user uuid,
-    CONSTRAINT compte_type_user_check CHECK (((type_user)::text = ANY ((ARRAY['utilisateur'::character varying, 'etablissement'::character varying])::text[])))
+    id_user_etablissement_sante integer,
+    CONSTRAINT compte_type_user_check CHECK (((type_user)::text = ANY (ARRAY[('utilisateur'::character varying)::text, ('etablissement'::character varying)::text])))
 );
 
 
@@ -587,6 +557,46 @@ ALTER SEQUENCE public.discussion_assistant_client_id_discussion_seq OWNED BY pub
 
 
 --
+-- Name: expert_sante; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.expert_sante (
+    id_expert integer NOT NULL,
+    id_user_etablissement_sante integer NOT NULL,
+    nom character varying(100),
+    prenom character varying(100),
+    domaine_expertise character varying(255),
+    identifiant character(6) NOT NULL,
+    mot_de_passe text NOT NULL,
+    url_profile text
+);
+
+
+ALTER TABLE public.expert_sante OWNER TO postgres;
+
+--
+-- Name: expert_sante_id_expert_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.expert_sante_id_expert_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.expert_sante_id_expert_seq OWNER TO postgres;
+
+--
+-- Name: expert_sante_id_expert_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.expert_sante_id_expert_seq OWNED BY public.expert_sante.id_expert;
+
+
+--
 -- Name: historique_transactions; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -631,12 +641,13 @@ ALTER SEQUENCE public.historique_transactions_id_historique_seq OWNED BY public.
 
 CREATE TABLE public.images (
     id_image uuid DEFAULT gen_random_uuid() NOT NULL,
-    id_user integer NOT NULL,
     date timestamp without time zone DEFAULT now() NOT NULL,
     url_image character varying NOT NULL,
-    motif public.image_motif_enum NOT NULL,
+    motif character varying(50) NOT NULL,
     type_user character varying(50),
-    id_user_etablissement_sante integer
+    id_user uuid,
+    id_user_etablissement_sante integer,
+    id_admin_gestionnaire integer
 );
 
 
@@ -695,7 +706,8 @@ CREATE TABLE public.liste_numero_vert_etablissement_sante (
     latitude double precision NOT NULL,
     longitude double precision NOT NULL,
     type_etablissement public.type_etablissement_enum NOT NULL,
-    site_web character varying(255)
+    site_web character varying(255),
+    categorie character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -768,29 +780,31 @@ ALTER SEQUENCE public.message_assistant_client_id_message_seq OWNED BY public.me
 
 
 --
--- Name: message_reseau_social; Type: TABLE; Schema: public; Owner: postgres
+-- Name: messages_thematique; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.message_reseau_social (
+CREATE TABLE public.messages_thematique (
     id_message integer NOT NULL,
-    id_thematique integer NOT NULL,
-    type_user character varying(50),
-    contenu_message text NOT NULL,
-    url_image character varying(255),
-    nbre_like integer DEFAULT 0,
+    id_thematique_discussion integer NOT NULL,
+    id_expediteur uuid NOT NULL,
+    contenu text NOT NULL,
+    type_message character varying(20) NOT NULL,
+    date_envoi timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    est_lu boolean DEFAULT false,
+    url_image text,
+    nbre_like integer,
     status_reponse boolean DEFAULT false,
-    date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    id_user uuid
+    CONSTRAINT messages_thematique_type_message_check CHECK (((type_message)::text = ANY (ARRAY[('texte'::character varying)::text, ('image'::character varying)::text])))
 );
 
 
-ALTER TABLE public.message_reseau_social OWNER TO postgres;
+ALTER TABLE public.messages_thematique OWNER TO postgres;
 
 --
--- Name: message_reseau_social_id_message_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: messages_thematique_id_message_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.message_reseau_social_id_message_seq
+CREATE SEQUENCE public.messages_thematique_id_message_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -799,13 +813,13 @@ CREATE SEQUENCE public.message_reseau_social_id_message_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.message_reseau_social_id_message_seq OWNER TO postgres;
+ALTER SEQUENCE public.messages_thematique_id_message_seq OWNER TO postgres;
 
 --
--- Name: message_reseau_social_id_message_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: messages_thematique_id_message_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.message_reseau_social_id_message_seq OWNED BY public.message_reseau_social.id_message;
+ALTER SEQUENCE public.messages_thematique_id_message_seq OWNED BY public.messages_thematique.id_message;
 
 
 --
@@ -889,46 +903,6 @@ CREATE TABLE public.partage (
 ALTER TABLE public.partage OWNER TO postgres;
 
 --
--- Name: partage_appli; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.partage_appli (
-    id_partage_appli integer NOT NULL,
-    lien_partage character varying(255) NOT NULL,
-    plateforme_partage character varying(50) NOT NULL,
-    nombre_clics integer DEFAULT 0,
-    bonus_recu integer DEFAULT 0,
-    date_partage timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    id_user uuid,
-    CONSTRAINT partage_appli_plateforme_partage_check CHECK (((plateforme_partage)::text = ANY ((ARRAY['whatsapp'::character varying, 'facebook'::character varying, 'twitter'::character varying, 'instagram'::character varying, 'autre'::character varying])::text[])))
-);
-
-
-ALTER TABLE public.partage_appli OWNER TO postgres;
-
---
--- Name: partage_appli_id_partage_appli_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.partage_appli_id_partage_appli_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.partage_appli_id_partage_appli_seq OWNER TO postgres;
-
---
--- Name: partage_appli_id_partage_appli_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.partage_appli_id_partage_appli_seq OWNED BY public.partage_appli.id_partage_appli;
-
-
---
 -- Name: publication; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -971,19 +945,13 @@ ALTER TABLE public.publicite OWNER TO postgres;
 
 CREATE TABLE public.qr_code_paiement_dynamique (
     id_qrcode integer NOT NULL,
-    id_utilisateur integer NOT NULL,
-    qr_code_valeur text NOT NULL,
+    qr_code_valeur text,
     date_creation timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     date_expiration timestamp without time zone NOT NULL,
     statut character varying(20) DEFAULT 'actif'::character varying,
-    token_securite character varying(64) DEFAULT NULL::character varying,
-    type_qrcode character varying(10) DEFAULT 'dynamique'::character varying NOT NULL,
-    historique boolean DEFAULT false,
-    transaction_id integer,
-    utilise boolean DEFAULT false,
+    token character varying(1000) DEFAULT NULL::character varying,
     id_user_etablissement_sante integer,
-    id_user uuid,
-    CONSTRAINT qr_code_paiement_dynamique_type_qrcode_check CHECK (((type_qrcode)::text = ANY ((ARRAY['statique'::character varying, 'dynamique'::character varying])::text[])))
+    id_user uuid
 );
 
 
@@ -1017,11 +985,13 @@ ALTER SEQUENCE public.qr_code_paiement_id_qrcode_seq OWNED BY public.qr_code_pai
 
 CREATE TABLE public.qr_code_paiement_statique (
     id_qrcode integer NOT NULL,
-    id_utilisateur integer NOT NULL,
-    qr_code_data text NOT NULL,
+    qr_code_data text,
     date_creation timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     statut character varying(20) DEFAULT 'actif'::character varying,
-    id_user_etablissement_sante integer NOT NULL
+    id_user_etablissement_sante integer,
+    id_user uuid,
+    date_expiration timestamp without time zone,
+    token character varying(1000)
 );
 
 
@@ -1311,7 +1281,6 @@ ALTER SEQUENCE public.transactions_frais_id_frais_seq OWNED BY public.transactio
 
 CREATE TABLE public.user_etablissement_sante (
     id_user_etablissement_sante integer NOT NULL,
-    id_admin_gestionnaire integer NOT NULL,
     nom character varying(255),
     telephone character varying(20),
     categorie character varying(100),
@@ -1319,7 +1288,10 @@ CREATE TABLE public.user_etablissement_sante (
     creat_at timestamp without time zone DEFAULT now(),
     latitude double precision,
     longitude double precision,
-    geom public.geometry(Point,4326)
+    geom public.geometry(Point,4326),
+    specialites character varying,
+    email character varying(255) DEFAULT NULL::character varying,
+    mot_de_passe text
 );
 
 
@@ -1353,7 +1325,6 @@ ALTER SEQUENCE public.user_etablissement_sante_id_user_etablissement_sante_seq O
 
 CREATE TABLE public.utilisateur (
     date_inscription timestamp without time zone DEFAULT now() NOT NULL,
-    code_confirmation character varying(10),
     "position" public.geometry(Point,4326),
     email character varying(255),
     telephone character varying(20),
@@ -1361,9 +1332,12 @@ CREATE TABLE public.utilisateur (
     nom character varying(255),
     prenom character varying(255),
     pays character varying(100),
-    photo_profile character varying(255),
-    raison_banni text,
-    id_user uuid DEFAULT gen_random_uuid() NOT NULL
+    raison_banni text DEFAULT 'R.A.S'::text,
+    id_user uuid DEFAULT gen_random_uuid() NOT NULL,
+    compte_verifier boolean DEFAULT false,
+    dernier_otp_envoye timestamp without time zone,
+    actif boolean DEFAULT true,
+    fcm_token character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1455,17 +1429,17 @@ ALTER TABLE ONLY public.cartes_physiques ALTER COLUMN id_commande SET DEFAULT ne
 
 
 --
--- Name: cartes_qr_code_dynamique id_carte_qr; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.cartes_qr_code_dynamique ALTER COLUMN id_carte_qr SET DEFAULT nextval('public.cartes_qr_code_id_carte_qr_seq'::regclass);
-
-
---
 -- Name: cartes_qr_code_statique id_carte_qr_statique; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.cartes_qr_code_statique ALTER COLUMN id_carte_qr_statique SET DEFAULT nextval('public.cartes_qr_code_statique_id_carte_qr_statique_seq'::regclass);
+
+
+--
+-- Name: code_verif_otp id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.code_verif_otp ALTER COLUMN id SET DEFAULT nextval('public.code_verif_otp_id_seq'::regclass);
 
 
 --
@@ -1487,6 +1461,13 @@ ALTER TABLE ONLY public.contacts_hostolink ALTER COLUMN id_contact SET DEFAULT n
 --
 
 ALTER TABLE ONLY public.discussion_assistant_client ALTER COLUMN id_discussion SET DEFAULT nextval('public.discussion_assistant_client_id_discussion_seq'::regclass);
+
+
+--
+-- Name: expert_sante id_expert; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.expert_sante ALTER COLUMN id_expert SET DEFAULT nextval('public.expert_sante_id_expert_seq'::regclass);
 
 
 --
@@ -1518,10 +1499,10 @@ ALTER TABLE ONLY public.message_assistant_client ALTER COLUMN id_message SET DEF
 
 
 --
--- Name: message_reseau_social id_message; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: messages_thematique id_message; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.message_reseau_social ALTER COLUMN id_message SET DEFAULT nextval('public.message_reseau_social_id_message_seq'::regclass);
+ALTER TABLE ONLY public.messages_thematique ALTER COLUMN id_message SET DEFAULT nextval('public.messages_thematique_id_message_seq'::regclass);
 
 
 --
@@ -1529,13 +1510,6 @@ ALTER TABLE ONLY public.message_reseau_social ALTER COLUMN id_message SET DEFAUL
 --
 
 ALTER TABLE ONLY public.notification_broadcast ALTER COLUMN id_notification_broadcast SET DEFAULT nextval('public.notification_broadcast_id_notification_broadcast_seq'::regclass);
-
-
---
--- Name: partage_appli id_partage_appli; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.partage_appli ALTER COLUMN id_partage_appli SET DEFAULT nextval('public.partage_appli_id_partage_appli_seq'::regclass);
 
 
 --
@@ -1612,7 +1586,7 @@ ALTER TABLE ONLY public.verification_kyc ALTER COLUMN id_kyc SET DEFAULT nextval
 -- Data for Name: administrateurs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.administrateurs (id_admin_gestionnaire, email, telephone, mot_de_passe, photo_profil, role, permissions, statut, dernier_connexion, date_creation, date_modification) FROM stdin;
+COPY public.administrateurs (id_admin_gestionnaire, email, telephone, mot_de_passe, role, permissions, statut, dernier_connexion, date_creation, date_modification, compte_verifier) FROM stdin;
 \.
 
 
@@ -1657,14 +1631,6 @@ COPY public.cartes_physiques (id_commande, id_utilisateur, id_carte_bancaire, ad
 
 
 --
--- Data for Name: cartes_qr_code_dynamique; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.cartes_qr_code_dynamique (id_carte_qr, id_utilisateur, qr_code_unique, date_creation, statut) FROM stdin;
-\.
-
-
---
 -- Data for Name: cartes_qr_code_statique; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1676,7 +1642,7 @@ COPY public.cartes_qr_code_statique (id_carte_qr_statique, id_utilisateur, qr_co
 -- Data for Name: code_verif_otp; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.code_verif_otp (id, user_id, otp_code, expires_at, is_valid, moyen_envoyer, id_user) FROM stdin;
+COPY public.code_verif_otp (id, otp_code, expires_at, is_valid, moyen_envoyer, id_user, id_user_etablissement_sante) FROM stdin;
 \.
 
 
@@ -1692,7 +1658,7 @@ COPY public.commentaire (id_commentaire, id_publication, id_user, contenu, date_
 -- Data for Name: compte; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.compte (id_compte, solde_compte, solde_bonus, cumule_mensuel, plafond, mode_paiement_preferentiel, type_user, devise, numero_compte, date_creation_compte, date_modification, statut, id_user_etablissement_sante, id_user) FROM stdin;
+COPY public.compte (id_compte, solde_compte, solde_bonus, cumule_mensuel, plafond, mode_paiement_preferentiel, type_user, devise, numero_compte, date_creation_compte, date_modification, statut, id_user, id_user_etablissement_sante) FROM stdin;
 \.
 
 
@@ -1713,6 +1679,14 @@ COPY public.discussion_assistant_client (id_discussion, id_agent_assistance, id_
 
 
 --
+-- Data for Name: expert_sante; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.expert_sante (id_expert, id_user_etablissement_sante, nom, prenom, domaine_expertise, identifiant, mot_de_passe, url_profile) FROM stdin;
+\.
+
+
+--
 -- Data for Name: historique_transactions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1724,7 +1698,7 @@ COPY public.historique_transactions (id_historique, id_transaction, ancien_statu
 -- Data for Name: images; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.images (id_image, id_user, date, url_image, motif, type_user, id_user_etablissement_sante) FROM stdin;
+COPY public.images (id_image, date, url_image, motif, type_user, id_user, id_user_etablissement_sante, id_admin_gestionnaire) FROM stdin;
 \.
 
 
@@ -1740,7 +1714,7 @@ COPY public.journal_activites (id_activite, id_user, id_admin_gestionnaire, acti
 -- Data for Name: liste_numero_vert_etablissement_sante; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.liste_numero_vert_etablissement_sante (id_liste_num_etablissement_sante, id_admin_gestionnaire, nom_etablissement, contact, image, presentation, adresse, latitude, longitude, type_etablissement, site_web) FROM stdin;
+COPY public.liste_numero_vert_etablissement_sante (id_liste_num_etablissement_sante, id_admin_gestionnaire, nom_etablissement, contact, image, presentation, adresse, latitude, longitude, type_etablissement, site_web, categorie) FROM stdin;
 \.
 
 
@@ -1753,10 +1727,10 @@ COPY public.message_assistant_client (id_message, id_discussion, expediteur, id_
 
 
 --
--- Data for Name: message_reseau_social; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: messages_thematique; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.message_reseau_social (id_message, id_thematique, type_user, contenu_message, url_image, nbre_like, status_reponse, date, id_user) FROM stdin;
+COPY public.messages_thematique (id_message, id_thematique_discussion, id_expediteur, contenu, type_message, date_envoi, est_lu, url_image, nbre_like, status_reponse) FROM stdin;
 \.
 
 
@@ -1785,14 +1759,6 @@ COPY public.partage (id_partage, id_publication, id_user, date_partage, lien_par
 
 
 --
--- Data for Name: partage_appli; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.partage_appli (id_partage_appli, lien_partage, plateforme_partage, nombre_clics, bonus_recu, date_partage, id_user) FROM stdin;
-\.
-
-
---
 -- Data for Name: publication; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1812,7 +1778,7 @@ COPY public.publicite (id_pub, id_admin_gestionnaire, titre, descript_pub, url_i
 -- Data for Name: qr_code_paiement_dynamique; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.qr_code_paiement_dynamique (id_qrcode, id_utilisateur, qr_code_valeur, date_creation, date_expiration, statut, token_securite, type_qrcode, historique, transaction_id, utilise, id_user_etablissement_sante, id_user) FROM stdin;
+COPY public.qr_code_paiement_dynamique (id_qrcode, qr_code_valeur, date_creation, date_expiration, statut, token, id_user_etablissement_sante, id_user) FROM stdin;
 \.
 
 
@@ -1820,7 +1786,7 @@ COPY public.qr_code_paiement_dynamique (id_qrcode, id_utilisateur, qr_code_valeu
 -- Data for Name: qr_code_paiement_statique; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.qr_code_paiement_statique (id_qrcode, id_utilisateur, qr_code_data, date_creation, statut, id_user_etablissement_sante) FROM stdin;
+COPY public.qr_code_paiement_statique (id_qrcode, qr_code_data, date_creation, statut, id_user_etablissement_sante, id_user, date_expiration, token) FROM stdin;
 \.
 
 
@@ -1884,7 +1850,7 @@ COPY public.transactions_frais (id_frais, id_transaction, montant_frais, type_tr
 -- Data for Name: user_etablissement_sante; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.user_etablissement_sante (id_user_etablissement_sante, id_admin_gestionnaire, nom, telephone, categorie, adresse, creat_at, latitude, longitude, geom) FROM stdin;
+COPY public.user_etablissement_sante (id_user_etablissement_sante, nom, telephone, categorie, adresse, creat_at, latitude, longitude, geom, specialites, email, mot_de_passe) FROM stdin;
 \.
 
 
@@ -1892,7 +1858,7 @@ COPY public.user_etablissement_sante (id_user_etablissement_sante, id_admin_gest
 -- Data for Name: utilisateur; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.utilisateur (date_inscription, code_confirmation, "position", email, telephone, mdp, nom, prenom, pays, photo_profile, raison_banni, id_user) FROM stdin;
+COPY public.utilisateur (date_inscription, "position", email, telephone, mdp, nom, prenom, pays, raison_banni, id_user, compte_verifier, dernier_otp_envoye, actif, fcm_token) FROM stdin;
 \.
 
 
@@ -1908,7 +1874,7 @@ COPY public.verification_kyc (id_kyc, id_utilisateur, type_document, url_documen
 -- Name: administrateurs_id_admin_gestionnaire_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.administrateurs_id_admin_gestionnaire_seq', 1, false);
+SELECT pg_catalog.setval('public.administrateurs_id_admin_gestionnaire_seq', 45, true);
 
 
 --
@@ -1947,17 +1913,17 @@ SELECT pg_catalog.setval('public.cartes_physiques_id_commande_seq', 1, false);
 
 
 --
--- Name: cartes_qr_code_id_carte_qr_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.cartes_qr_code_id_carte_qr_seq', 1, false);
-
-
---
 -- Name: cartes_qr_code_statique_id_carte_qr_statique_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.cartes_qr_code_statique_id_carte_qr_statique_seq', 1, false);
+
+
+--
+-- Name: code_verif_otp_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.code_verif_otp_id_seq', 71, true);
 
 
 --
@@ -1982,6 +1948,13 @@ SELECT pg_catalog.setval('public.discussion_assistant_client_id_discussion_seq',
 
 
 --
+-- Name: expert_sante_id_expert_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.expert_sante_id_expert_seq', 1, false);
+
+
+--
 -- Name: historique_transactions_id_historique_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -1999,7 +1972,7 @@ SELECT pg_catalog.setval('public.journal_activites_id_activite_seq', 1, false);
 -- Name: liste_numero_vert_etablisseme_id_liste_num_etablissement_sa_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.liste_numero_vert_etablisseme_id_liste_num_etablissement_sa_seq', 1, false);
+SELECT pg_catalog.setval('public.liste_numero_vert_etablisseme_id_liste_num_etablissement_sa_seq', 2, true);
 
 
 --
@@ -2010,10 +1983,10 @@ SELECT pg_catalog.setval('public.message_assistant_client_id_message_seq', 1, fa
 
 
 --
--- Name: message_reseau_social_id_message_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: messages_thematique_id_message_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.message_reseau_social_id_message_seq', 1, false);
+SELECT pg_catalog.setval('public.messages_thematique_id_message_seq', 1, false);
 
 
 --
@@ -2021,13 +1994,6 @@ SELECT pg_catalog.setval('public.message_reseau_social_id_message_seq', 1, false
 --
 
 SELECT pg_catalog.setval('public.notification_broadcast_id_notification_broadcast_seq', 1, false);
-
-
---
--- Name: partage_appli_id_partage_appli_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.partage_appli_id_partage_appli_seq', 1, false);
 
 
 --
@@ -2173,14 +2139,6 @@ ALTER TABLE ONLY public.cartes_physiques
 
 
 --
--- Name: cartes_qr_code_dynamique cartes_qr_code_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.cartes_qr_code_dynamique
-    ADD CONSTRAINT cartes_qr_code_pkey PRIMARY KEY (id_carte_qr);
-
-
---
 -- Name: cartes_qr_code_statique cartes_qr_code_statique_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2221,6 +2179,22 @@ ALTER TABLE ONLY public.discussion_assistant_client
 
 
 --
+-- Name: expert_sante expert_sante_identifiant_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.expert_sante
+    ADD CONSTRAINT expert_sante_identifiant_key UNIQUE (identifiant);
+
+
+--
+-- Name: expert_sante expert_sante_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.expert_sante
+    ADD CONSTRAINT expert_sante_pkey PRIMARY KEY (id_expert);
+
+
+--
 -- Name: historique_transactions historique_transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2253,11 +2227,11 @@ ALTER TABLE ONLY public.message_assistant_client
 
 
 --
--- Name: message_reseau_social message_reseau_social_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: messages_thematique messages_thematique_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.message_reseau_social
-    ADD CONSTRAINT message_reseau_social_pkey PRIMARY KEY (id_message);
+ALTER TABLE ONLY public.messages_thematique
+    ADD CONSTRAINT messages_thematique_pkey PRIMARY KEY (id_message);
 
 
 --
@@ -2266,14 +2240,6 @@ ALTER TABLE ONLY public.message_reseau_social
 
 ALTER TABLE ONLY public.notification_broadcast
     ADD CONSTRAINT notification_broadcast_pkey PRIMARY KEY (id_notification_broadcast);
-
-
---
--- Name: partage_appli partage_appli_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.partage_appli
-    ADD CONSTRAINT partage_appli_pkey PRIMARY KEY (id_partage_appli);
 
 
 --
@@ -2357,6 +2323,14 @@ ALTER TABLE ONLY public.transactions_frais
 
 
 --
+-- Name: user_etablissement_sante user_etablissement_sante_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_etablissement_sante
+    ADD CONSTRAINT user_etablissement_sante_email_key UNIQUE (email);
+
+
+--
 -- Name: user_etablissement_sante user_etablissement_sante_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2389,14 +2363,6 @@ ALTER TABLE ONLY public.annonce
 
 
 --
--- Name: cartes_bancaires fk_cartes_bancaires_compte; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.cartes_bancaires
-    ADD CONSTRAINT fk_cartes_bancaires_compte FOREIGN KEY (id_compte) REFERENCES public.compte(id_compte) ON DELETE CASCADE;
-
-
---
 -- Name: cartes_bancaires fk_cartes_bancaires_utilisateur; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2418,6 +2384,14 @@ ALTER TABLE ONLY public.cartes_physiques
 
 ALTER TABLE ONLY public.cartes_qr_code_statique
     ADD CONSTRAINT fk_cartes_qr_code_statique_utilisateur FOREIGN KEY (id_user) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE;
+
+
+--
+-- Name: code_verif_otp fk_code_verif_otp_user_etablissement; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.code_verif_otp
+    ADD CONSTRAINT fk_code_verif_otp_user_etablissement FOREIGN KEY (id_user_etablissement_sante) REFERENCES public.user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE;
 
 
 --
@@ -2477,6 +2451,14 @@ ALTER TABLE ONLY public.discussion_assistant_client
 
 
 --
+-- Name: expert_sante fk_expert_user_etablissement_sante; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.expert_sante
+    ADD CONSTRAINT fk_expert_user_etablissement_sante FOREIGN KEY (id_user_etablissement_sante) REFERENCES public.user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE;
+
+
+--
 -- Name: historique_transactions fk_historique_transactions_user_etablissement_sante; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2493,11 +2475,27 @@ ALTER TABLE ONLY public.historique_transactions
 
 
 --
+-- Name: images fk_images_administrateurs; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.images
+    ADD CONSTRAINT fk_images_administrateurs FOREIGN KEY (id_admin_gestionnaire) REFERENCES public.administrateurs(id_admin_gestionnaire) ON DELETE CASCADE;
+
+
+--
 -- Name: images fk_images_user_etablissement_sante; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.images
     ADD CONSTRAINT fk_images_user_etablissement_sante FOREIGN KEY (id_user_etablissement_sante) REFERENCES public.user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE;
+
+
+--
+-- Name: images fk_images_users; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.images
+    ADD CONSTRAINT fk_images_users FOREIGN KEY (id_user) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -2533,11 +2531,19 @@ ALTER TABLE ONLY public.message_assistant_client
 
 
 --
--- Name: message_reseau_social fk_message_reseau_social_utilisateur; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: messages_thematique fk_message_thematique; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.message_reseau_social
-    ADD CONSTRAINT fk_message_reseau_social_utilisateur FOREIGN KEY (id_user) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE;
+ALTER TABLE ONLY public.messages_thematique
+    ADD CONSTRAINT fk_message_thematique FOREIGN KEY (id_thematique_discussion) REFERENCES public.thematiques(id_thematique_discussion) ON DELETE CASCADE;
+
+
+--
+-- Name: messages_thematique fk_message_utilisateur; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.messages_thematique
+    ADD CONSTRAINT fk_message_utilisateur FOREIGN KEY (id_expediteur) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE;
 
 
 --
@@ -2570,14 +2576,6 @@ ALTER TABLE ONLY public.notification_transaction
 
 ALTER TABLE ONLY public.notification_transaction
     ADD CONSTRAINT fk_notification_transaction_utilisateur FOREIGN KEY (id_user) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE;
-
-
---
--- Name: partage_appli fk_partage_appli_utilisateur; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.partage_appli
-    ADD CONSTRAINT fk_partage_appli_utilisateur FOREIGN KEY (id_user) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE;
 
 
 --
@@ -2621,6 +2619,14 @@ ALTER TABLE ONLY public.publicite
 
 
 --
+-- Name: qr_code_paiement_dynamique fk_qr_code_dynamique_utilisateur; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.qr_code_paiement_dynamique
+    ADD CONSTRAINT fk_qr_code_dynamique_utilisateur FOREIGN KEY (id_user) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE;
+
+
+--
 -- Name: qr_code_paiement_dynamique fk_qr_code_paiement_dynamique_user_etablissement_sante; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2642,6 +2648,14 @@ ALTER TABLE ONLY public.qr_code_paiement_statique
 
 ALTER TABLE ONLY public.qr_code_paiement_dynamique
     ADD CONSTRAINT fk_qr_code_paiement_utilisateur FOREIGN KEY (id_user) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE;
+
+
+--
+-- Name: qr_code_paiement_statique fk_qr_code_utilisateur; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.qr_code_paiement_statique
+    ADD CONSTRAINT fk_qr_code_utilisateur FOREIGN KEY (id_user) REFERENCES public.utilisateur(id_user) ON DELETE CASCADE;
 
 
 --
@@ -2677,14 +2691,6 @@ ALTER TABLE ONLY public.thematiques
 
 
 --
--- Name: transaction_externe fk_transaction_externe_compte; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.transaction_externe
-    ADD CONSTRAINT fk_transaction_externe_compte FOREIGN KEY (id_compte) REFERENCES public.compte(id_compte) ON DELETE CASCADE;
-
-
---
 -- Name: transaction_externe fk_transaction_externe_moyen_paiement; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2698,22 +2704,6 @@ ALTER TABLE ONLY public.transaction_externe
 
 ALTER TABLE ONLY public.transaction_externe
     ADD CONSTRAINT fk_transaction_externe_transactions_frais FOREIGN KEY (id_transaction) REFERENCES public.transactions_frais(id_transaction) ON DELETE CASCADE;
-
-
---
--- Name: transaction_interne fk_transaction_interne_expediteur; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.transaction_interne
-    ADD CONSTRAINT fk_transaction_interne_expediteur FOREIGN KEY (id_compte_expediteur) REFERENCES public.compte(id_compte) ON DELETE CASCADE;
-
-
---
--- Name: transaction_interne fk_transaction_interne_recepteur; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.transaction_interne
-    ADD CONSTRAINT fk_transaction_interne_recepteur FOREIGN KEY (id_compte_recepteur) REFERENCES public.compte(id_compte) ON DELETE CASCADE;
 
 
 --
