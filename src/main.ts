@@ -6,6 +6,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';  
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 async function bootstrap() {
   try {

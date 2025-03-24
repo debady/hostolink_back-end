@@ -104,7 +104,8 @@ CREATE TABLE public.administrateurs (
     statut character varying(20) DEFAULT 'actif'::character varying,
     dernier_connexion timestamp without time zone,
     date_creation timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    date_modification timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    date_modification timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    compte_verifier character varying(255) DEFAULT false
 );
 
 
@@ -471,18 +472,19 @@ CREATE TABLE public.compte (
     solde_compte integer DEFAULT 0,
     solde_bonus integer DEFAULT 0,
     cumule_mensuel integer DEFAULT 0,
-    plafond integer DEFAULT 100000,
+    plafond integer DEFAULT 1000000,
     mode_paiement_preferentiel character varying(50),
     type_user character varying(20) NOT NULL,
-    devise character varying(10) NOT NULL,
+    devise character varying(10) DEFAULT 'XOF'::character varying NOT NULL,
     numero_compte character varying(50),
     date_creation_compte timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     date_modification timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     statut character varying(20) DEFAULT 'actif'::character varying,
-    id_user_etablissement_sante integer,
     id_user uuid,
-    CONSTRAINT compte_type_user_check CHECK (((type_user)::text = ANY ((ARRAY['utilisateur'::character varying, 'etablissement'::character varying])::text[])))
+    id_user_etablissement_sante integer,
+    CONSTRAINT compte_type_user_check CHECK (((type_user)::text = ANY (ARRAY[('utilisateur'::character varying)::text, ('etablissement'::character varying)::text])))
 );
+
 
 
 ALTER TABLE public.compte OWNER TO postgres;
@@ -978,19 +980,13 @@ ALTER TABLE public.publicite OWNER TO postgres;
 
 CREATE TABLE public.qr_code_paiement_dynamique (
     id_qrcode integer NOT NULL,
-    id_utilisateur integer NOT NULL,
-    qr_code_valeur text NOT NULL,
+    qr_code_valeur text,
     date_creation timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     date_expiration timestamp without time zone NOT NULL,
     statut character varying(20) DEFAULT 'actif'::character varying,
-    token_securite character varying(64) DEFAULT NULL::character varying,
-    type_qrcode character varying(10) DEFAULT 'dynamique'::character varying NOT NULL,
-    historique boolean DEFAULT false,
-    transaction_id integer,
-    utilise boolean DEFAULT false,
+    token character varying(1000) DEFAULT NULL::character varying,
     id_user_etablissement_sante integer,
-    id_user uuid,
-    CONSTRAINT qr_code_paiement_dynamique_type_qrcode_check CHECK (((type_qrcode)::text = ANY ((ARRAY['statique'::character varying, 'dynamique'::character varying])::text[])))
+    id_user uuid
 );
 
 
@@ -1024,13 +1020,14 @@ ALTER SEQUENCE public.qr_code_paiement_id_qrcode_seq OWNED BY public.qr_code_pai
 
 CREATE TABLE public.qr_code_paiement_statique (
     id_qrcode integer NOT NULL,
-    id_utilisateur integer NOT NULL,
-    qr_code_data text NOT NULL,
+    qr_code_data text,
     date_creation timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     statut character varying(20) DEFAULT 'actif'::character varying,
-    id_user_etablissement_sante integer NOT NULL
+    id_user_etablissement_sante integer,
+    id_user uuid,
+    date_expiration timestamp without time zone,
+    token character varying(1000)
 );
-
 
 ALTER TABLE public.qr_code_paiement_statique OWNER TO postgres;
 
@@ -1629,27 +1626,29 @@ ALTER TABLE ONLY public.verification_kyc ALTER COLUMN id_kyc SET DEFAULT nextval
 -- Data for Name: administrateurs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.administrateurs (id_admin_gestionnaire, email, telephone, mot_de_passe, role, permissions, statut, dernier_connexion, date_creation, date_modification) FROM stdin;
-27	geoloc1@hostolink.com	+2250101010105	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-28	assistant2@hostolink.com	+2250101010106	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-29	gestionappel2@hostolink.com	+2250101010107	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-31	assistant3@hostolink.com	+2250101010109	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-32	gestionappel3@hostolink.com	+2250101010110	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-33	geoloc3@hostolink.com	+2250101010111	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-34	assistant4@hostolink.com	+2250101010112	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-35	gestionappel4@hostolink.com	+2250101010113	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-36	geoloc4@hostolink.com	+2250101010114	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-37	assistant5@hostolink.com	+2250101010115	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-38	gestionappel5@hostolink.com	+2250101010116	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-39	geoloc5@hostolink.com	+2250101010117	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-40	assistant6@hostolink.com	+2250101010118	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-41	gestionappel6@hostolink.com	+2250101010119	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-43	superadmin001@gmail.com	+2250544704854	$2b$10$N0v0fWv07JdBNyR1wrhGG..hUfkSBjEPXkFVBWiDiMlB6tLc3pLrm	super_admin	{}	actif	\N	2025-03-19 20:08:24.29358	2025-03-19 20:08:24.29358
-42	geoloc6@hostolink.com	+2250101010120	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	inactif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287
-23	superadmin1@hostolink.com	+2250102030450	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	super_admin	{}	gggg	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 20:15:38.407
-24	superadmin2@hostolink.com	+2250101010102	$2b$10$xeTv.URnbYqhsQax47xp/OQUZdXhIG96PvVHwKeaCWV4S4jJGXlju	super_admin	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 21:03:32.758
-25	assistant1@hostolink.com	+2250101010103	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{"acces_stats": true, "gerer_utilisateurs": true, "supprimer_publications": false}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 21:10:32.746
-26	gestionappel1@hostolink.com	+2250101010104	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{"acces_stats": true, "gerer_utilisateurs": true, "supprimer_publications": false}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 21:11:58.54
+COPY public.administrateurs (id_admin_gestionnaire, email, telephone, mot_de_passe, role, permissions, statut, dernier_connexion, date_creation, date_modification, compte_verifier) FROM stdin;
+27	geoloc1@hostolink.com	+2250101010105	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+28	assistant2@hostolink.com	+2250101010106	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+29	gestionappel2@hostolink.com	+2250101010107	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+31	assistant3@hostolink.com	+2250101010109	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+32	gestionappel3@hostolink.com	+2250101010110	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+33	geoloc3@hostolink.com	+2250101010111	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+34	assistant4@hostolink.com	+2250101010112	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+35	gestionappel4@hostolink.com	+2250101010113	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+36	geoloc4@hostolink.com	+2250101010114	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+37	assistant5@hostolink.com	+2250101010115	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+38	gestionappel5@hostolink.com	+2250101010116	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+39	geoloc5@hostolink.com	+2250101010117	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+40	assistant6@hostolink.com	+2250101010118	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+41	gestionappel6@hostolink.com	+2250101010119	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+43	superadmin001@gmail.com	+2250544704854	$2b$10$N0v0fWv07JdBNyR1wrhGG..hUfkSBjEPXkFVBWiDiMlB6tLc3pLrm	super_admin	{}	actif	\N	2025-03-19 20:08:24.29358	2025-03-19 20:08:24.29358	false
+42	geoloc6@hostolink.com	+2250101010120	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_geolocalisation	{}	inactif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	false
+23	superadmin1@hostolink.com	+2250102030450	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	super_admin	{}	gggg	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 20:15:38.407	false
+24	superadmin2@hostolink.com	+2250101010102	$2b$10$xeTv.URnbYqhsQax47xp/OQUZdXhIG96PvVHwKeaCWV4S4jJGXlju	super_admin	{}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 21:03:32.758	false
+25	assistant1@hostolink.com	+2250101010103	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	assistant	{"acces_stats": true, "gerer_utilisateurs": true, "supprimer_publications": false}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 21:10:32.746	false
+26	gestionappel1@hostolink.com	+2250101010104	$2b$10$ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE	gestionnaire_appel	{"acces_stats": true, "gerer_utilisateurs": true, "supprimer_publications": false}	actif	2025-03-19 19:56:22.386287	2025-03-19 19:56:22.386287	2025-03-19 21:11:58.54	false
+44	superadmin002@gmail.com	+22505447048542	$2b$10$W86RysxSxtIo1h9DoDNZkueCc2.FYUXXWxwUETQ4LEwSS47XEWoFa	super_admin	{}	actif	\N	2025-03-20 19:20:58.17385	2025-03-20 19:20:58.17385	false
+45	superadmin003@gmail.com	+2250000000000	$2b$10$E2oRcgFPuzqCnwUPtFwD3OyzF1aKwLgPZPBDIftjdf7VzSE6TFWry	super_admin	{}	actif	\N	2025-03-21 14:59:03.831352	2025-03-21 14:59:03.831352	false
 \.
 
 
@@ -1714,7 +1713,8 @@ COPY public.cartes_qr_code_statique (id_carte_qr_statique, id_utilisateur, qr_co
 --
 
 COPY public.code_verif_otp (id, otp_code, expires_at, is_valid, moyen_envoyer, id_user, id_user_etablissement_sante) FROM stdin;
-55	8881	2025-03-20 00:17:19.901	f	email	1428126a-16b2-47d9-a860-c33d5005fdcb	\N
+70	2784	2025-03-21 14:51:39.378	f	telephone	d83e0ecf-e5e5-41c4-9ba0-bb50e9de4e36	\N
+71	3001	2025-03-21 15:31:15.288	f	email	a0ede9f8-f6ab-46f7-954d-60205bc3e02a	\N
 \.
 
 
@@ -1763,7 +1763,10 @@ COPY public.historique_transactions (id_historique, id_transaction, ancien_statu
 --
 
 COPY public.images (id_image, date, url_image, motif, type_user, id_user, id_user_etablissement_sante, id_admin_gestionnaire) FROM stdin;
-9fbf6628-97fe-4c56-83c3-2110468589eb	2025-03-19 20:09:40.225034	https://res.cloudinary.com/dhrrk7vsd/image/upload/v1742411378/avatars_admin/admin_43_1742411378371.jpg	avatar_admin	\N	\N	\N	43
+eea9a812-bb50-4d2a-8160-f0d83dea665d	2025-03-21 14:51:33.778098	https://res.cloudinary.com/dhrrk7vsd/image/upload/v1742565093/dossier_hostolink_preset/u835fjrzhsgcjdjkivxt.jpg	photo_profile	utilisateur	d83e0ecf-e5e5-41c4-9ba0-bb50e9de4e36	\N	\N
+bff5b32c-3d34-4868-97ce-79cf1bb0cce8	2025-03-21 15:01:44.471305	https://res.cloudinary.com/dhrrk7vsd/image/upload/v1742566039/dossier_hostolink_preset/avatars_admin/admin_44_1742566038173.jpg	avatar_admin	\N	\N	\N	44
+5fd09f6c-5a0c-4f90-8f85-27edc417e1b9	2025-03-21 15:07:28.462927	https://res.cloudinary.com/dhrrk7vsd/image/upload/v1742566662/dossier_hostolink_preset/avatars_admin/admin_45_1742566660888.jpg	avatar_admin	\N	\N	\N	45
+dad4077e-14da-45bf-b5ea-1ebd0e38ba28	2025-03-21 15:31:06.844735	https://res.cloudinary.com/dhrrk7vsd/image/upload/v1742567465/dossier_hostolink_preset/dzpwcqlvwmsw9xqbux32.jpg	photo_profile	utilisateur	a0ede9f8-f6ab-46f7-954d-60205bc3e02a	\N	\N
 \.
 
 
@@ -1932,7 +1935,8 @@ COPY public.user_etablissement_sante (id_user_etablissement_sante, nom, telephon
 --
 
 COPY public.utilisateur (date_inscription, "position", email, telephone, mdp, nom, prenom, pays, raison_banni, id_user, compte_verifier, dernier_otp_envoye, actif) FROM stdin;
-2025-03-20 00:11:20.957	\N	debadychatue@gmail.com	\N	\N	\N	\N	\N	R.A.S	1428126a-16b2-47d9-a860-c33d5005fdcb	f	\N	t
+2025-03-21 14:42:49.966	\N	cyber10email@gmail.com	+2250544704854	$2b$10$UdphganPqNjDGqla0UNBnu5p8KIzVIpHNN3z.TLb4BcZR/DvfSouS	N'guessan	Kouadio david	Côte d'Ivoire	R.A.S	d83e0ecf-e5e5-41c4-9ba0-bb50e9de4e36	t	\N	t
+2025-03-21 15:25:48.038	\N	cyber101email@gmail.com	+22505447048541	$2b$10$3uSNUW/AcRP2MlFbIJp8TehwiBMuwhNRRbiOxzUXhwBcVnEJXb0Qa	N'guessan	Kouadio david	Côte d'Ivoire	R.A.S	a0ede9f8-f6ab-46f7-954d-60205bc3e02a	t	\N	t
 \.
 
 
@@ -1948,7 +1952,7 @@ COPY public.verification_kyc (id_kyc, id_utilisateur, type_document, url_documen
 -- Name: administrateurs_id_admin_gestionnaire_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.administrateurs_id_admin_gestionnaire_seq', 43, true);
+SELECT pg_catalog.setval('public.administrateurs_id_admin_gestionnaire_seq', 45, true);
 
 
 --
@@ -2004,7 +2008,7 @@ SELECT pg_catalog.setval('public.cartes_qr_code_statique_id_carte_qr_statique_se
 -- Name: code_verif_otp_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.code_verif_otp_id_seq', 55, true);
+SELECT pg_catalog.setval('public.code_verif_otp_id_seq', 71, true);
 
 
 --

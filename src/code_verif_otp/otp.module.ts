@@ -1,21 +1,23 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Otp } from './entities/otp.entity';
-import { OtpService } from './otp.service';
 import { OtpController } from './otp.controller';
 import { UserModule } from '../utilisateur/user.module'; 
 import { User } from 'src/utilisateur/entities/user.entity';
-import { NotificationsModule } from '../notifications/notifications.module';
-// import { UserEtablissementSante } from 'src/user-etablissement/entities/user_etablissement.entity';
+import { OtpService } from './otp.service';
+
+import { SmsModule } from '../sms/sms.module'; 
+
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Otp,User]),
+    forwardRef(() => SmsModule), 
     forwardRef(() => UserModule),
-    NotificationsModule
+    forwardRef(() => UserModule),
   ],
   controllers: [OtpController],
   providers: [OtpService],
-  exports: [OtpService],
+  exports: [OtpService, TypeOrmModule],
 })
 export class OtpModule {}

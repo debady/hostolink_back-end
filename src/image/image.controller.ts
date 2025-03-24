@@ -20,17 +20,16 @@ export class ImageController {
   constructor(private readonly imageService: ImageService) {}
 
   @Post('upload')
-  @UseGuards(JwtAuthGuard) // 🔒 Sécurisation avec JWT
+  @UseGuards(JwtAuthGuard) 
   @UseInterceptors(FileInterceptor('file'))
   async uploadImage(
     @UploadedFile() file: Express.Multer.File,
-    @Req() req, // 🔄 Récupérer l'utilisateur depuis le JWT
+    @Req() req, 
     @Body('motif') motif: ImageMotifEnum,
     @Body('type_user') type_user?: string,
   ) {
-    const id_user = req.user.id_user; // ✅ Récupération sécurisée de l'ID utilisateur
+    const id_user = req.user.id_user; 
 
-    // Vérification si le fichier est bien envoyé
     if (!file) {
       return { success: false, message: "Aucun fichier reçu." };
     }

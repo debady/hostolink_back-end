@@ -1,19 +1,18 @@
 // ---------------------LOCAL ---------------------
-
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
-// Utilisateurs & Authentification
+// ✅ Utilisateurs & Authentification
 import { UserModule } from './utilisateur/user.module';
 import { User } from './utilisateur/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 
-// OTP & Notifications
+// ✅ OTP & Notifications
+import { OtpModule } from './code_verif_otp/otp.module'; 
 import { Otp } from './code_verif_otp/entities/otp.entity';
-import { NotificationsModule } from './notifications/notifications.module';
 
-// Images & Établissements de Santé
+// ✅ Images & Établissements de Santé
 import { ImageModule } from './image/image.module';
 import { Image } from './image/entities/image.entity';
 import { ListeNumeroEtablissementSanteModule } from './liste_etablissement/liste_numero_etablissement_sante.module';
@@ -29,13 +28,20 @@ import { ThematiqueDiscussionModule } from './thematique_discussion/thematique_d
 import { MessageThematique } from './thematique_discussion/entities/message_thematique.entity';
 import { FirebaseModule } from './thematique_discussion/firebase/firebase.module';
 
-// import { UserEtablissementModule } from './user-etablissement/user-etablissement.module';
+import { forwardRef } from '@nestjs/common';
+import { SmsModule } from './sms/sms.module';
 
+// ✅ transaction interne
+import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
+import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { OtpService } from './code_verif_otp/otp.service';
 
 
 
 @Module({
   imports: [
+    forwardRef(() => SmsModule),
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
 
     //connexion à la base de données PostgreSQL
@@ -45,7 +51,7 @@ import { FirebaseModule } from './thematique_discussion/firebase/firebase.module
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
-      database: process.env.DATABASE_NAME || 'hostolink_bds_master',
+      database: process.env.DATABASE_NAME || 'hostolink_bd',
       autoLoadEntities: false,
       synchronize: false, 
        entities: [User,Otp,Image, ListeNumeroEtablissementSante, Administrateur,Annonce, MessageThematique, Thematique], 
@@ -59,31 +65,45 @@ import { FirebaseModule } from './thematique_discussion/firebase/firebase.module
   AdministrateurModule,
   AnnonceModule,
   ThematiqueDiscussionModule,
-  FirebaseModule
+  FirebaseModule,
+  OtpModule,
+  TransactionFraisModule,
+  TransactionInterneModule
+
   // PublicationModule,
   // CommentaireModule,
   // PartageModule,
   // EtablissementSanteModule, 
   // EtablissementSanteModule
   ],
+  providers: [OtpService],
+  exports: [OtpService],
 })
 export class AppModule {}
 
 
 
 // // ----------en ligne ------------------
+  // UserEtablissementModule,
+  // PublicationModule, 
+  // CommentaireModule, 
+  // PartageModule, 
+  // EtablissementSanteModule, 
 
 // import { Module } from '@nestjs/common';
 // import { TypeOrmModule } from '@nestjs/typeorm';
 // import { ConfigModule } from '@nestjs/config';
-// import { UserModule } from './user/user.module';
 // import { AuthModule } from './auth/auth.module';
 // import { ImageModule } from './image/image.module';
-// import { PublicationModule } from './publication/publication.module';
-// import { CommentaireModule } from './commentaire/commentaire.module';
-// import { PartageModule } from './partage/partage.module';
-// import { UserEtablissementModule } from './user-etablissement/user-etablissement.module';
+// import { UserModule } from './utilisateur/user.module';
+// import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
+// import { OtpModule } from './code_verif_otp/otp.module';
+// import { SmsModule } from './sms/sms.module';
+// import { NotificationsModule } from './notifications/notifications.module';
+// import { OtpService } from './code_verif_otp/otp.service';
 // import { AdministrateurModule } from './administrateur/administrateur.module';
+// import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
+// import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
 
 
 // @Module({
@@ -107,13 +127,17 @@ export class AppModule {}
 //         ? { ssl: { rejectUnauthorized: false } }
 //         : undefined,
 //     }),
-//     UserModule,
-//     AuthModule,
-//     ImageModule,
-//     PublicationModule,
-//     CommentaireModule,
-//     PartageModule,
+//   UserModule, 
+//   AuthModule, 
+//   ImageModule, 
+//   AdministrateurModule,
+//   GestionUtilisateurModule,
+//   OtpModule, 
+//   SmsModule,
+//   NotificationsModule
 //   ],
+// providers: [OtpService],
+// exports: [OtpService],
 
 // })
 // export class AppModule {}

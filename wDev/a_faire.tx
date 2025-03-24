@@ -1,0 +1,45 @@
+endpoint de trop generer de otp 
+
+il y'a possibilité de creer un dossier pour chaque utilisateur automatiquement sur cloudinary du coup le faire 
+le code de mise a jour du champ compte verifier de la table utilisateur a ete supprimer revoir 
+
+
+- créer un dossier avec les données  d'un user (simple ou es ) sur clouniray et inserer ces photo renommé
+- endpoint qui permet a l'user lui même de changer son mdp
+- verifier que l'utilisateur a compte verif a true avant de continuer a se connecter
+- revoir endpoint d'envoi d'email et sms
+- lors de l'uploader de la photo de admin un dossier upload se creer en locale avec des fichiers lisible si on complète avec l'exetension
+- trouver un moyen d'exporter la bd en ligne
+- comparer a celui du locale et ajuster
+- trouver un moyen pour modifier les tables ainsi qu'en locale qu'en ligne 
+
+
+
+----- MISE A NIVEAU BD MASTER -----
+
+suppression 
+    compte 
+    qr_code_paiement_statique
+    cartes_qr_code_dynamique 
+
+importer 
+    
+
+
+----------------REVU LIAISON  ENTRE LES  TABLE THEMATIQUE | MESSAGE DISCUTION SUR THEMATIQUE | TABLE UTILISATEUR | TABLE EXPERT ----
+
+CREATE TABLE expert_sante (
+    id_expert SERIAL PRIMARY KEY,
+    id_user_etablissement_sante INTEGER NOT NULL,
+    nom VARCHAR(100),
+    prenom VARCHAR(100),
+    domaine_expertise VARCHAR(255),
+    identifiant CHAR(6) UNIQUE NOT NULL,
+    mot_de_passe TEXT NOT NULL,
+    url_profile TEXT,
+
+    CONSTRAINT fk_expert_user_etablissement_sante
+        FOREIGN KEY (id_user_etablissement_sante)
+        REFERENCES user_etablissement_sante(id_user_etablissement_sante)
+        ON DELETE CASCADE
+);

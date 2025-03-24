@@ -2,8 +2,6 @@ import { v2 as cloudinary } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 
-// ✅ Vérification que `.env` est bien chargé
-console.log('Cloudinary API Key in cloudinary.config.ts:', process.env.CLOUDINARY_API_KEY);
 
 export const configureCloudinary = (configService: ConfigService) => {
   cloudinary.config({
@@ -11,6 +9,8 @@ export const configureCloudinary = (configService: ConfigService) => {
     api_key: configService.get<string>('CLOUDINARY_API_KEY'),
     api_secret: configService.get<string>('CLOUDINARY_API_SECRET'),
   });
+  
+  console.log('Cloudinary API Key in cloudinary.config.ts:', process.env.CLOUDINARY_API_KEY);
   return cloudinary;
 };
 // ✅ Ajout de la classe CloudinaryService pour gérer l'upload
