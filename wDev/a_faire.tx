@@ -71,3 +71,7 @@ Inserer des utilisateur dans la table supabase
     ('nina.mutiso@example.com', '2547654321', '2021', 'Mutiso', 'Nina', 'Kenya', true),
     ('youssef.elhaj@example.com', '2121234567', '2223', 'Elhaj', 'Youssef', 'Maroc', true),
     ('aisha.mohammed@example.com', '2511234567', '2425', 'Mohammed', 'Aisha', 'Éthiopie', true);
+
+
+
+varyken = 

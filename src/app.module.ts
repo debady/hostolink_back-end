@@ -44,7 +44,6 @@ import { OtpService } from './code_verif_otp/otp.service';
     forwardRef(() => SmsModule),
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
 
-    //connexion à la base de données PostgreSQL
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
@@ -75,7 +74,6 @@ import { OtpService } from './code_verif_otp/otp.service';
   // CommentaireModule,
   // PartageModule,
   // EtablissementSanteModule, 
-  // EtablissementSanteModule
   ],
   providers: [OtpService],
   exports: [OtpService],
