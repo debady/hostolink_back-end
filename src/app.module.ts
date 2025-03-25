@@ -5,43 +5,29 @@ import { ConfigModule } from '@nestjs/config';
 
 // ✅ Utilisateurs & Authentification
 import { UserModule } from './utilisateur/user.module';
-import { User } from './utilisateur/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 
 // ✅ OTP & Notifications
-import { OtpModule } from './code_verif_otp/otp.module'; 
-import { Otp } from './code_verif_otp/entities/otp.entity';
 
 // ✅ Images & Établissements de Santé
 import { ImageModule } from './image/image.module';
-import { Image } from './image/entities/image.entity';
 import { ListeNumeroEtablissementSanteModule } from './liste_etablissement/liste_numero_etablissement_sante.module';
 import { CloudinaryModule } from './upload/cloudinary.module';
-import { ListeNumeroEtablissementSante } from './liste_etablissement/entities/liste_numero_vert_etablissement_sante.entity';
 import { AdministrateurModule } from './administrateur/administrateur.module';
-import { Administrateur } from './administrateur/entities/administrateur.entity';
 import { AnnonceModule } from './annonce/annonce.module';
-import { Annonce } from './annonce/entities/annonce.entity';
 
-import { Thematique } from './thematique_discussion/entities/thematique.entity';
 import { ThematiqueDiscussionModule } from './thematique_discussion/thematique_discussion.module';
-import { MessageThematique } from './thematique_discussion/entities/message_thematique.entity';
 import { FirebaseModule } from './thematique_discussion/firebase/firebase.module';
 
-import { forwardRef } from '@nestjs/common';
-import { SmsModule } from './sms/sms.module';
 
 // ✅ transaction interne
 import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
 import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
-import { NotificationsModule } from './notifications/notifications.module';
-import { OtpService } from './code_verif_otp/otp.service';
 
 
 
 @Module({
   imports: [
-    forwardRef(() => SmsModule),
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
 
     TypeOrmModule.forRoot({
@@ -54,19 +40,16 @@ import { OtpService } from './code_verif_otp/otp.service';
       autoLoadEntities: false,
       synchronize: false, 
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      //  entities: [User,Otp,Image, ListeNumeroEtablissementSante, Administrateur,Annonce, MessageThematique, Thematique], 
   }),
   UserModule,
   AuthModule,
   ImageModule,
   ListeNumeroEtablissementSanteModule,
   CloudinaryModule,
-  NotificationsModule,
   AdministrateurModule,
   AnnonceModule,
   ThematiqueDiscussionModule,
   FirebaseModule,
-  OtpModule,
   TransactionFraisModule,
   TransactionInterneModule
 
@@ -75,8 +58,7 @@ import { OtpService } from './code_verif_otp/otp.service';
   // PartageModule,
   // EtablissementSanteModule, 
   ],
-  providers: [OtpService],
-  exports: [OtpService],
+
 })
 export class AppModule {}
 

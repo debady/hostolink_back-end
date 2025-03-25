@@ -6,10 +6,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { CheckUserDto } from './dto/check-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { OtpService } from '../code_verif_otp/otp.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { MoyenEnvoiEnum } from './entities/otp.entity';
 
 interface AuthenticatedRequest extends Request {
   user: { id_user: string };
@@ -19,7 +19,6 @@ interface AuthenticatedRequest extends Request {
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly otpService: OtpService
   ) {}
 
   // ✅ Création d'un utilisateur (sans mot de passe)
@@ -81,28 +80,76 @@ export class UserController {
   }
 
   // ✅ Vérification d'un OTP
-  @Post('verify-otp')
-    async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
-      try {
-        console.log(`📩 Vérification OTP pour ${body.identifier}`);
+  // @Post('verify-otp')
+  //   async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
+  //     try {
+  //       console.log(`📩 Vérification OTP pour ${body.identifier}`);
         
-        const isValid = await this.userService.verifyConfirmationCode(
-          body.identifier.trim(), 
-          body.otpCode.trim()
-        );
+  //       const isValid = await this.userService.verifyConfirmationCode(
+  //         body.identifier.trim(), 
+  //         body.otpCode.trim()
+  //       );
         
-        if (isValid) { 
-          await this.userService.updateUserVerificationStatus(body.identifier.trim());
-          console.log(`✅ Compte vérifié pour ${body.identifier}`);
-        }
+  //       if (isValid) { 
+  //         await this.userService.updateUserVerificationStatus(body.identifier.trim());
+  //         console.log(`✅ Compte vérifié pour ${body.identifier}`);
+  //       }
         
 
-        return isValid;
+  //       return isValid;
+  //     } catch (error) {
+  //       console.error("❌ Erreur verify-otp:", error);
+  //       throw new InternalServerErrorException(error.message || "Erreur lors de la vérification de l'OTP");
+  //     }
+  // }
+
+
+  // ✅ Générer un OTP
+    @Post('generate')
+      async generateOtp(@Body() body: { identifier: string; moyen_envoyer: MoyenEnvoiEnum }) {
+        if (!body.identifier?.trim()) {
+          throw new BadRequestException("L'identifiant est requis");
+        }
+  
+      try {
+        console.log(`📩 Génération OTP pour ${body.identifier} via ${body.moyen_envoyer}`);
+        const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
+  
+        await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
+        return { success: true, message: "OTP généré avec succès" };
       } catch (error) {
-        console.error("❌ Erreur verify-otp:", error);
-        throw new InternalServerErrorException(error.message || "Erreur lors de la vérification de l'OTP");
+        console.error("❌ Erreur generate-otp:", error);
+        throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");
       }
-  }
+    }
+  
+  
+    // ✅ Vérifier un OTP
+    @Post('verify')
+    async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
+        if (!body.identifier?.trim() || !body.otpCode?.trim()) {
+            throw new BadRequestException("Identifiant et code OTP requis");
+        }
+  
+        try {
+            console.log(`📩 Vérification OTP pour ${body.identifier}`);
+            // const isValid = await this.otpService.verifyOtp(body.identifier.trim(), body.otpCode.trim());
+  
+            // if (isValid.success) {
+            //     await this.userService.updateUserVerificationStatus(body.identifier.trim());
+            //     console.log(`✅ Compte vérifié pour ${body.identifier}`);
+            // }
+  
+            // return isValid;
+        } catch (error) {
+            console.error("❌ Erreur verify-otp:", error);
+  
+            if (error instanceof BadRequestException) {
+                throw error;
+            }
+            throw new InternalServerErrorException("Erreur lors de la vérification de l'OTP");
+        }
+    }
 
   // ✅ Récupérer les infos de l'utilisateur connecté
   @Get('user/me')

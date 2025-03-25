@@ -12,6 +12,8 @@ le code de mise a jour du champ compte verifier de la table utilisateur a ete su
 - trouver un moyen d'exporter la bd en ligne
 - comparer a celui du locale et ajuster
 - trouver un moyen pour modifier les tables ainsi qu'en locale qu'en ligne 
+- changer le nom du dossier upload en config_coudinary 
+- quand l'otp est utiliser ne plus pouvois l'utiliser 
 
 
 

@@ -1,7 +1,7 @@
-import { Otp } from 'src/code_verif_otp/entities/otp.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { Image } from '../../image/entities/image.entity';
 import { MessageThematique } from 'src/thematique_discussion/entities/message_thematique.entity';
+import { Otp } from './otp.entity';
 
 
 @Entity('utilisateur')  
