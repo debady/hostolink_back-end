@@ -1,4 +1,6 @@
 
+
+// src/qr-code/qr-code.controller.ts
 import { Controller, Post, Get, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { QrCodeService } from './qr-code.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -16,32 +18,38 @@ export class QrCodeController {
   @UseGuards(JwtAuthGuard)
   async generateDynamicQrCode(@Req() req, @Body() body: { expiresIn?: number }) {
     const id_user = req.user.id_user;
-    const expiresIn = body.expiresIn || 30; // Par défaut 30 secondes
+    const expiresIn = body.expiresIn || 60; // Par défaut 60 secondes
+    
+    // Récupérer le compte utilisateur pour obtenir le numéro de compte
+    const compte = await this.qrCodeService['compteService'].getUserCompte(id_user);
+    const accountNumber = compte ? compte.numero_compte : undefined;
+    const currency = compte ? compte.devise : undefined;
     
     // Désactiver les anciens QR codes dynamiques avant d'en créer un nouveau
-    await this.qrCodeService.refreshUserDynamicQrCode(id_user, expiresIn);
+    const qrCode = await this.qrCodeService.refreshUserDynamicQrCode(
+      id_user,
+      accountNumber,
+      expiresIn,
+      currency
+    );
     
-    // Récupérer le QR code dynamique actif le plus récent
-    const dynamicQrCodes = await this.qrCodeService.getUserDynamicQrCodes(id_user);
-    
-    if (dynamicQrCodes.length === 0) {
+    if (!qrCode) {
       return {
         success: false,
         message: 'Erreur lors de la génération du QR code dynamique',
       };
     }
     
-    const qrCode = dynamicQrCodes[0]; // Le plus récent
-    
-    // Générer l'URL de l'image QR code
-    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+    // Générer l'URL de l'image QR code avec l'identifiant court au lieu du token
+    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.short_id);
     
     return {
       success: true,
       message: 'QR code dynamique généré avec succès',
       data: {
         id_qrcode: qrCode.id_qrcode,
-        token: qrCode.token,
+        short_id: qrCode.short_id,
+        token: qrCode.token, // On pourrait enlever celui-ci pour réduire la taille de la réponse
         date_expiration: qrCode.date_expiration,
         qr_code_image: qrCodeImageUrl,
       }
@@ -56,106 +64,39 @@ export class QrCodeController {
   async getStaticQrCode(@Req() req) {
     const id_user = req.user.id_user;
     
+    // Récupérer le compte utilisateur pour obtenir le numéro de compte
+    const compte = await this.qrCodeService['compteService'].getUserCompte(id_user);
+    const accountNumber = compte ? compte.numero_compte : undefined;
+    
     // Utiliser la méthode du service pour obtenir le QR code statique
-    const qrCode = await this.qrCodeService.getUserStaticQrCode(id_user);
+    let qrCode = await this.qrCodeService.getUserStaticQrCode(id_user);
     
     if (!qrCode) {
       // Si aucun QR code statique n'existe, en créer un nouveau
-      const newQrCode = await this.qrCodeService.createStaticQrForNewUser(id_user);
-      const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(newQrCode.token);
-      
-      return {
-        success: true,
-        message: 'Nouveau QR code statique généré',
-        data: {
-          id_qrcode: newQrCode.id_qrcode,
-          token: newQrCode.token,
-          qr_code_image: qrCodeImageUrl,
-        }
-      };
+      qrCode = await this.qrCodeService.createStaticQrForNewUser(id_user, accountNumber);
     }
     
-    // Générer l'URL de l'image QR code
-    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+    // Générer l'URL de l'image QR code avec l'identifiant court au lieu du token
+    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.short_id);
     
     return {
       success: true,
       message: 'QR code statique récupéré',
       data: {
         id_qrcode: qrCode.id_qrcode,
-        token: qrCode.token,
+        short_id: qrCode.short_id,
+        token: qrCode.token, // On pourrait enlever celui-ci pour réduire la taille de la réponse
         qr_code_image: qrCodeImageUrl,
       }
     };
   }
 
   /**
-   * Récupère le QR code dynamique actif de l'utilisateur connecté
-   */
-  @Get('my-dynamic')
-  @UseGuards(JwtAuthGuard)
-  async getMyDynamicQrCode(@Req() req) {
-    const id_user = req.user.id_user;
-    
-    // Mettre à jour le statut des QR codes expirés
-    await this.qrCodeService.updateExpiredQrCodesStatus(id_user);
-    
-    // Obtenir la date actuelle
-    const now = new Date();
-    
-    // Récupérer les QR codes dynamiques actifs non expirés
-    const dynamicQrCodes = await this.qrCodeService.getUserDynamicQrCodes(id_user);
-    
-    // Filtrer pour ne garder que ceux qui ne sont pas expirés
-    const activeQrCodes = dynamicQrCodes.filter(qrCode => 
-      qrCode.date_expiration > now && qrCode.statut === 'actif'
-    );
-    
-    if (activeQrCodes.length === 0) {
-      // Si aucun QR code actif n'est trouvé, générer un nouveau QR code dynamique
-      const newQrCode = await this.qrCodeService.createDynamicQrForUser(id_user,);
-      const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(newQrCode.token);
-      
-      return {
-        success: true,
-        message: 'Nouveau QR code dynamique généré',
-        data: {
-          id_qrcode: newQrCode.id_qrcode,
-          token: newQrCode.token,
-          date_expiration: newQrCode.date_expiration,
-          qr_code_image: qrCodeImageUrl,
-        }
-      };
-    }
-    
-    // Prendre le QR code le plus récent
-    const latestQrCode = activeQrCodes[0]; // car ils sont déjà triés par date décroissante
-    
-    // Générer l'image du QR code
-    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(latestQrCode.token);
-    
-    // Calculer le temps restant en secondes
-    const remainingTime = Math.floor((latestQrCode.date_expiration.getTime() - now.getTime()) / 1000);
-    
-    return {
-      success: true,
-      message: 'QR code dynamique récupéré',
-      data: {
-        id_qrcode: latestQrCode.id_qrcode,
-        token: latestQrCode.token,
-        date_expiration: latestQrCode.date_expiration,
-        remaining_seconds: remainingTime,
-        qr_code_image: qrCodeImageUrl,
-      }
-    };
-  }
-
-  /**
-   * Valide un QR code à partir de son token
+   * Valide un QR code à partir de son identifiant court ou de son token
    */
   @Post('validate')
-  async validateQrCode(@Body() body: { token: string }) {
-    const validationResult = await this.qrCodeService.validateQrCode(body.token);
+  async validateQrCode(@Body() body: { code: string }) {
+    const validationResult = await this.qrCodeService.validateQrCode(body.code);
     
     return {
       success: true,
@@ -171,18 +112,29 @@ export class QrCodeController {
   @UseGuards(JwtAuthGuard)
   async refreshDynamicQrCode(@Req() req, @Body() body: { expiresIn?: number }) {
     const id_user = req.user.id_user;
-    const expiresIn = body.expiresIn || 30; // Par défaut 30 secondes
+    const expiresIn = body.expiresIn || 60; // Par défaut 60 secondes
     
-    const qrCode = await this.qrCodeService.refreshUserDynamicQrCode(id_user, expiresIn);
+    // Récupérer le compte utilisateur pour obtenir le numéro de compte
+    const compte = await this.qrCodeService['compteService'].getUserCompte(id_user);
+    const accountNumber = compte ? compte.numero_compte : undefined;
+    const currency = compte ? compte.devise : undefined;
     
-    // Générer l'URL de l'image QR code
-    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+    const qrCode = await this.qrCodeService.refreshUserDynamicQrCode(
+      id_user,
+      accountNumber,
+      expiresIn,
+      currency
+    );
+    
+    // Générer l'URL de l'image QR code avec l'identifiant court
+    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.short_id);
     
     return {
       success: true,
       message: 'QR code dynamique rafraîchi avec succès',
       data: {
         id_qrcode: qrCode.id_qrcode,
+        short_id: qrCode.short_id,
         token: qrCode.token,
         date_expiration: qrCode.date_expiration,
         qr_code_image: qrCodeImageUrl,
@@ -206,7 +158,8 @@ export class QrCodeController {
     // Ajouter les images QR code aux codes statiques
     const staticQrCodesWithImages = await Promise.all(
       allQrCodes.static.map(async (qrCode) => {
-        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+        // Générer l'image QR code avec l'identifiant court
+        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.short_id);
         return {
           ...qrCode,
           qr_code_image: qrCodeImageUrl
@@ -217,9 +170,14 @@ export class QrCodeController {
     // Ajouter les images QR code aux codes dynamiques
     const dynamicQrCodesWithImages = await Promise.all(
       allQrCodes.dynamic.map(async (qrCode) => {
-        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+        // Générer l'image QR code avec l'identifiant court
+        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.short_id);
+        // Calculer le temps restant
+        const now = new Date();
+        const remainingTime = Math.floor((qrCode.date_expiration.getTime() - now.getTime()) / 1000);
         return {
           ...qrCode,
+          remaining_seconds: remainingTime > 0 ? remainingTime : 0,
           qr_code_image: qrCodeImageUrl
         };
       })
@@ -249,7 +207,8 @@ export class QrCodeController {
     // Ajouter les images QR code
     const staticQrCodesWithImages = await Promise.all(
       allQrCodes.static.map(async (qrCode) => {
-        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+        // Générer l'image QR code avec l'identifiant court
+        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.short_id);
         return {
           ...qrCode,
           qr_code_image: qrCodeImageUrl
@@ -259,9 +218,14 @@ export class QrCodeController {
     
     const dynamicQrCodesWithImages = await Promise.all(
       allQrCodes.dynamic.map(async (qrCode) => {
-        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+        // Générer l'image QR code avec l'identifiant court
+        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.short_id);
+        // Calculer le temps restant
+        const now = new Date();
+        const remainingTime = Math.floor((qrCode.date_expiration.getTime() - now.getTime()) / 1000);
         return {
           ...qrCode,
+          remaining_seconds: remainingTime > 0 ? remainingTime : 0,
           qr_code_image: qrCodeImageUrl
         };
       })
@@ -298,7 +262,8 @@ export class QrCodeController {
       };
     }
     
-    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+    // Générer l'image QR code avec l'identifiant court
+    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.short_id);
     
     return {
       success: true,
@@ -310,90 +275,51 @@ export class QrCodeController {
     };
   }
 
-  /* 
-   * Endpoints pour les établissements de santé (à décommenter plus tard)
+  /**
+   * Récupère le QR code dynamique actif de l'utilisateur connecté
    */
-  /*
-  @Get('etablissement/static')
+  @Get('my-dynamic')
   @UseGuards(JwtAuthGuard)
-  async getEtablissementStaticQrCode(@Req() req) {
-    // Vérifier que l'utilisateur est associé à un établissement
-    const id_etablissement = req.user.id_etablissement;
-    
-    if (!id_etablissement) {
-      return {
-        success: false,
-        message: 'Vous n\'êtes pas associé à un établissement de santé'
-      };
-    }
-    
-    // Utiliser la méthode du service pour obtenir le QR code statique
-    const qrCode = await this.qrCodeService.getEtablissementStaticQrCode(id_etablissement);
-    
-    if (!qrCode) {
-      // Si aucun QR code statique n'existe, en créer un nouveau
-      const newQrCode = await this.qrCodeService.createStaticQrForNewEtablissement(id_etablissement);
-      const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(newQrCode.token);
-      
-      return {
-        success: true,
-        message: 'Nouveau QR code statique généré pour l\'établissement',
-        data: {
-          id_qrcode: newQrCode.id_qrcode,
-          token: newQrCode.token,
-          qr_code_image: qrCodeImageUrl,
-        }
-      };
-    }
-    
-    // Générer l'URL de l'image QR code
-    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
-    
-    return {
-      success: true,
-      message: 'QR code statique de l\'établissement récupéré',
-      data: {
-        id_qrcode: qrCode.id_qrcode,
-        token: qrCode.token,
-        qr_code_image: qrCodeImageUrl,
-      }
-    };
-  }
-  
-  @Get('etablissement/dynamic')
-  @UseGuards(JwtAuthGuard)
-  async getEtablissementDynamicQrCode(@Req() req) {
-    // Vérifier que l'utilisateur est associé à un établissement
-    const id_etablissement = req.user.id_etablissement;
-    
-    if (!id_etablissement) {
-      return {
-        success: false,
-        message: 'Vous n\'êtes pas associé à un établissement de santé'
-      };
-    }
+  async getMyDynamicQrCode(@Req() req) {
+    const id_user = req.user.id_user;
     
     // Mettre à jour le statut des QR codes expirés
-    await this.qrCodeService.updateExpiredQrCodesStatus();
+    await this.qrCodeService.updateExpiredQrCodesStatus(id_user);
     
-    // Récupérer les QR codes dynamiques actifs de l'établissement
-    const dynamicQrCodes = await this.qrCodeService.getEtablissementDynamicQrCodes(id_etablissement);
-    
+    // Obtenir la date actuelle
     const now = new Date();
+    
+    // Récupérer le compte utilisateur pour obtenir le numéro de compte
+    const compte = await this.qrCodeService['compteService'].getUserCompte(id_user);
+    const accountNumber = compte ? compte.numero_compte : undefined;
+    const currency = compte ? compte.devise : undefined;
+    
+    // Récupérer les QR codes dynamiques actifs non expirés
+    const dynamicQrCodes = await this.qrCodeService.getUserDynamicQrCodes(id_user);
+    
+    // Filtrer pour ne garder que ceux qui ne sont pas expirés
     const activeQrCodes = dynamicQrCodes.filter(qrCode => 
       qrCode.date_expiration > now && qrCode.statut === 'actif'
     );
     
     if (activeQrCodes.length === 0) {
       // Si aucun QR code actif n'est trouvé, générer un nouveau QR code dynamique
-      const newQrCode = await this.qrCodeService.createDynamicQrForEtablissement(id_etablissement, 30);
-      const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(newQrCode.token);
+      const newQrCode = await this.qrCodeService.createDynamicQrForUser(
+        id_user,
+        accountNumber,
+        60,
+        currency
+      );
+      
+      // Générer l'URL de l'image QR code avec l'identifiant court
+      const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(newQrCode.short_id);
       
       return {
         success: true,
-        message: 'Nouveau QR code dynamique généré pour l\'établissement',
+        message: 'Nouveau QR code dynamique généré',
         data: {
           id_qrcode: newQrCode.id_qrcode,
+          short_id: newQrCode.short_id,
           token: newQrCode.token,
           date_expiration: newQrCode.date_expiration,
           qr_code_image: qrCodeImageUrl,
@@ -402,103 +328,225 @@ export class QrCodeController {
     }
     
     // Prendre le QR code le plus récent
-    const latestQrCode = activeQrCodes[0];
-    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(latestQrCode.token);
+    const latestQrCode = activeQrCodes[0]; // car ils sont déjà triés par date décroissante
+    
+    // Générer l'image du QR code avec l'identifiant court
+    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(latestQrCode.short_id);
+    
+    // Calculer le temps restant en secondes
     const remainingTime = Math.floor((latestQrCode.date_expiration.getTime() - now.getTime()) / 1000);
     
     return {
       success: true,
-      message: 'QR code dynamique de l\'établissement récupéré',
+      message: 'QR code dynamique récupéré',
       data: {
         id_qrcode: latestQrCode.id_qrcode,
+        short_id: latestQrCode.short_id,
         token: latestQrCode.token,
         date_expiration: latestQrCode.date_expiration,
         remaining_seconds: remainingTime,
         qr_code_image: qrCodeImageUrl,
       }
     };
+
   }
+
+
+
+
+
+
   
-  @Post('etablissement/dynamic')
-  @UseGuards(JwtAuthGuard)
-  async generateEtablissementDynamicQrCode(@Req() req, @Body() body: { expiresIn?: number }) {
-    // Vérifier que l'utilisateur est associé à un établissement
-    const id_etablissement = req.user.id_etablissement;
+//   /* 
+//    * Endpoints pour les établissements de santé (à décommenter plus tard)
+//    */
+//   /*
+//   @Get('etablissement/static')
+//   @UseGuards(JwtAuthGuard)
+//   async getEtablissementStaticQrCode(@Req() req) {
+//     // Vérifier que l'utilisateur est associé à un établissement
+//     const id_etablissement = req.user.id_etablissement;
     
-    if (!id_etablissement) {
-      return {
-        success: false,
-        message: 'Vous n\'êtes pas associé à un établissement de santé'
-      };
-    }
+//     if (!id_etablissement) {
+//       return {
+//         success: false,
+//         message: 'Vous n\'êtes pas associé à un établissement de santé'
+//       };
+//     }
     
-    const expiresIn = body.expiresIn || 30; // Par défaut 30 secondes
+//     // Utiliser la méthode du service pour obtenir le QR code statique
+//     const qrCode = await this.qrCodeService.getEtablissementStaticQrCode(id_etablissement);
     
-    // Désactiver les anciens QR codes dynamiques et créer un nouveau
-    const qrCode = await this.qrCodeService.refreshEtablissementDynamicQrCode(id_etablissement, expiresIn);
+//     if (!qrCode) {
+//       // Si aucun QR code statique n'existe, en créer un nouveau
+//       const newQrCode = await this.qrCodeService.createStaticQrForNewEtablissement(id_etablissement);
+//       const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(newQrCode.token);
+      
+//       return {
+//         success: true,
+//         message: 'Nouveau QR code statique généré pour l\'établissement',
+//         data: {
+//           id_qrcode: newQrCode.id_qrcode,
+//           token: newQrCode.token,
+//           qr_code_image: qrCodeImageUrl,
+//         }
+//       };
+//     }
     
-    // Générer l'URL de l'image QR code
-    const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+//     // Générer l'URL de l'image QR code
+//     const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
     
-    return {
-      success: true,
-      message: 'QR code dynamique généré avec succès pour l\'établissement',
-      data: {
-        id_qrcode: qrCode.id_qrcode,
-        token: qrCode.token,
-        date_expiration: qrCode.date_expiration,
-        qr_code_image: qrCodeImageUrl,
-      }
-    };
-  }
+//     return {
+//       success: true,
+//       message: 'QR code statique de l\'établissement récupéré',
+//       data: {
+//         id_qrcode: qrCode.id_qrcode,
+//         token: qrCode.token,
+//         qr_code_image: qrCodeImageUrl,
+//       }
+//     };
+//   }
   
-  @Get('etablissement/all')
-  @UseGuards(JwtAuthGuard)
-  async getAllEtablissementQrCodes(@Req() req) {
-    // Vérifier que l'utilisateur est associé à un établissement
-    const id_etablissement = req.user.id_etablissement;
+//   @Get('etablissement/dynamic')
+//   @UseGuards(JwtAuthGuard)
+//   async getEtablissementDynamicQrCode(@Req() req) {
+//     // Vérifier que l'utilisateur est associé à un établissement
+//     const id_etablissement = req.user.id_etablissement;
     
-    if (!id_etablissement) {
-      return {
-        success: false,
-        message: 'Vous n\'êtes pas associé à un établissement de santé'
-      };
-    }
+//     if (!id_etablissement) {
+//       return {
+//         success: false,
+//         message: 'Vous n\'êtes pas associé à un établissement de santé'
+//       };
+//     }
     
-    // Mettre à jour le statut des QR codes expirés
-    await this.qrCodeService.updateExpiredQrCodesStatus();
+//     // Mettre à jour le statut des QR codes expirés
+//     await this.qrCodeService.updateExpiredQrCodesStatus();
     
-    const allQrCodes = await this.qrCodeService.getAllEtablissementQrCodes(id_etablissement);
+//     // Récupérer les QR codes dynamiques actifs de l'établissement
+//     const dynamicQrCodes = await this.qrCodeService.getEtablissementDynamicQrCodes(id_etablissement);
     
-    // Ajouter les images QR code
-    const staticQrCodesWithImages = await Promise.all(
-      allQrCodes.static.map(async (qrCode) => {
-        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
-        return {
-          ...qrCode,
-          qr_code_image: qrCodeImageUrl
-        };
-      })
-    );
+//     const now = new Date();
+//     const activeQrCodes = dynamicQrCodes.filter(qrCode => 
+//       qrCode.date_expiration > now && qrCode.statut === 'actif'
+//     );
     
-    const dynamicQrCodesWithImages = await Promise.all(
-      allQrCodes.dynamic.map(async (qrCode) => {
-        const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
-        return {
-          ...qrCode,
-          qr_code_image: qrCodeImageUrl
-        };
-      })
-    );
+//     if (activeQrCodes.length === 0) {
+//       // Si aucun QR code actif n'est trouvé, générer un nouveau QR code dynamique
+//       const newQrCode = await this.qrCodeService.createDynamicQrForEtablissement(id_etablissement, 30);
+//       const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(newQrCode.token);
+      
+//       return {
+//         success: true,
+//         message: 'Nouveau QR code dynamique généré pour l\'établissement',
+//         data: {
+//           id_qrcode: newQrCode.id_qrcode,
+//           token: newQrCode.token,
+//           date_expiration: newQrCode.date_expiration,
+//           qr_code_image: qrCodeImageUrl,
+//         }
+//       };
+//     }
     
-    return {
-      success: true,
-      message: 'Tous les QR codes de l\'établissement récupérés',
-      data: {
-        static: staticQrCodesWithImages,
-        dynamic: dynamicQrCodesWithImages
-      }
-    };
-  }
-  */
+//     // Prendre le QR code le plus récent
+//     const latestQrCode = activeQrCodes[0];
+//     const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(latestQrCode.token);
+//     const remainingTime = Math.floor((latestQrCode.date_expiration.getTime() - now.getTime()) / 1000);
+    
+//     return {
+//       success: true,
+//       message: 'QR code dynamique de l\'établissement récupéré',
+//       data: {
+//         id_qrcode: latestQrCode.id_qrcode,
+//         token: latestQrCode.token,
+//         date_expiration: latestQrCode.date_expiration,
+//         remaining_seconds: remainingTime,
+//         qr_code_image: qrCodeImageUrl,
+//       }
+//     };
+//   }
+  
+//   @Post('etablissement/dynamic')
+//   @UseGuards(JwtAuthGuard)
+//   async generateEtablissementDynamicQrCode(@Req() req, @Body() body: { expiresIn?: number }) {
+//     // Vérifier que l'utilisateur est associé à un établissement
+//     const id_etablissement = req.user.id_etablissement;
+    
+//     if (!id_etablissement) {
+//       return {
+//         success: false,
+//         message: 'Vous n\'êtes pas associé à un établissement de santé'
+//       };
+//     }
+    
+//     const expiresIn = body.expiresIn || 30; // Par défaut 30 secondes
+    
+//     // Désactiver les anciens QR codes dynamiques et créer un nouveau
+//     const qrCode = await this.qrCodeService.refreshEtablissementDynamicQrCode(id_etablissement, expiresIn);
+    
+//     // Générer l'URL de l'image QR code
+//     const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+    
+//     return {
+//       success: true,
+//       message: 'QR code dynamique généré avec succès pour l\'établissement',
+//       data: {
+//         id_qrcode: qrCode.id_qrcode,
+//         token: qrCode.token,
+//         date_expiration: qrCode.date_expiration,
+//         qr_code_image: qrCodeImageUrl,
+//       }
+//     };
+//   }
+  
+//   @Get('etablissement/all')
+//   @UseGuards(JwtAuthGuard)
+//   async getAllEtablissementQrCodes(@Req() req) {
+//     // Vérifier que l'utilisateur est associé à un établissement
+//     const id_etablissement = req.user.id_etablissement;
+    
+//     if (!id_etablissement) {
+//       return {
+//         success: false,
+//         message: 'Vous n\'êtes pas associé à un établissement de santé'
+//       };
+//     }
+    
+//     // Mettre à jour le statut des QR codes expirés
+//     await this.qrCodeService.updateExpiredQrCodesStatus();
+    
+//     const allQrCodes = await this.qrCodeService.getAllEtablissementQrCodes(id_etablissement);
+    
+//     // Ajouter les images QR code
+//     const staticQrCodesWithImages = await Promise.all(
+//       allQrCodes.static.map(async (qrCode) => {
+//         const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+//         return {
+//           ...qrCode,
+//           qr_code_image: qrCodeImageUrl
+//         };
+//       })
+//     );
+    
+//     const dynamicQrCodesWithImages = await Promise.all(
+//       allQrCodes.dynamic.map(async (qrCode) => {
+//         const qrCodeImageUrl = await this.qrCodeService.generateQrCodeImage(qrCode.token);
+//         return {
+//           ...qrCode,
+//           qr_code_image: qrCodeImageUrl
+//         };
+//       })
+//     );
+    
+//     return {
+//       success: true,
+//       message: 'Tous les QR codes de l\'établissement récupérés',
+//       data: {
+//         static: staticQrCodesWithImages,
+//         dynamic: dynamicQrCodesWithImages
+//       }
+//     };
+//   }
+//   */
+  
 }
