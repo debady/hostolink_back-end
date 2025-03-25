@@ -1,0 +1,14 @@
+ajout de la colonne "short_id" dans les deux tables de qr codes
+
+commandes:
+    -- Ajouter la colonne short_id à la table des QR codes dynamiques
+    ALTER TABLE qr_code_paiement_dynamique 
+    ADD COLUMN short_id CHARACTER VARYING(16);
+
+    -- Ajouter la colonne short_id à la table des QR codes statiques
+    ALTER TABLE qr_code_paiement_statique 
+    ADD COLUMN short_id CHARACTER VARYING(16);
+
+    -- Créer un index pour rechercher rapidement par short_id
+    CREATE INDEX idx_dynamic_short_id ON qr_code_paiement_dynamique(short_id);
+    CREATE INDEX idx_static_short_id ON qr_code_paiement_statique(short_id);
