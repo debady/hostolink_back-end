@@ -39,15 +39,6 @@ export class UserService {
     private readonly qrCodeService: QrCodeService
   ) {}
   
-
-  // ✅ Vérifie si un utilisateur existe (email ou téléphone)
-  async checkUserExistence(identifier: string): Promise<boolean> {
-    const user = await this.userRepository.findOne({
-      where: [{ email: identifier }, { telephone: identifier }],
-    });
-    return !!user;
-  }
-
   // ✅ Création d'un utilisateur sans mot de passe
   async registerUser(identifier: string): Promise<{ success: boolean; id_user?: string; message: string }> {
     try {

@@ -35,7 +35,7 @@ export class OtpService {
       }
   
       // ✅ Générer un OTP (4 à 6 chiffres)
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpCode = Math.floor(1000 + Math.random() * 900).toString();
   
       // ✅ Définir l'expiration à 5 minutes
       const expirationDate = new Date();
@@ -63,7 +63,7 @@ export class OtpService {
           expires_at: expirationDate,
           is_valid: true,
           moyen_envoyer: moyen_envoyer,
-          user: user ?? null, // ou simplement user si toujours défini
+          // user: user ?? null, // ou simplement user si toujours défini
         });
         
         

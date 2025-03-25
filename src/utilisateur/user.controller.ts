@@ -22,17 +22,6 @@ export class UserController {
     private readonly otpService: OtpService
   ) {}
 
-  // ✅ Vérification de l’existence de l'utilisateur
-  @Post('check-user')
-  async checkUser(@Body() checkUserDto: CheckUserDto) {
-    if (!checkUserDto.identifier?.trim()) {
-      throw new BadRequestException('L’identifiant est requis');
-    }
-
-    const exists = await this.userService.checkUserExistence(checkUserDto.identifier.trim());
-    return { success: true, exists, identifier: checkUserDto.identifier.trim() };
-  }
-
   // ✅ Création d'un utilisateur (sans mot de passe)
   @Post('register-user')
   async registerUser(@Body() checkUserDto: CheckUserDto) {
