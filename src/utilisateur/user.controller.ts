@@ -151,11 +151,15 @@ export class UserController {
 
   // ✅ Récupérer les infos de l'utilisateur connecté
   @Get('user/me')
-    @UseGuards(JwtAuthGuard)
-    async getMe(@Req() req: AuthenticatedRequest) {
-      console.log(`📌 Récupération des infos utilisateur pour id_user : ${req.user.id_user}`);
-      return this.userService.getUserById(req.user.id_user);
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Req() req: AuthenticatedRequest) {
+    const user = await this.userService.getUserById(req.user.id_user);
+    return {
+      success: true,
+      data: user,
+    };
   }
+  
 
   // ✅ Mise à jour du profil utilisateur avec gestion de l'image de profil
 
