@@ -127,29 +127,27 @@ export class UserController {
     // ✅ Vérifier un OTP
     @Post('verify')
     async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
-        if (!body.identifier?.trim() || !body.otpCode?.trim()) {
-            throw new BadRequestException("Identifiant et code OTP requis");
-        }
-  
-        try {
-            console.log(`📩 Vérification OTP pour ${body.identifier}`);
-            // const isValid = await this.otpService.verifyOtp(body.identifier.trim(), body.otpCode.trim());
-  
-            // if (isValid.success) {
-            //     await this.userService.updateUserVerificationStatus(body.identifier.trim());
-            //     console.log(`✅ Compte vérifié pour ${body.identifier}`);
-            // }
-  
-            // return isValid;
-        } catch (error) {
-            console.error("❌ Erreur verify-otp:", error);
-  
-            if (error instanceof BadRequestException) {
-                throw error;
-            }
-            throw new InternalServerErrorException("Erreur lors de la vérification de l'OTP");
-        }
+      if (!body.identifier?.trim() || !body.otpCode?.trim()) {
+        throw new BadRequestException("Identifiant et code OTP requis");
+      }
+
+      try {
+        console.log(`📩 Vérification OTP pour ${body.identifier}`);
+        
+        const isValid = await this.userService.verifyOtp(
+          body.identifier.trim(), 
+          body.otpCode.trim()
+        );
+
+        console.log(`📢 Réponse verifyOtp: ${JSON.stringify(isValid)}`);
+
+        return isValid;
+      } catch (error) {
+        console.error("❌ Erreur verify-otp:", error);
+        return { success: false, message: "Échec de la vérification de l'OTP" };
+      }
     }
+
 
   // ✅ Récupérer les infos de l'utilisateur connecté
   @Get('user/me')

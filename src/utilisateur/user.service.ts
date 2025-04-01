@@ -202,31 +202,37 @@ export class UserService {
       try {
         identifier = identifier.trim();
         otpCode = otpCode.trim();
-  
+    
         const user = await this.userRepository.findOne({
           where: [{ email: identifier }, { telephone: identifier }],
         });
-  
+    
         if (!user) {
-          throw new BadRequestException("Utilisateur non trouvé.");
-      }
-      
-      const otp = await this.otpRepository.findOne({
-          where: { 
-              user: { id_user: user.id_user },  // ✅ Plus d'erreur car `user` est toujours défini ici
-              otp_code: otpCode, 
-              is_valid: true 
+          console.warn(`❌ Utilisateur non trouvé pour ${identifier}`);
+          return { success: false, message: "Utilisateur non trouvé" };
+        }
+    
+        const otp = await this.otpRepository.findOne({
+          where: {
+            user: { id_user: user.id_user }, 
+            otp_code: otpCode, 
+            is_valid: true 
           },
-          relations: ['user'], // ✅ Permet de récupérer la relation user
-      });
-      
-      
-      
-        
-        if (!otp || new Date() > otp.expires_at) {
+          relations: ['user'], 
+        });
+    
+        if (!otp) {
+          console.warn(`❌ Aucun OTP valide trouvé pour ${identifier} avec code ${otpCode}`);
           return { success: false, message: "Code OTP incorrect ou expiré" };
         }
-  
+        // ✅ Vérification et mise à jour du champ compte_verifier
+          if (!user.compte_verifier) {
+            user.compte_verifier = true;
+            await this.userRepository.save(user);
+            console.log(`✅ Le compte ${identifier} est maintenant vérifié.`);
+          }
+
+    
         // ✅ Vérifier si l'OTP est expiré
         if (new Date() > otp.expires_at) {
           otp.is_valid = false;
@@ -234,24 +240,20 @@ export class UserService {
           console.warn(`❌ Code OTP expiré pour ${identifier}`);
           return { success: false, message: "Code OTP expiré" };
         }
-
-        if (!otp) {
-          console.warn(`❌ Aucun OTP trouvé pour ${identifier} avec code ${otpCode}`);
-      }
-      
-  
-        // ✅ Marquer l'OTP comme utilisé (désactivation)
+    
+        // ✅ Désactiver l'OTP après validation
         otp.is_valid = false;
         await this.otpRepository.save(otp);
-  
+    
         console.log(`✅ Code OTP validé avec succès pour ${identifier}`);
-  
         return { success: true, message: "Code OTP valide" };
+    
       } catch (error) {
         console.error("❌ Erreur lors de la vérification de l'OTP :", error);
         throw new InternalServerErrorException("Erreur lors de la vérification de l'OTP");
       }
     }
+    
 
   // ✅ Mise à jour du profil utilisateur avec gestion d'image
   async updateUserProfile(id_user: string, updateProfileDto: UpdateProfileDto, file?: Express.Multer.File) {
