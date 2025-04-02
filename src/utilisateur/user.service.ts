@@ -122,11 +122,17 @@ export class UserService {
     
     // Récupération des informations du compte de l'utilisateur
     const compte = await this.compteService.getUserCompte(id_user);
+    // const qrcodedynamique = await this.qrCodeService.getUserDynamicQrCodes(id_user);
+    // const qrcodedstatique = await this.qrCodeService.getUserStaticQrCode(id_user);
+    const allqrcodes = await this.qrCodeService.getAllUserQrCodes(id_user);
 
     return { 
       ...user, 
       photo_profile: profileImage ? profileImage.url_image : null,
-      compte
+      compte,
+      // qrcodedynamique,
+      // qrcodedstatique,
+      allqrcodes,
     };
   }
 

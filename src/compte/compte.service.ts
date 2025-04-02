@@ -36,7 +36,7 @@ export class CompteService {
       solde_compte: 0,
       solde_bonus: 0,
       cumule_mensuel: 0,
-      plafond: 100000, // Valeur par défaut
+      plafond: 0, // Valeur par défaut
       devise: 'XOF',
       statut: 'actif',
       date_creation_compte: new Date(),

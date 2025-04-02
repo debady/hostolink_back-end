@@ -16,7 +16,7 @@ export class QrCodeJwtService {
       ? this.configService.get('QR_STATIC_SECRET')
       : this.configService.get('QR_DYNAMIC_SECRET');
     
-    const expiresIn = isStatic ? '365d' : '1m';
+    const expiresIn = isStatic ? '365d' : '1d';
     
     return this.jwtService.sign(payload, {
       secret,

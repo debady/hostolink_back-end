@@ -339,20 +339,43 @@ const dateExpiration = new Date(payload.expiresAt || Date.now() + (expiresIn * 1
   }
 
   //  * Récupère les QR codes dynamiques actifs d'un utilisateur spécifique
-  async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
-    // D'abord mettre à jour le statut des QR codes expirés
-    await this.updateExpiredQrCodesStatus(id_user);
+  // async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
+  //   // D'abord mettre à jour le statut des QR codes expirés
+  //   await this.updateExpiredQrCodesStatus(id_user);
     
-    return this.qrCodeDynamiqueRepository.find({
-      where: { 
-        id_user,
-        statut: 'actif'
-      },
-      order: {
-        date_creation: 'DESC'
-      }
+  //   return this.qrCodeDynamiqueRepository.find({
+  //     // where: { 
+  //     //   id_user,
+  //     //   statut: 'actif'
+  //     // },
+  //     order: {
+  //       date_creation: 'DESC'
+  //     }
+  //   });
+  // }
+
+
+  // SOLUTION ALTERNATIVE POUR LE FAIRE AUTOMATIQUEMENT
+  async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
+    // 1. Mettre à jour les statuts des QR expirés
+    await this.updateExpiredQrCodesStatus(id_user);
+  
+    // 2. Rechercher les QR codes actifs
+    let activeQRCodes = await this.qrCodeDynamiqueRepository.find({
+      where: { id_user, statut: 'actif' },
+      order: { date_creation: 'DESC' }
     });
+  
+    // 3. S'il n'y en a plus, on en crée automatiquement un nouveau
+    if (activeQRCodes.length === 0) {
+      const compte = await this.compteService.getUserCompte(id_user);
+      const newQr = await this.createDynamicQrForUser(id_user, compte?.numero_compte, 60, compte?.devise);
+      activeQRCodes = [newQr];
+    }
+  
+    return activeQRCodes;
   }
+  
 
   //  * Récupère tous les QR codes (statiques et dynamiques) d'un utilisateur spécifique
   //  * @returns Objet contenant les QR codes statiques et dynamiques

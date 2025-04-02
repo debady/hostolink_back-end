@@ -79,31 +79,6 @@ export class UserController {
       }
   }
 
-  // ✅ Vérification d'un OTP
-  // @Post('verify-otp')
-  //   async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
-  //     try {
-  //       console.log(`📩 Vérification OTP pour ${body.identifier}`);
-        
-  //       const isValid = await this.userService.verifyConfirmationCode(
-  //         body.identifier.trim(), 
-  //         body.otpCode.trim()
-  //       );
-        
-  //       if (isValid) { 
-  //         await this.userService.updateUserVerificationStatus(body.identifier.trim());
-  //         console.log(`✅ Compte vérifié pour ${body.identifier}`);
-  //       }
-        
-
-  //       return isValid;
-  //     } catch (error) {
-  //       console.error("❌ Erreur verify-otp:", error);
-  //       throw new InternalServerErrorException(error.message || "Erreur lors de la vérification de l'OTP");
-  //     }
-  // }
-
-
   // ✅ Générer un OTP
     @Post('generate')
       async generateOtp(@Body() body: { identifier: string; moyen_envoyer: MoyenEnvoiEnum }) {
