@@ -27,6 +27,10 @@ export class Otp {
   @Column({ type: 'enum', enum: MoyenEnvoiEnum, nullable: false })
   moyen_envoyer: MoyenEnvoiEnum; 
 
+  // @Column({nullable: false })
+  // moyen_envoyer: string;
+
+
   @Column({ type: 'timestamp' })
   expires_at: Date;
 
