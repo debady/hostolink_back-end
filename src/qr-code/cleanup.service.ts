@@ -79,7 +79,7 @@ export class CleanupService {
       },
     );
     
-    this.logger.log(`${result.affected} QR codes dynamiques expirés ont été désactivés`);
+    // this.logger.log(`${result.affected} QR codes dynamiques expirés ont été désactivés`);
   }
 
   /**

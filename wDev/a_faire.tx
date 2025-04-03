@@ -77,3 +77,27 @@ Inserer des utilisateur dans la table supabase
 
 
 varyken = 
+
+------j ai modifier la table annonce en ajoutant une valeur au champ date----
+
+ voici la requete  que j ai utilisé pour l ajouter
+
+ ALTER TABLE annonce
+ ALTER COLUMN date SET DEFAULT CURRENT_DATE;
+
+
+ 
+hostolink_bds_reviser_toutes=# \d annonce
+                                                  Table ½ public.annonce ╗
+        Colonne        |          Type          | Collationnement | NULL-able |                 Par dÚfaut              
+-----------------------+------------------------+-----------------+-----------+---------------------------------------------
+ id_annonce            | integer                |                 | not null  | nextval('annonce_id_annonce_seq'::regclass)
+ id_admin_gestionnaire | integer                |                 | not null  |
+ titre_annonce         | character varying(255) |                 |           |
+ description_annonce   | text                   |                 |           |
+ date                  | date                   |                 |           | CURRENT_DATE
+ url_images            | character varying(255) |                 |           | NULL::character varying
+Index :
+    "annonce_pkey" PRIMARY KEY, btree (id_annonce)
+Contraintes de clÚs ÚtrangÞres :
+    "fk_annonce_admin_gestionnaire" FOREIGN KEY (id_admin_gestionnaire) REFERENCES administrateurs(id_admin_gestionnaire) ON DELETE CASCADE
