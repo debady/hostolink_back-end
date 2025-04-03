@@ -8,11 +8,9 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller'; 
 import { JwtAdminStrategy } from './jwt-admin.strategy';
 import { AdministrateurModule } from 'src/administrateur/administrateur.module';
-import { OtpModule } from 'src/code_verif_otp/otp.module';
 
 @Module({
   imports: [
-    OtpModule,
     AdministrateurModule,
     ConfigModule, 
     UserModule, 

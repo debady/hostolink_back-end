@@ -14,6 +14,14 @@ export class GestUtilisateurService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+    // ✅ Vérifie si un utilisateur existe (email ou téléphone)
+    async checkUserExistence(identifier: string): Promise<boolean> {
+      const user = await this.userRepository.findOne({
+        where: [{ email: identifier }, { telephone: identifier }],
+      });
+      return !!user;
+    }
+
   async findAll(): Promise<{ total: number; utilisateurs: User[] }> {
     const users = await this.userRepository.find({
       relations: ['images'],

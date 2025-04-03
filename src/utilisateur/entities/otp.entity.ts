@@ -2,7 +2,6 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 import { User } from '../../utilisateur/entities/user.entity';
 
 export enum MoyenEnvoiEnum {
-  // TELEPHONE = 'telephone',
   SMS = 'SMS',
   EMAIL = 'email',
 }
@@ -12,14 +11,17 @@ export class Otp {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, user => user.otps, { onDelete: 'CASCADE', nullable: true, eager: true })
+ @ManyToOne(() => User, user => user.otps, { onDelete: 'CASCADE', nullable: true, eager: true })
   @JoinColumn({ name: 'id_user' })  
-  user: User;
+  user?: User;  
 
-  // @Column({ type: 'uuid', nullable: true })
-  // id_user: string;
+  @Column({ type: 'uuid', nullable: true, default: null })
+  id_user_etablissement_sante: string | null;
 
-  @Column({ type: 'varchar', length: 6, nullable: false })
+
+
+
+  @Column({ type: 'varchar', length: 4, nullable: false })
   otp_code: string;
 
   @Column({ type: 'enum', enum: MoyenEnvoiEnum, nullable: false })

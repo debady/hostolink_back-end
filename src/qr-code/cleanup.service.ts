@@ -1,14 +1,19 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { QrCodeDynamique } from './entitie/qr_code_dynamique.entity';
+import { QrCodeService } from './qr-code.service';
 
 @Injectable()
 export class CleanupService {
   private readonly logger = new Logger(CleanupService.name);
+  
 
   constructor(
+    @Inject(forwardRef(() => QrCodeService))
+    private readonly qrCodeService: QrCodeService,
+
     @InjectRepository(QrCodeDynamique)
     private readonly qrCodeDynamiqueRepository: Repository<QrCodeDynamique>,
   ) {}
@@ -33,20 +38,48 @@ export class CleanupService {
   /**
    * Désactive tous les QR codes dynamiques expirés
    */
-  async deactivateExpiredQrCodes(): Promise<void> {
-    const now = new Date();
+  // async deactivateExpiredQrCodes(): Promise<void> {
+  //   const now = new Date();
     
-    const result = await this.qrCodeDynamiqueRepository.update(
-      { 
-        statut: 'actif',
-        date_expiration: LessThan(now)
-      },
-      { 
-        statut: 'inactif' 
-      }
-    );
+  //   const result = await this.qrCodeDynamiqueRepository.update(
+  //     { 
+  //       statut: 'actif',
+  //       date_expiration: LessThan(now)
+  //     },
+  //     { 
+  //       statut: 'inactif' 
+  //     }
+  //   );
     
     // this.logger.log(`${result.affected} QR codes dynamiques expirés ont été désactivés`);
+  // }
+
+  async deactivateExpiredQrCodes(): Promise<void> {
+    const now = new Date();
+  
+    // 1. Récupérer les utilisateurs affectés AVANT mise à jour
+    const expiredCodes = await this.qrCodeDynamiqueRepository.find({
+      where: {
+        statut: 'actif',
+        date_expiration: LessThan(now),
+      },
+      select: ['id_user'],
+    });
+  
+    const userIds = [...new Set(expiredCodes.map(code => code.id_user))]; // uniques
+  
+    // 2. Mettre à jour les statuts
+    const result = await this.qrCodeDynamiqueRepository.update(
+      {
+        statut: 'actif',
+        date_expiration: LessThan(now),
+      },
+      {
+        statut: 'inactif',
+      },
+    );
+    
+    this.logger.log(`${result.affected} QR codes dynamiques expirés ont été désactivés`);
   }
 
   /**
