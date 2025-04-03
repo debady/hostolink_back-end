@@ -6,7 +6,7 @@ export class Annonce {
   @PrimaryGeneratedColumn()
   id_annonce: number;
 
-  @ManyToOne(() => Administrateur, (admin) => admin.annonces, { onDelete: 'CASCADE' })
+  @ManyToOne(() =>Administrateur, (admin) => admin.annonces, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'id_admin_gestionnaire' })  // 🔹 Correction ici
   id_admin_gestionnaire: Administrateur;
 

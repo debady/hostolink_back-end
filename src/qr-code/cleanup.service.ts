@@ -19,7 +19,7 @@ export class CleanupService {
    */
   @Cron('* * * * *') // Exécution quotidienne chaque minute
   async scheduledCleanup() {
-    this.logger.log('Début du nettoyage programmé des QR codes dynamiques');
+    // this.logger.log('Début du nettoyage programmé des QR codes dynamiques');
     
     // Étape 1: Marquer comme inactifs tous les QR codes expirés
     await this.deactivateExpiredQrCodes();
@@ -27,7 +27,7 @@ export class CleanupService {
     // Étape 2: Supprimer les QR codes expirés depuis longtemps
     await this.removeOldQrCodes();
     
-    this.logger.log('Nettoyage programmé terminé');
+    // this.logger.log('Nettoyage programmé terminé');
   }
 
   /**
@@ -46,7 +46,7 @@ export class CleanupService {
       }
     );
     
-    this.logger.log(`${result.affected} QR codes dynamiques expirés ont été désactivés`);
+    // this.logger.log(`${result.affected} QR codes dynamiques expirés ont été désactivés`);
   }
 
   /**
@@ -60,7 +60,7 @@ export class CleanupService {
       date_expiration: LessThan(cutoffDate)
     });
     
-    this.logger.log(`${result.affected} QR codes dynamiques anciens ont été supprimés`);
+    // this.logger.log(`${result.affected} QR codes dynamiques anciens ont été supprimés`);
   }
 
   /**

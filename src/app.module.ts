@@ -51,7 +51,7 @@ import { OtpService } from './code_verif_otp/otp.service';
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
-      database: process.env.DATABASE_NAME || 'hostolink_bd',
+      database: process.env.DATABASE_NAME || 'hostolink_bds_reviser_toutes',
       autoLoadEntities: false,
       synchronize: false, 
        entities: [User,Otp,Image, ListeNumeroEtablissementSante, Administrateur,Annonce, MessageThematique, Thematique], 
@@ -67,8 +67,8 @@ import { OtpService } from './code_verif_otp/otp.service';
   ThematiqueDiscussionModule,
   FirebaseModule,
   OtpModule,
-  TransactionFraisModule,
-  TransactionInterneModule
+  //TransactionFraisModule,
+  //TransactionInterneModule
 
   // PublicationModule,
   // CommentaireModule,
