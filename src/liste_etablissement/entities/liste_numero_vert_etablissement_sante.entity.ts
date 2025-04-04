@@ -14,7 +14,7 @@ export class ListeNumeroEtablissementSante {
   @PrimaryGeneratedColumn()
   id_liste_num_etablissement_sante: number;
 
-  @ManyToOne(() => Administrateur, (admin) => admin.listeNumeroEtablissementSante, { nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Administrateur, (admin) => admin.liste_numero_vert, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'id_admin_gestionnaire' })
   administrateur: Administrateur;
 

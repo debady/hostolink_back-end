@@ -5,8 +5,8 @@ export default new DataSource({
   host: 'localhost',
   port: 5432,
   username: 'postgres',
-  password: 'NGUESSAN',
-  database: 'hostolink_bds_master',
+  password: 'mdp_dev_sohapigroup',
+  database: 'hostolink_bd',
   entities: [
     'src/**/*.entity.ts',
     

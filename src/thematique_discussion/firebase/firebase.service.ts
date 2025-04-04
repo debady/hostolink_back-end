@@ -22,7 +22,7 @@ export class FirebaseService {
       credential: admin.credential.cert(serviceAccountPath),
     });
 
-    console.log('✅ Firebase initialisé depuis :', serviceAccountPath);
+    // console.log('✅ Firebase initialisé depuis :', serviceAccountPath);
   }
 
   async sendNotification(fcmToken: string, title: string, body: string) {

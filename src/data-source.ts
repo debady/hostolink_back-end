@@ -7,7 +7,7 @@ export const AppDataSource = new DataSource({
     port: 5432,
     username: "postgres",
     password: "NGUESSAN",
-    database: "hostolink_bds_master",
+    database: "hostolink_bd",
     synchronize: true,
 
     logging: true,

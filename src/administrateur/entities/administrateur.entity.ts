@@ -39,7 +39,6 @@ export class Administrateur {
   // ✅ Relation avec liste_numero_vert_etablissement_sante
   @OneToMany(() => ListeNumeroEtablissementSante, (liste) => liste.administrateur, { cascade: true })
   liste_numero_vert: ListeNumeroEtablissementSante[];
-  listeNumeroEtablissementSante: any;
 
   @OneToMany(() => Annonce, (annonce) => annonce.id_admin_gestionnaire)
   annonces: Annonce[];

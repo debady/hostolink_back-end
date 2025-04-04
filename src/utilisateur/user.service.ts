@@ -1,5 +1,3 @@
-
-// INSCRITPION AVEC CREATION AUTOMATIQUE DE COMPTE AVEC CODE QR
 import { 
   Injectable, 
   InternalServerErrorException, 
@@ -18,6 +16,7 @@ import { ImageMotifEnum } from 'src/image/entities/image.entity';
 import { ImageService } from 'src/image/image.service';
 import { CompteService } from 'src/compte/compte.service';
 import { QrCodeService } from 'src/qr-code/qr-code.service';
+import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
 
 @Injectable()
 export class UserService {
@@ -36,18 +35,14 @@ export class UserService {
     private readonly compteService: CompteService,
   
     @Inject(forwardRef(() => QrCodeService))
-    private readonly qrCodeService: QrCodeService
+    private readonly qrCodeService: QrCodeService,
+
+    @InjectRepository(Otp)
+    private readonly otpRepository: Repository<Otp>,
+
+
   ) {}
   
-
-  // ✅ Vérifie si un utilisateur existe (email ou téléphone)
-  async checkUserExistence(identifier: string): Promise<boolean> {
-    const user = await this.userRepository.findOne({
-      where: [{ email: identifier }, { telephone: identifier }],
-    });
-    return !!user;
-  }
-
   // ✅ Création d'un utilisateur sans mot de passe
   async registerUser(identifier: string): Promise<{ success: boolean; id_user?: string; message: string }> {
     try {
@@ -127,13 +122,143 @@ export class UserService {
     
     // Récupération des informations du compte de l'utilisateur
     const compte = await this.compteService.getUserCompte(id_user);
+    // const qrcodedynamique = await this.qrCodeService.getUserDynamicQrCodes(id_user);
+    // const qrcodedstatique = await this.qrCodeService.getUserStaticQrCode(id_user);
+    const allqrcodes = await this.qrCodeService.getAllUserQrCodes(id_user);
 
     return { 
       ...user, 
       photo_profile: profileImage ? profileImage.url_image : null,
-      compte
+      compte,
+      // qrcodedynamique,
+      // qrcodedstatique,
+      allqrcodes,
     };
   }
+
+
+  async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
+    try {
+      identifier = identifier.trim();
+      const user = await this.userRepository.findOne({
+        where: [{ email: identifier }, { telephone: identifier }],
+      });
+  
+      if (!user || !user.id_user) {
+        console.error(`❌ Échec : Utilisateur invalide ou introuvable pour ${identifier}`);
+        throw new BadRequestException("Utilisateur invalide ou introuvable");
+      }
+  
+      // ✅ Générer un OTP (4 chiffres)
+      const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+  
+      // ✅ Définir l'expiration à 5 minutes
+      const expirationDate = new Date();
+      expirationDate.setMinutes(expirationDate.getMinutes() + 5);
+  
+      // ✅ Créer le nouvel OTP
+      const otp = this.otpRepository.create({
+        otp_code: otpCode,
+        expires_at: expirationDate,
+        is_valid: true,
+        moyen_envoyer,
+        user,
+        id_user_etablissement_sante: undefined,
+      });
+  
+      // ✅ Sauvegarder d'abord le nouvel OTP
+      await this.otpRepository.save(otp);
+  
+      // ✅ Supprimer tous les anciens OTP de ce user (sauf le nouveau qu’on vient d’insérer)
+      await this.otpRepository.createQueryBuilder()
+        .delete()
+        .from(Otp)
+        .where("id_user = :id_user AND otp_code != :code", {
+          id_user: user.id_user,
+          code: otpCode,
+        })
+        .execute();
+  
+      // 📤 Envoi simulé
+      if (moyen_envoyer === MoyenEnvoiEnum.SMS) {
+        // await this.smsService.sendOtpSms(identifier, otpCode);
+        console.log(`📤 SMS vers ${identifier} avec OTP ${otpCode}`);
+      } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL) {
+        // await this.emailService.sendOtpEmail(identifier, otpCode);
+        console.log(`📤 EMAIL à ${identifier} avec OTP ${otpCode}`);
+      }
+  
+      console.log(`✅ OTP généré pour ${identifier} : ${otpCode}`);
+      return { success: true, otp: otpCode };
+  
+    } catch (error) {
+      console.error("❌ Erreur dans generateOtp :", error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException("Erreur lors de la génération de l'OTP");
+    }
+  }
+  
+    
+  
+    // verif otp
+    async verifyOtp(identifier: string, otpCode: string): Promise<{ success: boolean; message: string }> {
+      try {
+        identifier = identifier.trim();
+        otpCode = otpCode.trim();
+    
+        const user = await this.userRepository.findOne({
+          where: [{ email: identifier }, { telephone: identifier }],
+        });
+    
+        if (!user) {
+          console.warn(`❌ Utilisateur non trouvé pour ${identifier}`);
+          return { success: false, message: "Utilisateur non trouvé" };
+        }
+    
+        const otp = await this.otpRepository.findOne({
+          where: {
+            user: { id_user: user.id_user }, 
+            otp_code: otpCode, 
+            is_valid: true 
+          },
+          relations: ['user'], 
+        });
+    
+        if (!otp) {
+          console.warn(`❌ Aucun OTP valide trouvé pour ${identifier} avec code ${otpCode}`);
+          return { success: false, message: "Code OTP incorrect ou expiré" };
+        }
+        // ✅ Vérification et mise à jour du champ compte_verifier
+          if (!user.compte_verifier) {
+            user.compte_verifier = true;
+            await this.userRepository.save(user);
+            console.log(`✅ Le compte ${identifier} est maintenant vérifié.`);
+          }
+
+    
+        // ✅ Vérifier si l'OTP est expiré
+        if (new Date() > otp.expires_at) {
+          otp.is_valid = false;
+          await this.otpRepository.save(otp);
+          console.warn(`❌ Code OTP expiré pour ${identifier}`);
+          return { success: false, message: "Code OTP expiré" };
+        }
+    
+        // ✅ Désactiver l'OTP après validation
+        otp.is_valid = false;
+        await this.otpRepository.save(otp);
+    
+        console.log(`✅ Code OTP validé avec succès pour ${identifier}`);
+        return { success: true, message: "Code OTP valide" };
+    
+      } catch (error) {
+        console.error("❌ Erreur lors de la vérification de l'OTP :", error);
+        throw new InternalServerErrorException("Erreur lors de la vérification de l'OTP");
+      }
+    }
+    
 
   // ✅ Mise à jour du profil utilisateur avec gestion d'image
   async updateUserProfile(id_user: string, updateProfileDto: UpdateProfileDto, file?: Express.Multer.File) {
@@ -228,4 +353,12 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
 
     return isValid;
   }
+
+  async generateAndSendOtp(user: User): Promise<void> {
+    const identifier = user.email ?? user.telephone;
+    const moyen = user.email ? MoyenEnvoiEnum.EMAIL : MoyenEnvoiEnum.SMS;
+    await this.generateOtp(identifier!, moyen);
+  }
+
+  
 }

@@ -16,7 +16,7 @@ export class CloudinaryService {
     try {
       const result: UploadApiResponse = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
-          { folder: 'hostolink/etablissements' },
+          { folder: 'dossier_hostolink_preset/hostolink/etablissements' },
           (error: UploadApiErrorResponse, result: UploadApiResponse) => {
             if (error) reject(error);
             resolve(result);
