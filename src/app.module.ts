@@ -82,6 +82,7 @@ import { FirebaseModule } from './thematique_discussion/firebase/firebase.module
 import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
 import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
 import { EtablissementSanteModule } from './localisation_etablissement_sante/etablissement_sante.module';
+import { UserEtablissementSante } from './user_etablissement_sante/entities/user-etablissement-sante.entity';
 
 
 @Module({
@@ -119,7 +120,9 @@ import { EtablissementSanteModule } from './localisation_etablissement_sante/eta
   FirebaseModule,
   TransactionFraisModule,
   TransactionInterneModule,
-  EtablissementSanteModule,  
+  EtablissementSanteModule, 
+  
+  UserEtablissementSante
 
   // PublicationModule,
   // CommentaireModule,
