@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { CodeVerifOtp } from './code-verif-otp.entity';
+import { RaisonSuppressionCompte } from './raison-suppression.entity';
 
 @Entity('user_etablissement_sante')
 export class UserEtablissementSante {
@@ -47,4 +48,8 @@ export class UserEtablissementSante {
 
   @OneToMany(() => CodeVerifOtp, (otp) => otp.userEtablissementSante)
   otps: CodeVerifOtp[];
+
+  @OneToMany(() => RaisonSuppressionCompte, (r) => r.userEtablissementSante)
+  raisons: RaisonSuppressionCompte[];
+
 }

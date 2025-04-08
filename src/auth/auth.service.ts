@@ -24,12 +24,10 @@ export class AuthService {
     private userRepo: Repository<UserEtablissementSante>,
   ) {}
 
-  // async validateUser(identifier: string, password: string): Promise<{ user: User; access_token: string }> {
     async validateUser(identifier: string, password: string): Promise<{ user: User; access_token: string | null }> {
 
     console.log(`🔐 Tentative de connexion avec l'identifiant : ${identifier}`);
 
-    // Recherche utilisateur par identifiant
     const user = await this.userService.findUserByIdentifier(identifier);
 
     if (!user || !user.mdp) {
@@ -46,9 +44,6 @@ export class AuthService {
       throw new BadRequestException('Identifiant ou mot de passe incorrect');
     }
 
-    // Préparation du payload JWT
-    // const payload = { id_user: user.id_user, email: user.email };
-
     if (!user.compte_verifier) {
       await this.userService.generateOtp(identifier, MoyenEnvoiEnum.SMS); // ou EMAIL selon config
       return {
@@ -56,15 +51,6 @@ export class AuthService {
         access_token: null,
       };
     }
-    // throw new BadRequestException('Connexion impossible');
-
-    
-    // Génération du token JWT
-    // const access_token = this.jwtService.sign(payload);
-    // console.log(`✅ Connexion réussie pour : ${user.id_user}, Token généré : ${access_token}`);
-
-    // console.log('✅ Connexion réussie, Token généré:', access_token);
-    // return { user, access_token };
 
     const payload = { id_user: user.id_user, email: user.email };
     const access_token = this.jwtService.sign(payload);
