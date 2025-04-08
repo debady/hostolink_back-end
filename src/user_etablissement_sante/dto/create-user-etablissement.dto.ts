@@ -1,31 +1,39 @@
-import { IsString, IsOptional, IsEmail } from 'class-validator';
+import { IsNotEmpty, IsString, IsEmail, IsNumber } from 'class-validator';
 
 export class CreateUserEtablissementDto {
   @IsString()
+  @IsNotEmpty()
   nom: string;
 
   @IsString()
+  @IsNotEmpty()
   telephone: string;
 
   @IsString()
+  @IsNotEmpty()
   categorie: string;
 
   @IsString()
+  @IsNotEmpty()
   adresse: string;
 
-  @IsOptional()
-  latitude?: number;
+  @IsNumber()
+  @IsNotEmpty()
+  latitude: number;
 
-  @IsOptional()
-  longitude?: number;
-
-  @IsOptional()
-  specialites?: string;
-
-  @IsEmail()
-  @IsOptional()
-  email?: string;
+  @IsNumber()
+  @IsNotEmpty()
+  longitude: number;
 
   @IsString()
+  @IsNotEmpty()
+  specialites: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
   mot_de_passe: string;
 }

@@ -1,6 +1,7 @@
-import { Controller, Post, Body, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from '../utilisateur/user.service';
+import { LoginEtablissementDto } from 'src/user_etablissement_sante/dto/login-etablissement.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -49,4 +50,18 @@ export class AuthController {
       throw new InternalServerErrorException('Erreur lors de la connexion');
     }
   }
+
+  @Post('/login-etablissement')
+  async loginEtablissement(@Body() dto: LoginEtablissementDto) {
+    const user = await this.authService.validateUserEtablissementSante(dto.identifiant, dto.mot_de_passe);
+    if (!user) throw new UnauthorizedException('Identifiants invalides');
+
+    const token = await this.authService.login(user); // génère JWT
+
+    return {
+      token,
+      etablissement: user,
+    };
+  }
+
 }

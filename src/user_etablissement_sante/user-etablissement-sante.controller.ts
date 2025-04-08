@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { UserEtablissementSanteService } from './user-etablissement-sante.service';
 import { CreateUserEtablissementDto } from './dto/create-user-etablissement.dto';
 
@@ -6,18 +6,13 @@ import { CreateUserEtablissementDto } from './dto/create-user-etablissement.dto'
 export class UserEtablissementSanteController {
   constructor(private readonly service: UserEtablissementSanteService) {}
 
-  @Post()
-  create(@Body() dto: CreateUserEtablissementDto) {
-    return this.service.create(dto);
+  @Post('register')
+  register(@Body() dto: CreateUserEtablissementDto) {
+    return this.service.register(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.service.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.service.findById(+id);
+  @Post('verify-otp')
+  verify(@Body() body: { email: string; code: string }) {
+    return this.service.verifyOtp(body.email, body.code);
   }
 }
