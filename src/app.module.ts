@@ -27,12 +27,12 @@
 // import { UserEtablissementSanteModule } from './user_etablissement_sante/user-etablissement-sante.module';
 // import { QrDynamiqueModule } from './qr-dynamique_user_es/qr-dynamique.module';
 // import { PaiementModule } from './paiement_user_a_es/paiement.module';
+// import { ExpertSanteModule } from './user_etablissement_sante/expert-sante.module';
 
 // @Module({
   
 //   imports: [
 //     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-
 //     TypeOrmModule.forRoot({
 //       type: 'postgres',
       
@@ -61,8 +61,10 @@
 //   // TransactionInterneModule,
   
 //   UserEtablissementSanteModule,
+//   ExpertSanteModule,
+  
 //   QrDynamiqueModule,
-//   PaiementModule
+//   PaiementModule,
 
 //   ],
 
@@ -136,6 +138,7 @@ import { PaiementModule } from './paiement_user_a_es/paiement.module';
     QrDynamiqueModule,
     PaiementModule,
     AdministrateurModule,
+    PaiementModule
 
   ],
 })
