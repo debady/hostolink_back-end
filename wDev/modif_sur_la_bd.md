@@ -26,3 +26,5 @@ FOREIGN KEY (id_user_etablissement_sante)
 REFERENCES user_etablissement_sante(id_user_etablissement_sante);
 
 
+ALTER TABLE transaction_interne
+DROP CONSTRAINT fk_transaction_interne_transactions_frais;

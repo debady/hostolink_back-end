@@ -56,7 +56,7 @@ export class AuthController {
     const user = await this.authService.validateUserEtablissementSante(dto.identifiant, dto.mot_de_passe);
     if (!user) throw new UnauthorizedException('Identifiants invalides');
 
-    const token = await this.authService.login(user); // génère JWT
+    const token = await this.authService.loginEtablissement(user);
 
     return {
       token,

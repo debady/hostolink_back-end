@@ -6,12 +6,16 @@ import { UpdateUserDto } from './dto/update-user.dto';  // ✅ Celui d'admin
 import { ActivationUserDto } from './dto/activation-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import * as bcrypt from 'bcrypt';
+import { DataSource } from 'typeorm';
+
 
 @Injectable()
 export class GestUtilisateurService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly dataSource: DataSource
+    
   ) {}
 
     // ✅ Vérifie si un utilisateur existe (email ou téléphone)
@@ -22,23 +26,65 @@ export class GestUtilisateurService {
       return !!user;
     }
 
-  async findAll(): Promise<{ total: number; utilisateurs: User[] }> {
+  // async findAll(): Promise<{ total: number; utilisateurs: User[] }> {
+  //   const users = await this.userRepository.find({
+  //     relations: ['images'],
+  //   });
+  
+  //   // Filtrer pour ne garder que l'URL de la photo de profil
+  //   const utilisateurs = users.map(user => ({
+  //     ...user,
+  //     image_profil: user.images?.find(img => img.motif === 'photo_profile')?.url_image || null,
+  //     images: undefined, // Supprimer le champ "images"
+  //   }));
+  
+  //   return {
+  //     total: users.length,  // Nombre total d'utilisateurs
+  //     utilisateurs,
+  //   };
+  // }
+
+  async findAll(): Promise<{ total: number; utilisateurs: any[] }> {
     const users = await this.userRepository.find({
       relations: ['images'],
     });
   
-    // Filtrer pour ne garder que l'URL de la photo de profil
-    const utilisateurs = users.map(user => ({
-      ...user,
-      image_profil: user.images?.find(img => img.motif === 'photo_profile')?.url_image || null,
-      images: undefined, // Supprimer le champ "images"
-    }));
+    const utilisateurs = await Promise.all(
+      users.map(async (user) => {
+        const [compte] = await this.dataSource.query(
+          `SELECT * FROM compte WHERE id_user = $1 LIMIT 1`,
+          [user.id_user],
+        );
+  
+        const [qrStatique] = await this.dataSource.query(
+          `SELECT * FROM qr_code_paiement_statique WHERE id_user = $1 LIMIT 1`,
+          [user.id_user],
+        );
+  
+        const [qrDynamique] = await this.dataSource.query(
+          `SELECT * FROM qr_code_paiement_dynamique 
+           WHERE id_user = $1 AND statut = 'actif' AND date_expiration > NOW() 
+           ORDER BY date_creation DESC LIMIT 1`,
+          [user.id_user],
+        );
+  
+        return {
+          ...user,
+          image_profil: user.images?.find(img => img.motif === 'photo_profile')?.url_image || null,
+          images: undefined,
+          compte: compte || null,
+          qr_code_statique: qrStatique || null,
+          qr_code_dynamique: qrDynamique || null,
+        };
+      }),
+    );
   
     return {
-      total: users.length,  // Nombre total d'utilisateurs
+      total: utilisateurs.length,
       utilisateurs,
     };
   }
+  
 
   async findOne(id_user: string): Promise<Omit<User, 'images'> & { image_profil: string | null }> {
     const user = await this.userRepository.findOne({

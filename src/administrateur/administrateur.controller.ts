@@ -12,7 +12,8 @@ import {
   UseInterceptors,
   Delete,
   UnauthorizedException,
-  Patch
+  Patch,
+  BadRequestException
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateAdministrateurDto } from './dto/create-administrateur.dto';
@@ -22,7 +23,9 @@ import { JwtAdminGuard } from '../auth/jwt-auth.guard';
 
 @Controller('administrateurs')
 export class AdministrateurController {
-  constructor(private readonly adminService: AdministrateurService) {}
+  constructor(
+    private readonly administrateurService: AdministrateurService,
+    private readonly adminService: AdministrateurService) {}
 
   @Post('inscription')
   async inscrireAdmin(@Body() dto: CreateAdministrateurDto) {
@@ -170,10 +173,29 @@ export class AdministrateurController {
   }
 
 
+  @UseGuards(JwtAdminGuard)
+  @Post('crediter-utilisateur')
+  async crediterUtilisateur(@Body() body: { id_user: string; montant: number }) {
+    return this.adminService.crediterUtilisateur(body.id_user, body.montant);
+  }
+  
 
+  @Post('crediter-etablissement')
+  @UseGuards(JwtAdminGuard)
+  async crediterEtablissement(
+    @Body('id_etab') id: number,
+    @Body('montant') montant: number,
+  ) {
+    if (!id || !montant) {
+      throw new BadRequestException('ID et montant requis');
+    }
+    return this.administrateurService.crediterEtablissement(id, montant);
+  }
 
-
-
-
+  @Get('etablissements')
+  @UseGuards(JwtAdminGuard)
+  async getAllEtablissements() {
+    return this.administrateurService.findAllEtablissements();
+  }
 
 }

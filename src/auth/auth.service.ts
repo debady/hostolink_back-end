@@ -88,6 +88,12 @@ export class AuthService {
       const payload = { id: user.id };
       return this.jwtService.sign(payload);
     }
+
+    async loginEtablissement(user: any) {
+      const payload = { id: user.id_user_etablissement_sante };
+      return this.jwtService.sign(payload);
+    }
+    
     
     
 

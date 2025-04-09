@@ -26,18 +26,28 @@ export class UserEtablissementSanteController {
   verify(@Body() body: { email: string; code: string }) {
     return this.service.verifyOtp(body.email, body.code);
   }
+  
+  @UseGuards(JwtEtablissementAuthGuard)
+  @Post('logout')
+  async logout(@Req() req: any) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) throw new BadRequestException('Token manquant');
+    return this.service.logout(token);
+  }
 
   @UseGuards(JwtEtablissementAuthGuard)
   @Get('me')
   async getProfile(@Req() req: any) {
-    const id = req.user.id;
+    const id = req.user.id_user_etablissement_sante;
+
     return this.service.getProfile(id);
   }
 
   @UseGuards(JwtEtablissementAuthGuard)
   @Patch('update-profile')
   updateProfile(@Req() req: any, @Body() dto: UpdateProfileEtablissementDto) {
-    const id = req.user.id;
+    const id = req.user.id_user_etablissement_sante;
+
     return this.service.updateProfile(id, dto);
   }
 
@@ -74,13 +84,6 @@ export class UserEtablissementSanteController {
     return this.userEtablissementSanteService.uploadOrUpdateAvatar(idEtablissement, file);
   }
 
-  @UseGuards(JwtEtablissementAuthGuard)
-  @Post('logout')
-  async logout(@Req() req: any) {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) throw new BadRequestException('Token manquant');
-    return this.service.logout(token);
-  }
 
 
 

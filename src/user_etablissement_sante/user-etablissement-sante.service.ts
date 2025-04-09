@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserEtablissementSante } from './entities/user-etablissement-sante.entity';
 import { CodeVerifOtp } from './entities/code-verif-otp.entity';
@@ -40,6 +40,8 @@ isTokenRevoked(token: string): boolean {
 }
 
   constructor(
+    private readonly dataSource: DataSource, 
+    
     @InjectRepository(UserEtablissementSante)
     private readonly userRepo: Repository<UserEtablissementSante>,
     @InjectRepository(CodeVerifOtp)
@@ -111,12 +113,9 @@ isTokenRevoked(token: string): boolean {
   }
 
   async verifyOtp(email: string, code: string) {
-    const user = await this.userRepo.findOne({
-      where: { email },
-    });
-
+    const user = await this.userRepo.findOne({ where: { email } });
     if (!user) throw new BadRequestException('Utilisateur non trouvé');
-
+  
     const otp = await this.otpRepo.findOne({
       where: {
         userEtablissementSante: { id_user_etablissement_sante: user.id_user_etablissement_sante },
@@ -124,16 +123,28 @@ isTokenRevoked(token: string): boolean {
         is_valid: true,
       },
     });
-
+  
     if (!otp) throw new BadRequestException('Code invalide');
-
+  
     const now = new Date();
     if (otp.expires_at.getTime() < now.getTime()) {
       throw new BadRequestException('Code expiré');
     }
-
+  
     otp.is_valid = false;
     await this.otpRepo.save(otp);
+  
+    // 🔁 Étape 1 – Créer le compte s’il n’existe pas
+    await this.createOrEnsureCompte(user.id_user_etablissement_sante);
+  
+    // 🔁 Étape 2 – Générer le QR statique si absent
+    await this.createOrEnsureQrStatique(user.id_user_etablissement_sante);
+  
+    // 🔁 Étape 3 – Générer le QR dynamique si absent
+    await this.createOrEnsureQrDynamique(user.id_user_etablissement_sante);
+
+
+    await this.createOrReplaceQrDynamique(user.id_user_etablissement_sante);
 
     return {
       message: 'Code OTP vérifié avec succès',
@@ -146,7 +157,60 @@ isTokenRevoked(token: string): boolean {
     };
   }
 
-  async getProfile(id: number) {
+  // Création d’un compte lié à l’établissement
+  private async createOrEnsureCompte(idEtab: number) {
+    const existing = await this.dataSource.query(
+      'SELECT * FROM compte WHERE id_user_etablissement_sante = $1',
+      [idEtab],
+    );
+    if (existing.length > 0) return;
+
+    const numero_compte = `HST-${idEtab}-${Date.now()}`;
+    await this.dataSource.query(
+      `INSERT INTO compte (solde_compte, solde_bonus, cumule_mensuel, plafond, mode_paiement_preferentiel, type_user, devise, numero_compte, statut, id_user_etablissement_sante)
+      VALUES (0, 0, 0, 100000, NULL, 'etablissement', 'XOF', $1, 'actif', $2)`,
+      [numero_compte, idEtab],
+    );
+  }
+
+// Génération d’un QR statique
+private async createOrEnsureQrStatique(idEtab: number) {
+  const existing = await this.dataSource.query(
+    'SELECT * FROM qr_code_paiement_statique WHERE id_user_etablissement_sante = $1',
+    [idEtab],
+  );
+  if (existing.length > 0) return;
+
+  const token = this.generateToken();
+  const qrData = `HST_STATIC_${idEtab}_${token}`;
+  const expiration = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 an
+
+  await this.dataSource.query(
+    `INSERT INTO qr_code_paiement_statique (qr_code_data, statut, token, id_user_etablissement_sante, date_expiration)
+     VALUES ($1, 'actif', $2, $3, $4)`,
+    [qrData, token, idEtab, expiration],
+  );
+}
+
+// Génération d’un QR dynamique
+private async createOrEnsureQrDynamique(idEtab: number) {
+  const token = this.generateToken();
+  const expiration = new Date(Date.now() + 5 * 60 * 1000); // expire après 5 min
+
+  await this.dataSource.query(
+    `INSERT INTO qr_code_paiement_dynamique (qr_code_valeur, statut, token, id_user_etablissement_sante, date_expiration)
+     VALUES ($1, 'actif', $2, $3, $4)`,
+    [`HST_DYNAMIC_${idEtab}_${token}`, token, idEtab, expiration],
+  );
+}
+
+// Génère un token aléatoire (peut être déplacé dans un utilitaire si besoin)
+private generateToken(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
+
+async getProfile(id: number) {
     const user = await this.userRepo.findOne({
       where: { id_user_etablissement_sante: id },
       select: {
@@ -162,10 +226,14 @@ isTokenRevoked(token: string): boolean {
         creatAt: true,
       },
     });
+
+    if (!id || isNaN(id)) {
+      throw new BadRequestException('Identifiant établissement invalide');
+    }
+    
   
     if (!user) throw new BadRequestException('Établissement non trouvé');
   
-    // 🔍 Cherche l'image de profil (avatar)
     const image = await this.imageRepo.findOne({
       where: {
         id_user_etablissement_sante: id,
@@ -173,12 +241,56 @@ isTokenRevoked(token: string): boolean {
       },
     });
   
-    // ✅ Ajoute l'image dans la réponse (ou null si pas d'image)
+    // ✅ Fix : récupération directe par query avec conversion int
+    const [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user_etablissement_sante = $1 LIMIT 1`,
+      [Number(id)]
+    );
+  
+    const [qrStatique] = await this.dataSource.query(
+      `SELECT * FROM qr_code_paiement_statique WHERE id_user_etablissement_sante = $1 LIMIT 1`,
+      [Number(id)]
+    );
+  
+    const [qrDynamique] = await this.dataSource.query(
+      `SELECT * FROM qr_code_paiement_dynamique 
+       WHERE id_user_etablissement_sante = $1 
+       AND date_expiration > NOW() 
+       ORDER BY date_creation DESC 
+       LIMIT 1`,
+      [Number(id)]
+    );
+  
     return {
       ...user,
       image_profil: image ? image.url_image : null,
+      compte: compte || null,
+      qr_code_statique: qrStatique || null,
+      qr_code_dynamique: qrDynamique || null,
     };
   }
+  
+
+  private async createOrReplaceQrDynamique(idEtab: number) {
+    // ❌ Supprimer tous les anciens QR de cet établissement
+    await this.dataSource.query(
+      `DELETE FROM qr_code_paiement_dynamique 
+       WHERE id_user_etablissement_sante = $1`,
+      [idEtab]
+    );
+  
+    // ✅ Créer un nouveau QR dynamique
+    const token = this.generateToken();
+    const expiration = new Date(Date.now() + 60 * 1000); // 60 sec
+    const valeur = `HST_DYNAMIC_${idEtab}_${token}`;
+  
+    await this.dataSource.query(
+      `INSERT INTO qr_code_paiement_dynamique (qr_code_valeur, statut, token, id_user_etablissement_sante, date_expiration)
+       VALUES ($1, 'actif', $2, $3, $4)`,
+      [valeur, token, idEtab, expiration]
+    );
+  }
+  
   
 
   async updateProfile(id: number, dto: UpdateProfileEtablissementDto) {
