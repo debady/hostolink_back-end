@@ -114,9 +114,6 @@ import {
           [compteEtablissement.id_compte],
         );
 
-      
-      
-  
       return {
         message: '✅ Paiement effectué avec succès',
         montant_envoyé: montant,
@@ -126,5 +123,110 @@ import {
         solde_etablissement: compteEtabMaj.solde_compte,
       };
     }
+
+
+    async payerParIdentifiant(identifiant: string, montant: number, idUser: string) {
+      if (!identifiant || !montant || !idUser) {
+        throw new BadRequestException('Données manquantes');
+      }
+    
+      // 1. 🔍 Trouver l’établissement par email ou téléphone
+      const [etab] = await this.dataSource.query(
+        `SELECT * FROM user_etablissement_sante 
+         WHERE (email = $1 OR telephone = $1) AND compte_verifie = true LIMIT 1`,
+        [identifiant],
+      );
+    
+      if (!etab) {
+        throw new NotFoundException("Établissement introuvable ou non vérifié");
+      }
+    
+      const etabId = etab.id_user_etablissement_sante;
+    
+      // 2. 💰 Vérifie le compte de l’utilisateur
+      const [compteUtilisateur] = await this.dataSource.query(
+        `SELECT * FROM compte WHERE id_user = $1 AND statut = 'actif' LIMIT 1`,
+        [idUser],
+      );
+    
+      if (!compteUtilisateur) {
+        throw new UnauthorizedException('Compte utilisateur introuvable');
+      }
+    
+      if (compteUtilisateur.solde_compte < montant) {
+        throw new BadRequestException('Solde insuffisant');
+      }
+    
+      // 3. 🔄 Compte de l’établissement
+      const [compteEtablissement] = await this.dataSource.query(
+        `SELECT * FROM compte WHERE id_user_etablissement_sante = $1 LIMIT 1`,
+        [etabId],
+      );
+    
+      if (!compteEtablissement) {
+        throw new NotFoundException("Compte de l'établissement introuvable");
+      }
+    
+      const frais = Math.floor(montant * 0.02);
+      const montantFinal = montant - frais;
+    
+      // 4. 🔐 Transaction
+      await this.dataSource.transaction(async (manager) => {
+        // a. Débit
+        await manager.query(
+          `UPDATE compte SET solde_compte = solde_compte - $1 WHERE id_compte = $2`,
+          [montant, compteUtilisateur.id_compte],
+        );
+      
+        // b. Crédit
+        await manager.query(
+          `UPDATE compte SET solde_compte = solde_compte + $1 WHERE id_compte = $2`,
+          [montantFinal, compteEtablissement.id_compte],
+        );
+      
+        // ✅ c. Insérer d’abord dans transaction_interne
+        const insertTransaction = await manager.query(
+          `INSERT INTO transaction_interne 
+           (id_compte_expediteur, id_compte_recepteur, montant, frais_transaction, devise_transaction, statut, type_transaction, id_user_etablissement_sante, id_etablissement_recepteur)
+           VALUES ($1, $2, $3, $4, 'XOF', 'effectué', 'paiement_contact', $5, $6)
+           RETURNING id_transaction`,
+          [
+            compteUtilisateur.id_compte,
+            compteEtablissement.id_compte,
+            montant,
+            frais,
+            etabId,
+            etabId,
+          ],
+        );
+      
+        const idTransaction = insertTransaction[0].id_transaction;
+      
+        // ✅ d. Insérer dans transactions_frais avec le bon id_transaction
+        await manager.query(
+          `INSERT INTO transactions_frais 
+           (id_transaction, montant_frais, type_transaction, mode_paiement)
+           VALUES ($1, $2, 'interne', 'wallet')`,
+          [idTransaction, frais],
+        );
+      });
+      
+    
+      // 5. 🔁 Solde utilisateur MAJ
+      const [soldeActuel] = await this.dataSource.query(
+        `SELECT solde_compte FROM compte WHERE id_compte = $1`,
+        [compteUtilisateur.id_compte],
+      );
+    
+      return {
+        message: '✅ Paiement effectué avec succès',
+        identifiant_etablissement: identifiant,
+        montant_envoyé: montant,
+        montant_reçu: montantFinal,
+        frais_appliqués: frais,
+        solde_restant: soldeActuel?.solde_compte || null,
+      };
+    }
+    
   }
   

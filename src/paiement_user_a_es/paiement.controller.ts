@@ -26,5 +26,19 @@ import {
   
       return this.paiementService.payerParQr(dto.token, dto.montant, idUser);
     }
+
+    @Post('vers-etablissement/email-ou-tel')
+  @UseGuards(JwtAuthGuard)
+  async payerVersEtablissementParIdentifiant(
+    @Body() body: { identifiant: string; montant: number },
+    @Req() req,
+  ) {
+    return this.paiementService.payerParIdentifiant(
+      body.identifiant,
+      body.montant,
+      req.user.id_user,
+    );
   }
+
+}
   
