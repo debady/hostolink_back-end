@@ -1,39 +1,69 @@
-// src/transaction/dto/create-transaction.dto.ts
-import { IsNumber, IsString, IsEnum, IsOptional, Min } from 'class-validator';
-import { TransactionType } from '../entitie/transaction-interne.entity';
+// dto/create-transaction.dto.ts
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, IsEnum } from 'class-validator';
+import { TransactionStatus, TransactionType } from '../entitie/transaction-interne.entity';
 
 export class CreateTransactionDto {
+  @IsNotEmpty()
   @IsNumber()
   id_compte_expediteur: number;
 
-  @IsNumber()
-  id_compte_recepteur: number;
-
-  @IsNumber()
   @IsOptional()
-  id_utilisateur_recepteur?: number;
+  @IsUUID()
+  id_utilisateur_envoyeur?: string;
 
-  @IsNumber()
   @IsOptional()
+  @IsUUID()
+  id_utilisateur_recepteur?: string;
+
+  @IsOptional()
+  @IsNumber()
   id_etablissement_recepteur?: number;
 
+  @IsOptional()
   @IsNumber()
-  @Min(1)
-  montant: number;
+  id_etablissement_envoyeur?: number;
 
+  @IsNotEmpty()
+  @IsNumber()
+  montant_envoyer: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  montant_reçu: number;
+
+  @IsOptional()
+  @IsNumber()
+  frais_preleve?: number;
+
+
+
+  @IsOptional()
   @IsString()
-  @IsOptional()
-  devise_transaction?: string = 'XOF';
+  motif_annulation?: string;
 
+  
+  
+  @IsOptional()
+  @IsEnum(TransactionStatus)
+  statut?: TransactionStatus;
+
+  @IsOptional()
+  @IsString()
+  devise_transaction?: string;
+
+  @IsOptional()
   @IsEnum(TransactionType)
-  @IsOptional()
-  type_transaction?: TransactionType = TransactionType.PAIEMENT_QRCODE;
+  type_transaction?: TransactionType;
 
-  @IsNumber()
   @IsOptional()
-  id_qrcode?: number;
+  @IsNumber()
+  id_qrcode_dynamique?: number;
 
-  @IsNumber()
   @IsOptional()
-  id_user_etablissement_sante?: number;
+  @IsNumber()
+  id_qrcode_statique?: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  id_compte_recepteur: number;
 }

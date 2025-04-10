@@ -1,4 +1,4 @@
-// src/transaction/dto/pay-with-phone.dto.ts
+// dto/pay-with-phone.dto.ts
 import { IsString, IsNumber, IsOptional, Min, Matches } from 'class-validator';
 
 export class PayWithPhoneDto {
@@ -7,10 +7,11 @@ export class PayWithPhoneDto {
   telephone: string;
 
   @IsNumber()
-  @Min(1)
-  montant: number;
+  @Min(500)
+  montant_envoyer: number;
 
   @IsString()
   @IsOptional()
   description?: string;
 }
+

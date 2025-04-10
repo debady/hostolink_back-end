@@ -1,11 +1,16 @@
-// src/transaction/dto/pay-with-qr.dto.ts
-import { IsString, IsNumber, Min } from 'class-validator';
+// dto/pay-with-qr.dto.ts
+import { IsNotEmpty, IsNumber, IsString, IsOptional } from 'class-validator';
 
 export class PayWithQrDto {
+  @IsNotEmpty()
   @IsString()
   token: string;
 
+  @IsNotEmpty()
   @IsNumber()
-  @Min(1)
-  montant: number;
+  montant_envoyer: number;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 }

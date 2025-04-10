@@ -1,21 +1,21 @@
-// src/transaction/entities/transaction-frais.entity.ts
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+// transaction-frais.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-export enum TypeTransactionFrais {
+export enum TransactionFraisType {
   INTERNE = 'interne',
   EXTERNE = 'externe',
-  BANCAIRE = 'bancaire',
+  BANCAIRE = 'bancaire'
 }
 
-export enum ModePaiement {
+export enum ModePayment {
   WALLET = 'wallet',
   MOBILE_MONEY = 'mobile_money',
-  BANQUE = 'banque',
+  BANQUE = 'banque'
 }
 
 @Entity('transactions_frais')
 export class TransactionFrais {
-  @PrimaryGeneratedColumn('increment')
+  @PrimaryGeneratedColumn()
   id_frais: number;
 
   @Column()
@@ -24,12 +24,21 @@ export class TransactionFrais {
   @Column()
   montant_frais: number;
 
-  @Column({ length: 20, enum: TypeTransactionFrais })
-  type_transaction: TypeTransactionFrais;
+  @Column({
+    type: 'varchar',
+    length: 20
+  })
+  type_transaction: TransactionFraisType;
 
-  @Column({ length: 20, enum: ModePaiement })
-  mode_paiement: ModePaiement;
+  @Column({
+    type: 'varchar',
+    length: 20
+  })
+  mode_paiement: ModePayment;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP'
+  })
   date_creation: Date;
 }

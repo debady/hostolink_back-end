@@ -8,6 +8,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as dotenv from 'dotenv';
 dotenv.config();
+import 'reflect-metadata';
 
 async function bootstrap() {
   try {

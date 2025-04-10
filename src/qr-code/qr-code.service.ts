@@ -387,29 +387,49 @@ export class QrCodeService {
     }
   }
 
-  /**
-   * Rafraîchit ou crée un QR code dynamique pour un utilisateur
-   */
+
+
+
+
+
   async refreshUserDynamicQrCode(
     id_user: string, 
     accountNumber?: string,
     expiresIn: number = 60,
     currency?: string,
-    // amount?: number,
-    // description?: string
   ): Promise<QrCodeDynamique> {
     console.log(`Rafraîchissement du QR code dynamique pour l'utilisateur ${id_user}`);
     
     try {
-      // Désactiver tous les QR codes dynamiques actifs de cet utilisateur
-      const updateResult = await this.qrCodeDynamiqueRepository.update(
-        { id_user, statut: 'actif' },
-        { statut: 'inactif' }
-      );
+      // Chercher d'abord un QR code dynamique existant pour cet utilisateur
+      const existingQrCode = await this.qrCodeDynamiqueRepository.findOne({
+        where: { id_user, statut: 'actif' },
+        order: { date_creation: 'DESC' }
+      });
       
-      console.log(`${updateResult.affected} QR codes désactivés`);
+      // Si un QR code existe, le mettre à jour
+      if (existingQrCode) {
+        // Créer un nouveau payload et token
+        const payload = this.createUserPayload(
+          id_user, 
+          true, 
+          expiresIn, 
+          { 
+            accountNumber,
+            currency
+          }
+        );
+        const token = this.generateTokenWithPayload(payload);
+        
+        // Mettre à jour le QR code existant
+        existingQrCode.token = token;
+        existingQrCode.date_expiration = new Date(payload.expiresAt || Date.now() + (expiresIn * 1000));
+        
+        // Sauvegarder les modifications
+        return this.qrCodeDynamiqueRepository.save(existingQrCode);
+      }
       
-      // Créer un nouveau QR code dynamique
+      // Si aucun QR code n'existe, en créer un nouveau
       return this.createDynamicQrForUser(id_user, accountNumber, expiresIn, currency);
     } catch (error) {
       console.error('Erreur lors du rafraîchissement du QR code:', error);
@@ -417,26 +437,123 @@ export class QrCodeService {
     }
   }
 
-  //  * Récupère les QR codes dynamiques actifs d'un utilisateur spécifique
-  async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
-    // 1. Mettre à jour les statuts des QR expirés
-    await this.updateExpiredQrCodesStatus(id_user);
+
+
+
+
+
+
+
+
+
+
+  /**
+   * Rafraîchit ou crée un QR code dynamique pour un utilisateur
+   */
+  // async refreshUserDynamicQrCode(
+  //   id_user: string, 
+  //   accountNumber?: string,
+  //   expiresIn: number = 60,
+  //   currency?: string,
+  //   // amount?: number,
+  //   // description?: string
+  // ): Promise<QrCodeDynamique> {
+  //   console.log(`Rafraîchissement du QR code dynamique pour l'utilisateur ${id_user}`);
+    
+  //   try {
+  //     // Désactiver tous les QR codes dynamiques actifs de cet utilisateur
+  //     const updateResult = await this.qrCodeDynamiqueRepository.update(
+  //       { id_user, statut: 'actif' },
+  //       { statut: 'inactif' }
+  //     );
+      
+  //     console.log(`${updateResult.affected} QR codes désactivés`);
+      
+  //     // Créer un nouveau QR code dynamique
+  //     return this.createDynamicQrForUser(id_user, accountNumber, expiresIn, currency);
+  //   } catch (error) {
+  //     console.error('Erreur lors du rafraîchissement du QR code:', error);
+  //     throw new BadRequestException('Impossible de rafraîchir le QR code: ' + error.message);
+  //   }
+  // }
+
+
+// Modification de la méthode getUserDynamicQrCodes
+async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
+  // 1. Récupérer le QR code dynamique actif le plus récent de l'utilisateur
+  let userQRCode = await this.qrCodeDynamiqueRepository.findOne({
+    where: { id_user, statut: 'actif' },
+    order: { date_creation: 'DESC' }
+  });
   
-    // 2. Rechercher les QR codes actifs
-    let activeQRCodes = await this.qrCodeDynamiqueRepository.find({
-      where: { id_user, statut: 'actif' },
-      order: { date_creation: 'DESC' }
-    });
-  
-    // 3. S'il n'y en a plus, on en crée automatiquement un nouveau
-    if (activeQRCodes.length === 0) {
-      const compte = await this.compteService.getUserCompte(id_user);
-      const newQr = await this.createDynamicQrForUser(id_user, compte?.numero_compte, 60, compte?.devise);
-      activeQRCodes = [newQr];
-    }
-  
-    return activeQRCodes;
+  // 2. Si aucun QR code n'existe, en créer un nouveau
+  if (!userQRCode) {
+    const compte = await this.compteService.getUserCompte(id_user);
+    userQRCode = await this.createDynamicQrForUser(
+      id_user, 
+      compte?.numero_compte, 
+      60, 
+      compte?.devise
+    );
+    return [userQRCode];
   }
+  
+  // 3. Vérifier si le QR code est expiré
+  const now = new Date();
+  if (now > userQRCode.date_expiration) {
+    // 4. Mettre à jour le token et la date d'expiration du QR code existant
+    const compte = await this.compteService.getUserCompte(id_user);
+    
+    // Créer un nouveau payload et token
+    const payload = this.createUserPayload(
+      id_user, 
+      true, 
+      60, 
+      { 
+        accountNumber: compte?.numero_compte,
+        currency: compte?.devise
+      }
+    );
+    const token = this.generateTokenWithPayload(payload);
+    
+    // Mettre à jour le QR code existant
+    userQRCode.token = token;
+    userQRCode.date_expiration = new Date(payload.expiresAt || Date.now() + (60 * 1000));
+    
+    // Sauvegarder les modifications
+    await this.qrCodeDynamiqueRepository.save(userQRCode);
+  }
+  
+  return [userQRCode];
+}
+
+
+
+
+
+
+
+
+  //  * Récupère les QR codes dynamiques actifs d'un utilisateur spécifique
+  // async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
+  //   // 1. Mettre à jour les statuts des QR expirés
+  //   await this.updateExpiredQrCodesStatus(id_user);
+  
+  //   // 2. Rechercher les QR codes actifs
+  //   let activeQRCodes = await this.qrCodeDynamiqueRepository.find({
+  //     where: { id_user, statut: 'actif' },
+  //     order: { date_creation: 'DESC' }
+  //   });
+  
+  //   // 3. S'il n'y en a plus, on en crée automatiquement un nouveau
+  //   if (activeQRCodes.length === 0) {
+  //     const compte = await this.compteService.getUserCompte(id_user);
+  //     const newQr = await this.createDynamicQrForUser(id_user, compte?.numero_compte, 60, compte?.devise);
+  //     activeQRCodes = [newQr];
+  //   }
+  
+  //   return activeQRCodes;
+  // }
   
 
   /**
@@ -495,6 +612,82 @@ export class QrCodeService {
       return qrCode;
     }
   }
+
+  
+
+
+  // async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
+  //   // 1. Récupérer tous les QR codes de l'utilisateur
+  //   let userQRCodes = await this.qrCodeDynamiqueRepository.find({
+  //     where: { id_user, statut: 'actif' },
+  //     order: { date_creation: 'DESC' }
+  //   });
+  
+  //   // 2. Vérifier si des QR codes sont expirés et les mettre à jour
+  //   const now = new Date();
+  //   let needsUpdate = false;
+    
+  //   for (const qrCode of userQRCodes) {
+  //     if (now > qrCode.date_expiration) {
+  //       needsUpdate = true;
+  //       break;
+  //     }
+  //   }
+    
+  //   // 3. S'il y a des QR codes expirés ou pas de QR code du tout
+  //   if (needsUpdate || userQRCodes.length === 0) {
+  //     // S'il n'y a pas de QR code, en créer un nouveau
+  //     if (userQRCodes.length === 0) {
+  //       const compte = await this.compteService.getUserCompte(id_user);
+  //       const newQr = await this.createDynamicQrForUser(
+  //         id_user, 
+  //         compte?.numero_compte, 
+  //         60, 
+  //         compte?.devise
+  //       );
+  //       userQRCodes = [newQr];
+  //     }
+  //     // S'il y a des QR codes expirés, mettre à jour le premier
+  //     else {
+  //       const expiredQr = userQRCodes[0]; // Prendre le plus récent (premier après tri DESC)
+        
+  //       // Créer temporairement un nouveau QR code pour récupérer un nouveau token et date d'expiration
+  //       const compte = await this.compteService.getUserCompte(id_user);
+  //       const tempNewQr = await this.createDynamicQrForUser(
+  //         id_user, 
+  //         compte?.numero_compte, 
+  //         60, 
+  //         compte?.devise
+  //       );
+        
+  //       // Mettre à jour l'ancien QR code avec les nouvelles informations
+  //       expiredQr.token = tempNewQr.token;
+  //       expiredQr.date_expiration = tempNewQr.date_expiration;
+  //       // expiredQr.date_modification = new Date();
+        
+  //       // Sauvegarder les modifications
+  //       await this.qrCodeDynamiqueRepository.save(expiredQr);
+        
+  //       // Supprimer le QR code temporaire
+  //       await this.qrCodeDynamiqueRepository.delete(tempNewQr.id_qrcode);
+        
+  //       // Récupérer à nouveau les QR codes mis à jour
+  //       userQRCodes = await this.qrCodeDynamiqueRepository.find({
+  //         where: { id_user, statut: 'actif' },
+  //         order: { date_creation: 'DESC' }
+  //       });
+  //     }
+  //   }
+  
+  //   return userQRCodes;
+  // }
+
+
+
+  
+
+
+
 
   /* 
    * Méthodes pour les établissements de santé (à décommenter plus tard)

@@ -1,22 +1,26 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { TransactionInterneService } from './transaction-interne.service';
-// import { TransactionInterneController } from './transaction-interne.controller';
-import { Transaction } from './entitie/transaction-interne.entity';
-import { TransactionFrais } from 'src/transaction-frais/entite/transaction-frais.entity';
-import { CompteModule } from 'src/compte/compte.module';
-import { QrCodeModule } from 'src/qr-code/qr-code.module';
-import { UserModule } from 'src/utilisateur/user.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
-// transaction-interne.module.ts
+
+// transaction.module.ts
+import { Module, forwardRef } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Transaction } from './entitie/transaction-interne.entity';
+import { TransactionInterneController } from './transaction-interne.controller';
+import { TransactionInterneService } from './transaction-interne.service';
+
+// Importez les modules réels
+import { CompteModule } from '../compte/compte.module';
+import { QrCodeModule } from '../qr-code/qr-code.module';
+import { UserModule } from '../utilisateur/user.module';
+import { TransactionFrais } from 'src/transaction-frais/entite/transaction-frais.entity';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Transaction, TransactionFrais]), // Assurez-vous que ces entités sont importées
+    TypeOrmModule.forFeature([Transaction, TransactionFrais]),
     forwardRef(() => CompteModule),
     forwardRef(() => QrCodeModule),
     forwardRef(() => UserModule)
   ],
-  // controllers: [TransactionInterneController],
+  controllers: [TransactionInterneController],
   providers: [TransactionInterneService],
   exports: [TransactionInterneService]
 })

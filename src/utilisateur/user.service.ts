@@ -360,5 +360,21 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
     await this.generateOtp(identifier!, moyen);
   }
 
+
+
+// Méthode à ajouter au UserService
+// Dans user.service.ts
+  async findUserByPhone(telephone: string) {
+    const user = await this.userRepository.findOne({
+      where: { telephone, compte_verifier: true, actif: true }
+    });
+    
+    if (!user) {
+      throw new NotFoundException(`Aucun utilisateur trouvé avec le numéro ${telephone}`);
+    }
+    
+    return user;
+  }
+
   
 }

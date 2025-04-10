@@ -12,3 +12,17 @@ commandes:
     -- Créer un index pour rechercher rapidement par short_id
     CREATE INDEX idx_dynamic_short_id ON qr_code_paiement_dynamique(short_id);
     CREATE INDEX idx_static_short_id ON qr_code_paiement_statique(short_id);
+
+
+
+ajout de la colonne "motif_annulation" dans la table "transaction_interne" 
+cette colonne est la uniquement pour distingué les remboursement fait par les administrateurs
+
+    ALTER TABLE transaction_interne 
+    ADD COLUMN motif_annulation CHARACTER VARYING(50);
+
+
+modification du type de la colonne "montant_frais" dans la table "transactions_frais" 
+
+    ALTER TABLE transactions_frais 
+    ALTER COLUMN montant_frais TYPE DECIMAL(10,2);

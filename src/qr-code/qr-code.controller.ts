@@ -4,7 +4,7 @@
 import { Controller, Post, Get, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { QrCodeService } from './qr-code.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { QrCodeDynamique } from './entitie/qr_code_dynamique.entity';
+// import { QrCodeDynamique } from './entitie/qr_code_dynamique.entity';
 
 
 @Controller('qr-codes')
@@ -17,6 +17,7 @@ export class QrCodeController {
   @Post('dynamic')
   @UseGuards(JwtAuthGuard)
   async generateDynamicQrCode(@Req() req, @Body() body: { expiresIn?: number }) {
+    console.log('Request received for dynamic QR code');  // Ajoutez cette ligne pour le débogage
     const id_user = req.user.id_user;
     const expiresIn = body.expiresIn || 60; // Par défaut 60 secondes
     
