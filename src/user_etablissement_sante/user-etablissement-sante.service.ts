@@ -168,7 +168,7 @@ isTokenRevoked(token: string): boolean {
     const numero_compte = `HST-${idEtab}-${Date.now()}`;
     await this.dataSource.query(
       `INSERT INTO compte (solde_compte, solde_bonus, cumule_mensuel, plafond, mode_paiement_preferentiel, type_user, devise, numero_compte, statut, id_user_etablissement_sante)
-      VALUES (0, 0, 0, 100000, NULL, 'etablissement', 'XOF', $1, 'actif', $2)`,
+      VALUES (0, 0, 0, 0, NULL, 'etablissement', 'XOF', $1, 'actif', $2)`,
       [numero_compte, idEtab],
     );
   }
