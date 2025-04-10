@@ -8,6 +8,7 @@ import { LoginAdministrateurDto } from './dto/login-administrateur.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Image, ImageMotifEnum } from '../image/entities/image.entity';
 import { v2 as cloudinary } from 'cloudinary';
+import { DataSource } from 'typeorm';
 
 
 @Injectable()
@@ -21,7 +22,7 @@ export class AdministrateurService {
     @Inject('CLOUDINARY') private cloudinaryProvider: typeof cloudinary,
 
     @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
-
+    private readonly dataSource: DataSource
 
     
   ) {}
@@ -286,5 +287,101 @@ export class AdministrateurService {
   }
   
    
+  async crediterUtilisateur(id_user: string, montant: number) {
+    if (!id_user || !montant || montant <= 0) {
+      throw new BadRequestException('ID utilisateur et montant requis');
+    }
+  
+    const [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user = $1 AND statut = 'actif' LIMIT 1`,
+      [id_user],
+    );
+  
+    if (!compte) {
+      throw new NotFoundException('Compte utilisateur introuvable');
+    }
+  
+    await this.dataSource.query(
+      `UPDATE compte SET solde_compte = solde_compte + $1 WHERE id_compte = $2`,
+      [montant, compte.id_compte],
+    );
+  
+    return {
+      message: '✅ Solde crédité avec succès',
+      utilisateur: id_user,
+      montant_crédité: montant,
+    };
+  }
+
+  async crediterEtablissement(idEtab: number, montant: number) {
+    const [compte] = await this.dataSource.query(
+      `SELECT * FROM compte 
+       WHERE id_user_etablissement_sante = $1 
+       AND statut = 'actif' LIMIT 1`,
+      [idEtab],
+    );
+  
+    if (!compte) {
+      throw new NotFoundException("Compte établissement introuvable");
+    }
+  
+    await this.dataSource.query(
+      `UPDATE compte SET solde_compte = solde_compte + $1 
+       WHERE id_compte = $2`,
+      [montant, compte.id_compte],
+    );
+  
+    return { message: `✅ Crédit de ${montant} XOF effectué avec succès.` };
+  }
+
+  async findAllEtablissements(): Promise<{ total: number; etablissements: any[] }> {
+    const etabs = await this.dataSource.query(
+      `SELECT * FROM user_etablissement_sante ORDER BY id_user_etablissement_sante DESC`,
+    );
+  
+    const etablissements = await Promise.all(
+      etabs.map(async (etab) => {
+        const [compte] = await this.dataSource.query(
+          `SELECT * FROM compte WHERE id_user_etablissement_sante = $1 LIMIT 1`,
+          [etab.id_user_etablissement_sante],
+        );
+  
+        const [qrStatique] = await this.dataSource.query(
+          `SELECT * FROM qr_code_paiement_statique WHERE id_user_etablissement_sante = $1 LIMIT 1`,
+          [etab.id_user_etablissement_sante],
+        );
+  
+        const [qrDynamique] = await this.dataSource.query(
+          `SELECT * FROM qr_code_paiement_dynamique 
+           WHERE id_user_etablissement_sante = $1 AND statut = 'actif' 
+           AND date_expiration > NOW() 
+           ORDER BY date_creation DESC LIMIT 1`,
+          [etab.id_user_etablissement_sante],
+        );
+  
+        const [image] = await this.dataSource.query(
+          `SELECT url_image FROM images 
+           WHERE id_user_etablissement_sante = $1 
+           AND motif = 'photo_profile' LIMIT 1`,
+          [etab.id_user_etablissement_sante],
+        );
+  
+        return {
+          ...etab,
+          image_profil: image?.url_image || null,
+          compte: compte || null,
+          qr_code_statique: qrStatique || null,
+          qr_code_dynamique: qrDynamique || null,
+        };
+      }),
+    );
+  
+    return {
+      total: etablissements.length,
+      etablissements,
+    };
+  }
+  
+  
   
 }

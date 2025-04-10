@@ -26,3 +26,56 @@ modification du type de la colonne "montant_frais" dans la table "transactions_f
 
     ALTER TABLE transactions_frais 
     ALTER COLUMN montant_frais TYPE DECIMAL(10,2);
+
+
+
+
+
+-- suppression de la table `transaction_interne` 
+DROP TABLE transaction_interne;
+
+
+-- Création de la table `transaction_interne` mise à jour avec les ajustements nécessaires
+CREATE TABLE public.transaction_interne (
+    id_transaction SERIAL PRIMARY KEY,
+    id_compte_expediteur INTEGER NOT NULL,
+    id_utilisateur_envoyeur UUID,
+    id_utilisateur_recepteur UUID,
+    id_etablissement_recepteur INTEGER,
+    id_etablissement_envoyeur INTEGER,
+    montant_envoyer NUMERIC(15, 2) NOT NULL,
+    montant_reçu NUMERIC(15, 2) NOT NULL,
+    frais_preleve NUMERIC(15, 2),
+    motif_annulation VARCHAR(255);
+    statut VARCHAR(20) CHECK (statut IN ('en attente', 'réussie', 'échouée', 'annulée')) DEFAULT 'en attente',
+    devise_transaction VARCHAR(10),
+    type_transaction VARCHAR(100) CHECK (type_transaction IN ('transfert', 'paiement', 'remboursement', 'recharge')),
+    date_transaction TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_qrcode_dynamique INTEGER,
+    id_qrcode_statique INTEGER,
+    id_compte_recepteur INTEGER NOT NULL,
+    FOREIGN KEY (id_compte_expediteur) REFERENCES compte(id_compte),
+    FOREIGN KEY (id_utilisateur_recepteur) REFERENCES utilisateur(id_user),
+    FOREIGN KEY (id_utilisateur_envoyeur) REFERENCES utilisateur(id_user),
+    FOREIGN KEY (id_etablissement_recepteur) REFERENCES user_etablissement_sante(id_user_etablissement_sante),
+    FOREIGN KEY (id_etablissement_envoyeur) REFERENCES user_etablissement_sante(id_user_etablissement_sante),
+    FOREIGN KEY (id_qrcode_dynamique) REFERENCES qr_code_paiement_dynamique(id_qrcode),
+    FOREIGN KEY (id_qrcode_statique) REFERENCES qr_code_paiement_statique(id_qrcode),
+    CONSTRAINT transaction_interne_check CHECK (id_utilisateur_recepteur IS NOT NULL OR id_etablissement_recepteur IS NOT NULL)
+);
+
+
+--------- SUPPRESSION DES ENUM DE LA TABLE transaction_interne
+
+-- Supprimer les contraintes CHECK
+La première étape consiste à supprimer les contraintes CHECK qui font référence à statut et type_transaction :
+
+ALTER TABLE public.transaction_interne
+DROP CONSTRAINT IF EXISTS transaction_interne_statut_check,
+DROP CONSTRAINT IF EXISTS transaction_interne_type_transaction_check;
+
+
+-- supprimer leurs contraintes et les rendre simplement des VARCHAR sans restriction sur les valeurs :
+ALTER TABLE public.transaction_interne
+ALTER COLUMN statut TYPE VARCHAR(50),
+ALTER COLUMN type_transaction TYPE VARCHAR(100);

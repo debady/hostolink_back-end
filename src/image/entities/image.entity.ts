@@ -32,6 +32,10 @@ export class Image {
   @JoinColumn({ name: 'id_user' })
   user: User;
 
+  @Column({ type: 'integer', nullable: true })
+  id_user_etablissement_sante?: number;
+
+
   @Column({ type: 'enum', enum: ImageMotifEnum, nullable: false })
   motif: ImageMotifEnum;
 

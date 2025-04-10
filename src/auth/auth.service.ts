@@ -5,6 +5,9 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../utilisateur/entities/user.entity';
 import { MoyenEnvoiEnum } from 'src/utilisateur/entities/otp.entity';
+import { UserEtablissementSante } from 'src/user_etablissement_sante/entities/user-etablissement-sante.entity';
+import { InjectRepository } from '@nestjs/typeorm/dist/common/typeorm.decorators';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -16,14 +19,15 @@ export class AuthService {
     private readonly jwtService: JwtService,
     // Pour la sacurité des transaction
     private configService: ConfigService,
+
+    @InjectRepository(UserEtablissementSante)
+    private userRepo: Repository<UserEtablissementSante>,
   ) {}
 
-  // async validateUser(identifier: string, password: string): Promise<{ user: User; access_token: string }> {
     async validateUser(identifier: string, password: string): Promise<{ user: User; access_token: string | null }> {
 
     console.log(`🔐 Tentative de connexion avec l'identifiant : ${identifier}`);
 
-    // Recherche utilisateur par identifiant
     const user = await this.userService.findUserByIdentifier(identifier);
 
     if (!user || !user.mdp) {
@@ -40,9 +44,6 @@ export class AuthService {
       throw new BadRequestException('Identifiant ou mot de passe incorrect');
     }
 
-    // Préparation du payload JWT
-    // const payload = { id_user: user.id_user, email: user.email };
-
     if (!user.compte_verifier) {
       await this.userService.generateOtp(identifier, MoyenEnvoiEnum.SMS); // ou EMAIL selon config
       return {
@@ -50,15 +51,6 @@ export class AuthService {
         access_token: null,
       };
     }
-    // throw new BadRequestException('Connexion impossible');
-
-    
-    // Génération du token JWT
-    // const access_token = this.jwtService.sign(payload);
-    // console.log(`✅ Connexion réussie pour : ${user.id_user}, Token généré : ${access_token}`);
-
-    // console.log('✅ Connexion réussie, Token généré:', access_token);
-    // return { user, access_token };
 
     const payload = { id_user: user.id_user, email: user.email };
     const access_token = this.jwtService.sign(payload);
@@ -75,47 +67,34 @@ export class AuthService {
       await this.userService.generateAndSendOtp(user);
     }
     
+    async validateUserEtablissementSante(identifiant: string, password: string): Promise<any> {
+      const user = await this.userRepo.findOne({
+        where: [
+          { email: identifiant },
+          { telephone: identifiant },
+        ],
+      });
+    
+      if (!user) return null;
+    
+      const isMatch = await bcrypt.compare(password, user.mot_de_passe);
+      if (!isMatch) return null;
+    
+      const { mot_de_passe, ...rest } = user;
+      return rest;
+    }
 
+    async login(user: any) {
+      const payload = { id: user.id };
+      return this.jwtService.sign(payload);
+    }
 
-    // console.log('✅ Connexion réussie, Token généré:', access_token);
-    // return { access_token };
-  
-  
-  // // Méthode pour signer les JWT des QR codes statiques (longue durée)
-  // generateStaticQrCodeToken(payload: any) {
-  //   return this.jwtService.sign(payload, {
-  //     secret: this.configService.get('JWT_STATIC_QR_SECRET'),
-  //     expiresIn: '365d', // Validité d'un an
-  //   });
-  // }
-
-  // // Méthode pour signer les JWT des QR codes dynamiques (courte durée)
-  // generateStaticQrCodeToken(payload: any) {
-  //   return this.jwtService.sign(payload, {
-  //     secret: this.configService.get('JWT_DYNAMIC_QR_SECRET'),
-  //     expiresIn: '1m', // Validité d'une minute
-  //   });
-  // }
-
-  // // Méthode pour vérifier les QR codes
-  // verifyQrCodeToken(token: string, isDynamic: boolean = false) {
-  //   try {
-  //     const secret = isDynamic 
-  //       ? this.configService.get('QR_DYNAMIC_SECRET')
-  //       : this.configService.get('QR_STATIC_SECRET');
-      
-  //     return this.jwtService.verify(token, { secret });
-  //   } catch (error) {
-  //     throw new UnauthorizedException('QR code invalide ou expiré');
-  //   }
-  // }
-
-
-  // function generateStaticQrCodeToken(payload: any, any: any) {
-  //   throw new Error('Function not implemented.');
-  // }
-  // function verifyQrCodeToken(token: any, string: any, isDynamic: any, arg3: boolean) {
-  //   throw new Error('Function not implemented.');
-  // }
+    async loginEtablissement(user: any) {
+      const payload = { id: user.id_user_etablissement_sante };
+      return this.jwtService.sign(payload);
+    }
+    
+    
+    
 
 }
