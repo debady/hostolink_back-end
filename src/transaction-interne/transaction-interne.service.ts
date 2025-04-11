@@ -68,6 +68,11 @@ async getMyTransactions(userId: string) {
 
 // Récupérer une transaction par ID avec les noms des destinataires
 async getTransactionById(id: number) {
+
+  if (isNaN(id) || id <= 0) {
+    throw new BadRequestException('ID de transaction invalide');
+  }
+  
   const transaction = await this.transactionRepository
     .createQueryBuilder('transaction')
     .leftJoinAndSelect(
@@ -94,8 +99,6 @@ async getTransactionById(id: number) {
 
   return transaction;
 }
-
-
 
 
 
@@ -918,4 +921,166 @@ async rollbackTransaction(id: number, userId: string, rollbackDto: RollbackTrans
       return null;
     }
   }
+
+
+
+
+  // endpoints permettant de recupérer les statistiques des transactions
+
+async getStats() {
+  // Configuration des dates pour les différentes périodes
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - 6);
+  weekStart.setHours(0, 0, 0, 0);
+  
+  const monthStart = new Date();
+  monthStart.setDate(monthStart.getDate() - 29);
+  monthStart.setHours(0, 0, 0, 0);
+  
+  const yearStart = new Date();
+  yearStart.setDate(yearStart.getDate() - 364);
+  yearStart.setHours(0, 0, 0, 0);
+
+  // Statistiques par statut de transaction
+  const statsByStatus = await this.transactionRepository.createQueryBuilder('transaction')
+    .select('transaction.statut', 'statut')
+    .addSelect('COUNT(*)', 'count')
+    .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .groupBy('transaction.statut')
+    .getRawMany();
+  
+  // Statistiques par type de transaction
+  const statsByType = await this.transactionRepository.createQueryBuilder('transaction')
+    .select('transaction.type_transaction', 'type')
+    .addSelect('COUNT(*)', 'count')
+    .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .groupBy('transaction.type_transaction')
+    .getRawMany();
+  
+  // Total global
+  const totalStats = await this.transactionRepository.createQueryBuilder('transaction')
+    .select('COUNT(*)', 'count')
+    .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .getRawOne();
+  
+  // Stats journalières (aujourd'hui)
+  const dailyStats = await this.transactionRepository.createQueryBuilder('transaction')
+    .select('COUNT(*)', 'count')
+    .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .where('transaction.date_transaction >= :startDate', { startDate: today })
+    .andWhere('transaction.date_transaction < :endDate', { endDate: tomorrow })
+    .getRawOne();
+  
+  // Stats hebdomadaires (7 derniers jours)
+  const weeklyStats = await this.transactionRepository.createQueryBuilder('transaction')
+    .select('COUNT(*)', 'count')
+    .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .where('transaction.date_transaction >= :startDate', { startDate: weekStart })
+    .andWhere('transaction.date_transaction < :endDate', { endDate: tomorrow })
+    .getRawOne();
+  
+  // Stats mensuelles (30 derniers jours)
+  const monthlyStats = await this.transactionRepository.createQueryBuilder('transaction')
+    .select('COUNT(*)', 'count')
+    .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .where('transaction.date_transaction >= :startDate', { startDate: monthStart })
+    .andWhere('transaction.date_transaction < :endDate', { endDate: tomorrow })
+    .getRawOne();
+  
+  // Stats annuelles (365 derniers jours)
+  const yearlyStats = await this.transactionRepository.createQueryBuilder('transaction')
+    .select('COUNT(*)', 'count')
+    .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .where('transaction.date_transaction >= :startDate', { startDate: yearStart })
+    .andWhere('transaction.date_transaction < :endDate', { endDate: tomorrow })
+    .getRawOne();
+  
+  // Détail par jour sur les 7 derniers jours
+  const dailyDetail = await this.transactionRepository.createQueryBuilder('transaction')
+    .select("to_char(transaction.date_transaction, 'DD-MM-YYYY')", 'date')
+    .addSelect('COUNT(*)', 'count')
+    .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .where('transaction.date_transaction >= :startDate', { startDate: weekStart })
+    .groupBy("to_char(transaction.date_transaction, 'DD-MM-YYYY')")
+    .orderBy('date', 'ASC')
+    .getRawMany();
+  
+  // Détail par mois sur l'année
+  const monthlyDetail = await this.transactionRepository.createQueryBuilder('transaction')
+    .select("to_char(transaction.date_transaction, 'MM-YYYY')", 'month')
+    .addSelect('COUNT(*)', 'count')
+    .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .where('transaction.date_transaction >= :startDate', { startDate: yearStart })
+    .groupBy("to_char(transaction.date_transaction, 'MM-YYYY')")
+    .orderBy('month', 'ASC')
+    .getRawMany();
+  
+  // Montant moyen des transactions
+  const avgTransaction = await this.transactionRepository.createQueryBuilder('transaction')
+    .select('AVG(transaction.montant_envoyer)', 'avg')
+    .addSelect('AVG(transaction.montant_reçu)', 'avg')
+    .getRawOne();
+  
+  // // Comptes les plus actifs (émetteurs)
+  // const topSenderAccounts = await this.transactionRepository.createQueryBuilder('transaction')
+  //   .select('transaction.id_compte_expediteur', 'compte')
+  //   .addSelect('COUNT(*)', 'count')
+  //   .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+  //   .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+  //   .groupBy('transaction.id_compte_expediteur')
+  //   .orderBy('count', 'DESC')
+  //   .limit(5)
+  //   .getRawMany();
+  
+  // // Comptes les plus actifs (récepteurs)
+  // const topReceiverAccounts = await this.transactionRepository.createQueryBuilder('transaction')
+  //   .select('transaction.compte_recepteur', 'compte')
+  //   .addSelect('COUNT(*)', 'count')
+  //   .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
+  //   .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+  //   .groupBy('transaction.compte_recepteur')
+  //   .orderBy('count', 'DESC')
+  //   .limit(5)
+  //   .getRawMany();
+  
+ 
+  
+  return {
+    montant_total_des_transactions: totalStats,
+    statistique_par_statut: statsByStatus,
+    statistique_par_type: statsByType,
+    montant_moyen_des_transactions: avgTransaction?.avg || 0,
+    periodes: {
+      statistique_par_jour: dailyStats,
+      statistique_par_semaine: weeklyStats,
+      statistique_par_mois: monthlyStats,
+      statistique_par_an: yearlyStats,
+    },
+    details: {
+      jounalier: dailyDetail,
+      mensuel: monthlyDetail
+    },
+    // topAccounts: {
+    //   senders: topSenderAccounts,
+    //   receivers: topReceiverAccounts
+    // }
+  };
+}
+
+
+
 }

@@ -9,7 +9,6 @@ import { RollbackTransactionDto } from './rollback-dto/rollback-transaction.dto'
 import { PayWithEmailDto } from './payer-avec/payer-avec-email.dto';
 
 @Controller('transaction')
-@UseGuards(JwtAuthGuard)
 export class TransactionInterneController {
   constructor(
     private readonly TransactionInterneService: TransactionInterneService,
@@ -22,8 +21,26 @@ export class TransactionInterneController {
     return this.TransactionInterneService.getMyTransactions(req.user.id_user);
   }
 
+
+
+  // endpoints pour recuprer les statistiques des transactions 
+  // il est placer là parce que l'endpoint /transaction/statistiques-des-transactions est confondu avec l'endpoint /transaction/:id.
+
+  @Get('statistiques-des-transactions')
+  @UseGuards(JwtAdminGuard)
+  async getTransactionStats() {
+    return {
+      success: true,
+      message: 'Statistiques des transactions récupérées',
+      data: await this.TransactionInterneService.getStats()
+    };
+  }
+  
+
+
+  
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAdminGuard)
   async getTransactionById(@Param('id') id: string, @Req() req) {
     const transaction = await this.TransactionInterneService.getTransactionById(+id);
     
@@ -116,5 +133,18 @@ export class TransactionInterneController {
     return this.TransactionInterneService.rollbackTransaction(+id, req.user.id_user, rollbackDto);
   }
 
+
+
+  // endpoints pour recuprer les statistiques des transactions d'un utilisateur
+
+// @Get('stats/utilisateur/:id_user')
+// @UseGuards(JwtAdminGuard)
+// async getUserTransactionStats(@Param('id_user') id_user: string) {
+//   return {
+//     success: true,
+//     message: `Statistiques des transactions de l'utilisateur ${id_user} récupérées`,
+//     data: await this.TransactionInterneService.getUserStats(id_user)
+//   };
+// }
 
 }

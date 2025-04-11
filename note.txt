@@ -47,9 +47,9 @@ CREATE TABLE public.transaction_interne (
     montant_reçu NUMERIC(15, 2) NOT NULL,
     frais_preleve NUMERIC(15, 2),
     motif_annulation VARCHAR(255);
-    statut VARCHAR(20) CHECK (statut IN ('en attente', 'réussie', 'échouée', 'annulée')) DEFAULT 'en attente',
+    statut VARCHAR(50), 
     devise_transaction VARCHAR(10),
-    type_transaction VARCHAR(100) CHECK (type_transaction IN ('transfert', 'paiement', 'remboursement', 'recharge')),
+    type_transaction VARCHAR(100),
     date_transaction TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_qrcode_dynamique INTEGER,
     id_qrcode_statique INTEGER,
@@ -64,18 +64,3 @@ CREATE TABLE public.transaction_interne (
     CONSTRAINT transaction_interne_check CHECK (id_utilisateur_recepteur IS NOT NULL OR id_etablissement_recepteur IS NOT NULL)
 );
 
-
---------- SUPPRESSION DES ENUM DE LA TABLE transaction_interne
-
--- Supprimer les contraintes CHECK
-La première étape consiste à supprimer les contraintes CHECK qui font référence à statut et type_transaction :
-
-ALTER TABLE public.transaction_interne
-DROP CONSTRAINT IF EXISTS transaction_interne_statut_check,
-DROP CONSTRAINT IF EXISTS transaction_interne_type_transaction_check;
-
-
--- supprimer leurs contraintes et les rendre simplement des VARCHAR sans restriction sur les valeurs :
-ALTER TABLE public.transaction_interne
-ALTER COLUMN statut TYPE VARCHAR(50),
-ALTER COLUMN type_transaction TYPE VARCHAR(100);

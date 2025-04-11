@@ -208,7 +208,7 @@ export class QrCodeController {
   /**
    * Récupère tous les QR codes (statiques et dynamiques) de l'utilisateur connecté
    */
-  @Get('tous-les-qr-codes')
+  @Get('les-deux-qr-codes')
   @UseGuards(JwtAuthGuard)
   async getAllUserQrCodes(@Req() req) {
     const id_user = req.user.id_user;
