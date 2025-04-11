@@ -1,3 +1,4 @@
+
 import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
@@ -9,9 +10,8 @@ import { QrCodeDynamique } from './entitie/qr_code_dynamique.entity';
 import { QrCodeStatique } from './entitie/qr_code_statique.entity';
 import { QrCodePayload, QrCodePayloadUser, QrCodeType, RecipientType } from './interface_qr_code/qr-code-payload.interface';
 import { CompteService } from 'src/compte/compte.service';
-import { Compte } from 'src/compte/entitie/compte.entity';
 import { UserService } from 'src/utilisateur/user.service';
-import { User } from 'src/utilisateur/entities/user.entity';
+import { CleanupService } from './cleanup.service';
 
 @Injectable()
 export class QrCodeService {
@@ -29,18 +29,17 @@ export class QrCodeService {
     private readonly compteService: CompteService,
 
     @Inject(forwardRef(() => UserService))
-    private readonly userService: UserService
-
-    // Commenté pour les établissements de santé
-    // @Inject(forwardRef(() => EtablissementService))
-    // private readonly etablissementService: EtablissementService,
+    private readonly userService: UserService,
+    
+    @Inject(forwardRef(() => CleanupService))
+    private readonly cleanupService: CleanupService
   ) {}
 
   /**
    * Génère un identifiant court unique
    * @returns Identifiant court de 16 caractères
    */
-  private generateShortId(): string {
+  public generateShortId(): string {
     // Générer un ID court de 16 caractères hexadécimaux
     return crypto.randomBytes(8).toString('hex');
   }
@@ -49,19 +48,19 @@ export class QrCodeService {
    * Génère un token JWT pour un QR code avec un payload complet
    * @param payload Informations complètes pour le QR code
    */
-  private generateTokenWithPayload(payload: QrCodePayload): string {
+  public generateTokenWithPayload(payload: QrCodePayload): string {
     const options: any = {
       secret: this.configService.get<string>('JWT_QR_SECRET', 'qr_code_secret_key'),
     };
     
-    // Ajouter l'expiration si applicable
-    if (payload.expiresAt) {
+    // Ajouter l'expiration seulement si c'est un QR code dynamique
+    if (payload.qrType === QrCodeType.DYNAMIC && payload.expiresAt) {
       const expiresInSeconds = Math.floor((payload.expiresAt - payload.timestamp) / 1000);
       if (expiresInSeconds > 0) {
         options.expiresIn = `${expiresInSeconds}s`;
       }
     }
-
+  
     return this.jwtService.sign(payload, options);
   }
 
@@ -69,18 +68,15 @@ export class QrCodeService {
    * Génère un payload pour un QR code utilisateur
    * @param isDynamic Si true, crée un payload pour QR code dynamique
    */
-  private createUserPayload(
+  public createUserPayload(
     id_user: string, 
     isDynamic: boolean, 
     expiresIn?: number,
     additionalInfo?: { 
       accountNumber?: string, 
-      currency?: string, 
-      // amount?: number, 
-      // description?: string 
+      currency?: string
     }
   ): QrCodePayloadUser {
-
     const timestamp = Date.now();
     
     const payload: QrCodePayloadUser = {
@@ -151,21 +147,14 @@ export class QrCodeService {
     id_user: string, 
     accountNumber?: string,
     expiresIn: number = 60,
-    currency?: string,
-    // amount?: number,
-    // description?: string
+    currency?: string
   ): Promise<QrCodeDynamique> {
     // Créer le payload avec toutes les informations
     const payload = this.createUserPayload(
       id_user, 
       true, 
       expiresIn, 
-      { 
-        accountNumber,
-        currency, 
-        // amount, 
-        // description 
-      }
+      { accountNumber, currency }
     );
     
     // Générer le token JWT
@@ -186,37 +175,19 @@ export class QrCodeService {
       statut: 'actif',
     });
     
-    return this.qrCodeDynamiqueRepository.save(qrCode);
-  }
-
-  /**
-   * Met à jour le statut des QR codes dynamiques expirés pour un utilisateur
-   */
-  async updateExpiredQrCodesStatus(id_user?: string): Promise<number> {
-    const now = new Date();
+    // Sauvegarder le QR code
+    const savedQrCode = await this.qrCodeDynamiqueRepository.save(qrCode);
     
-    const whereCondition: any = { 
-      statut: 'actif',
-      date_expiration: LessThan(now)
-    };
+    // Planifier la mise à jour automatique à l'expiration
+    this.cleanupService.scheduleQrCodeUpdate(savedQrCode);
     
-    if (id_user) {
-      whereCondition.id_user = id_user;
-    }
-    
-    const result = await this.qrCodeDynamiqueRepository.update(
-      whereCondition,
-      { statut: 'inactif' }
-    );
-    
-    console.log(`${result.affected} QR codes dynamiques marqués comme inactifs`);
-    return result.affected || 0;
+    return savedQrCode;
   }
 
   /**
    * Supprime les QR codes dynamiques expirés depuis longtemps
    */
-  async deleteOldExpiredQrCodes(days: number = 1): Promise<number> {
+  async deleteOldExpiredQrCodes(days: number = 7): Promise<number> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
     
@@ -224,7 +195,7 @@ export class QrCodeService {
       date_expiration: LessThan(cutoffDate)
     });
     
-    console.log(`${result.affected} QR codes dynamiques anciens supprimés`);
+    // console.log(`${result.affected} QR codes dynamiques anciens supprimés`);
     return result.affected || 0;
   }
 
@@ -234,119 +205,218 @@ export class QrCodeService {
    */
   verifyToken(token: string): QrCodePayload {
     try {
-      return this.jwtService.verify(token, {
+      // Vérifier d'abord si c'est un token de QR code statique 
+      const decoded = this.jwtService.decode(token) as QrCodePayload;
+      
+      // Configurer les options selon le type de QR code
+      const options: any = {
         secret: this.configService.get<string>('JWT_QR_SECRET', 'qr_code_secret_key'),
-      });
+      };
+      
+      if (decoded && decoded.qrType === QrCodeType.STATIC) {
+        // Pour les QR codes statiques, ignorer l'expiration
+        options.ignoreExpiration = true;
+      } else {
+        // Pour les QR codes dynamiques, vérifier l'expiration (comportement par défaut)
+        options.ignoreExpiration = false;
+      }
+      
+      return this.jwtService.verify(token, options);
     } catch (error) {
       throw new BadRequestException('Token invalide ou expiré');
     }
   }
 
-  /**
-   * Récupère un QR code par son identifiant court
-   */
-  async getQrCodeByShortId(shortId: string): Promise<QrCodeDynamique | QrCodeStatique | null> {
-    // Chercher d'abord dans les QR codes statiques
-    const staticQrCode = await this.qrCodeStatiqueRepository.findOne({
-      where: { short_id: shortId }
+
+
+
+  async refreshAllStaticQrCodes(): Promise<number> {
+    // Récupérer tous les QR codes statiques actifs
+    const staticQrCodes = await this.qrCodeStatiqueRepository.find({
+      where: { statut: 'actif' }
     });
     
-    if (staticQrCode) {
-      return staticQrCode;
-    }
+    let updatedCount = 0;
     
-    // Sinon chercher dans les QR codes dynamiques
-    const dynamicQrCode = await this.qrCodeDynamiqueRepository.findOne({
-      where: { short_id: shortId }
-    });
-    
-    // Si c'est un QR code dynamique, vérifier s'il est expiré
-    if (dynamicQrCode && dynamicQrCode.statut === 'actif') {
-      const now = new Date();
-      if (now > dynamicQrCode.date_expiration) {
-        // Marquer comme inactif si expiré
-        dynamicQrCode.statut = 'inactif';
-        await this.qrCodeDynamiqueRepository.save(dynamicQrCode);
+    for (const qrCode of staticQrCodes) {
+      try {
+        // Récupérer les informations du compte utilisateur si besoin
+        const compte = await this.compteService.getUserCompte(qrCode.id_user);
+        const accountNumber = compte ? compte.numero_compte : undefined;
+        
+        // Créer un nouveau payload sans expiration
+        const payload = this.createUserPayload(
+          qrCode.id_user, 
+          false, // QR code statique
+          undefined, // Pas d'expiration
+          { accountNumber }
+        );
+        
+        // Générer le nouveau token
+        const token = this.generateTokenWithPayload(payload);
+        
+        // Mettre à jour le token
+        qrCode.token = token;
+        await this.qrCodeStatiqueRepository.save(qrCode);
+        updatedCount++;
+      } catch (error) {
+        console.error(`Erreur lors du rafraîchissement du QR code statique ${qrCode.id_qrcode}: ${error.message}`);
+        // Continuer avec le prochain QR code
       }
     }
     
-    return dynamicQrCode;
+    return updatedCount;
   }
 
+ 
+  
   /**
-   * Valide un QR code à partir de son identifiant court ou de son token JWT
-   * @returns Informations complètes sur le QR code et son propriétaire
+   * Rafraîchit le token d'un QR code dynamique expiré
+   * Cette fonction est utilisée uniquement en interne, jamais lors du scan
    */
-  async validateQrCode(idOrToken: string): Promise<any> {
+  async refreshQrCodeToken(qrCode: QrCodeDynamique): Promise<void> {
     try {
+      // Récupérer les informations du compte utilisateur
+      const compte = await this.compteService.getUserCompte(qrCode.id_user);
+      const accountNumber = compte ? compte.numero_compte : undefined;
+      const currency = compte ? compte.devise : undefined;
+      
+      // Créer un nouveau payload et token
+      const payload = this.createUserPayload(
+        qrCode.id_user, 
+        true, 
+        60, // 1 minute
+        { accountNumber, currency }
+      );
+      
+      // Générer le nouveau token
+      const token = this.generateTokenWithPayload(payload);
+      
+      // Mettre à jour l'entrée existante
+      qrCode.token = token;
+      qrCode.date_expiration = new Date(payload.expiresAt || Date.now() + (60 * 1000));
+      
+      // Sauvegarder les modifications
+      await this.qrCodeDynamiqueRepository.save(qrCode);
+      
+      // Planifier la prochaine mise à jour automatique
+      this.cleanupService.scheduleQrCodeUpdate(qrCode);
+    } catch (error) {
+      console.error(`Erreur lors du rafraîchissement du token: ${error.message}`);
+      // Ne pas propager l'erreur pour éviter de bloquer le processus
+    }
+  }
+
+ 
+
+
+  async validateQrCode(codeInput: string): Promise<any> {
+    try {
+      // console.log(`Tentative de validation du code: ${codeInput}`);
       let qrCode: QrCodeDynamique | QrCodeStatique | null = null;
       let payload: QrCodePayload;
       
-      // Vérifier si c'est un identifiant court (16 caractères) ou un token JWT (plus long)
-      if (idOrToken.length <= 16) {
-        // C'est un identifiant court
-        qrCode = await this.getQrCodeByShortId(idOrToken);
+      // Essayer d'abord de trouver par identifiant court
+      // console.log(`Recherche du QR code par short_id: ${codeInput}`);
+      
+      // Chercher spécifiquement dans les QR codes statiques
+      const staticQrCode = await this.qrCodeStatiqueRepository.findOne({
+        where: { short_id: codeInput }
+      });
+      
+      if (staticQrCode) {
+        // console.log(`QR code statique trouvé: ${JSON.stringify(staticQrCode)}`);
         
-        if (!qrCode) {
-          throw new NotFoundException('QR code non trouvé');
-        }
-        
-        if (qrCode.statut !== 'actif') {
+        if (staticQrCode.statut !== 'actif') {
+          // console.log(`QR code statique inactif: ${staticQrCode.statut}`);
           throw new BadRequestException('QR code inactif');
         }
         
-        // Utiliser le token du QR code pour obtenir le payload
-        payload = this.verifyToken(qrCode.token);
+        // console.log(`Vérification du token du QR code statique`);
+        try {
+          payload = this.verifyToken(staticQrCode.token);
+          // console.log(`Token valide, payload: ${JSON.stringify(payload)}`);
+          qrCode = staticQrCode;
+        } catch (error) {
+          // console.error(`Erreur lors de la vérification du token: ${error.message}`);
+          throw new BadRequestException('Token invalide');
+        }
       } else {
-        // C'est un token JWT
-        payload = this.verifyToken(idOrToken);
+        // console.log(`Aucun QR code statique trouvé, recherche dans les QR codes dynamiques`);
+        // Chercher dans les QR codes dynamiques
+        const dynamicQrCode = await this.qrCodeDynamiqueRepository.findOne({
+          where: { short_id: codeInput }
+        });
         
-        // Déduire le type de QR code à partir du payload
-        const isDynamic = payload.qrType === QrCodeType.DYNAMIC;
-        
-        // Chercher le QR code correspondant
-        if (isDynamic) {
-          qrCode = await this.qrCodeDynamiqueRepository.findOne({
-            where: { token: idOrToken }
-          });
-        } else {
-          qrCode = await this.qrCodeStatiqueRepository.findOne({
-            where: { token: idOrToken }
-          });
-        }
-        
-        if (!qrCode) {
-          throw new NotFoundException('QR code non trouvé');
-        }
-        
-        if (qrCode.statut !== 'actif') {
-          throw new BadRequestException('QR code inactif');
-        }
-        
-        // Pour les QR codes dynamiques, vérifier l'expiration
-        if (isDynamic) {
-          const dynamicQrCode = qrCode as QrCodeDynamique;
+        if (dynamicQrCode) {
+          // console.log(`QR code dynamique trouvé: ${JSON.stringify(dynamicQrCode)}`);
+          
+          if (dynamicQrCode.statut !== 'actif') {
+            // console.log(`QR code dynamique inactif: ${dynamicQrCode.statut}`);
+            throw new BadRequestException('QR code inactif');
+          }
+          
+          // Vérifier l'expiration pour les QR codes dynamiques
           const now = new Date();
           if (now > dynamicQrCode.date_expiration) {
-            // Marquer comme inactif si expiré
-            dynamicQrCode.statut = 'inactif';
-            await this.qrCodeDynamiqueRepository.save(dynamicQrCode);
+            // console.log(`QR code dynamique expiré: ${dynamicQrCode.date_expiration}`);
             throw new BadRequestException('QR code expiré');
+          }
+          
+          try {
+            payload = this.verifyToken(dynamicQrCode.token);
+            // console.log(`Token dynamique valide, payload: ${JSON.stringify(payload)}`);
+            qrCode = dynamicQrCode;
+          } catch (error) {
+            // console.error(`Erreur lors de la vérification du token dynamique: ${error.message}`);
+            throw new BadRequestException('le Token est invalide');
+          }
+        } else {
+          // console.log(`Aucun QR code trouvé par short_id, tentative de validation directe du token`);
+          // Essayer de vérifier comme token JWT
+          try {
+            payload = this.verifyToken(codeInput);
+            // console.log(`Token direct valide, payload: ${JSON.stringify(payload)}`);
+            
+            // Chercher le QR code correspondant au token
+            const isDynamic = payload.qrType === QrCodeType.DYNAMIC;
+            
+            if (isDynamic) {
+              qrCode = await this.qrCodeDynamiqueRepository.findOne({
+                where: { token: codeInput }
+              });
+              // console.log(`QR code dynamique trouvé par token: ${qrCode ? 'oui' : 'non'}`);
+            } else {
+              qrCode = await this.qrCodeStatiqueRepository.findOne({
+                where: { token: codeInput }
+              });
+              // console.log(`QR code statique trouvé par token: ${qrCode ? 'oui' : 'non'}`);
+            }
+            
+            if (!qrCode) {
+              throw new NotFoundException('QR code non trouvé avec ce token');
+            }
+            
+            if (qrCode.statut !== 'actif') {
+              // console.log(`QR code trouvé mais inactif: ${qrCode.statut}`);
+              throw new BadRequestException('QR code inactif');
+            }
+          } catch (error) {
+            // console.error(`Erreur lors de la validation directe du token: ${error.message}`);
+            throw new BadRequestException('token expiré');
           }
         }
       }
       
       // Récupérer les informations utilisateur
+      // console.log(`Récupération des informations utilisateur pour le payload`);
       const id_user = payload.recipientType === RecipientType.USER ? payload.recipientId as string : undefined;
-      const id_etablissement = payload.recipientType === RecipientType.ETABLISSEMENT ? payload.recipientId as number : undefined;
-      
-      // ✅ Récupérer uniquement nom, prénom et numéro de compte
       let userInfo: { identifiant: string; nom: string; prenom: string; numero_compte: string } | null = null;
-
+  
       if (id_user) {
-        const user = await this.userService.getUserById(id_user); // Récupérer nom & prénom
-        const compte = await this.compteService.getUserCompte(id_user); // Récupérer numéro de compte
-
+        const user = await this.userService.getUserById(id_user);
+        const compte = await this.compteService.getUserCompte(id_user);
+  
         if (user && compte) {
           userInfo = {
             identifiant: user.id_user,
@@ -354,27 +424,34 @@ export class QrCodeService {
             prenom: user.prenom,
             numero_compte: compte.numero_compte
           };
+          // console.log(`Informations utilisateur récupérées: ${JSON.stringify(userInfo)}`);
+        } else {
+          // console.log(`Utilisateur ou compte non trouvé: user=${!!user}, compte=${!!compte}`);
         }
       }
-      /* else if (payload.recipientType === RecipientType.ETABLISSEMENT && id_etablissement) {
-        // Code pour les établissements (à décommenter plus tard)
-      } */
- 
+  
       // Retourner les informations complètes
-      return {
+      const result = {
         ...payload,
         id_qrcode: qrCode.id_qrcode,
         short_id: qrCode.short_id,
         creation_date: qrCode.date_creation,
         utilisateur: userInfo
       };
+      
+      // console.log(`Validation réussie, retour des données`);
+      return result;
     } catch (error) {
+      console.error(`Erreur finale dans validateQrCode: ${error.message}`);
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
       }
       throw new BadRequestException('Erreur de validation du QR code: ' + error.message);
     }
   }
+
+
+
 
   /**
    * Génère une représentation image d'un QR code à partir d'un identifiant court ou d'un token
@@ -387,19 +464,16 @@ export class QrCodeService {
     }
   }
 
-
-
-
-
-
+  /**
+   * Rafraîchit ou réutilise un QR code dynamique pour un utilisateur
+   * En mettant à jour le token plutôt qu'en créant une nouvelle entrée
+   */
   async refreshUserDynamicQrCode(
     id_user: string, 
     accountNumber?: string,
     expiresIn: number = 60,
-    currency?: string,
+    currency?: string
   ): Promise<QrCodeDynamique> {
-    console.log(`Rafraîchissement du QR code dynamique pour l'utilisateur ${id_user}`);
-    
     try {
       // Chercher d'abord un QR code dynamique existant pour cet utilisateur
       const existingQrCode = await this.qrCodeDynamiqueRepository.findOne({
@@ -414,10 +488,7 @@ export class QrCodeService {
           id_user, 
           true, 
           expiresIn, 
-          { 
-            accountNumber,
-            currency
-          }
+          { accountNumber, currency }
         );
         const token = this.generateTokenWithPayload(payload);
         
@@ -426,7 +497,12 @@ export class QrCodeService {
         existingQrCode.date_expiration = new Date(payload.expiresAt || Date.now() + (expiresIn * 1000));
         
         // Sauvegarder les modifications
-        return this.qrCodeDynamiqueRepository.save(existingQrCode);
+        const updatedQrCode = await this.qrCodeDynamiqueRepository.save(existingQrCode);
+        
+        // Planifier la mise à jour automatique à l'expiration
+        this.cleanupService.scheduleQrCodeUpdate(updatedQrCode);
+        
+        return updatedQrCode;
       }
       
       // Si aucun QR code n'existe, en créer un nouveau
@@ -437,133 +513,44 @@ export class QrCodeService {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
   /**
-   * Rafraîchit ou crée un QR code dynamique pour un utilisateur
+   * Récupère ou crée un QR code dynamique pour un utilisateur
+   * Met à jour automatiquement le token si expiré
    */
-  // async refreshUserDynamicQrCode(
-  //   id_user: string, 
-  //   accountNumber?: string,
-  //   expiresIn: number = 60,
-  //   currency?: string,
-  //   // amount?: number,
-  //   // description?: string
-  // ): Promise<QrCodeDynamique> {
-  //   console.log(`Rafraîchissement du QR code dynamique pour l'utilisateur ${id_user}`);
+  async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
+    // Récupérer le QR code dynamique actif le plus récent de l'utilisateur
+    let userQRCode = await this.qrCodeDynamiqueRepository.findOne({
+      where: { id_user, statut: 'actif' },
+      order: { date_creation: 'DESC' }
+    });
     
-  //   try {
-  //     // Désactiver tous les QR codes dynamiques actifs de cet utilisateur
-  //     const updateResult = await this.qrCodeDynamiqueRepository.update(
-  //       { id_user, statut: 'actif' },
-  //       { statut: 'inactif' }
-  //     );
-      
-  //     console.log(`${updateResult.affected} QR codes désactivés`);
-      
-  //     // Créer un nouveau QR code dynamique
-  //     return this.createDynamicQrForUser(id_user, accountNumber, expiresIn, currency);
-  //   } catch (error) {
-  //     console.error('Erreur lors du rafraîchissement du QR code:', error);
-  //     throw new BadRequestException('Impossible de rafraîchir le QR code: ' + error.message);
-  //   }
-  // }
-
-
-// Modification de la méthode getUserDynamicQrCodes
-async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
-  // 1. Récupérer le QR code dynamique actif le plus récent de l'utilisateur
-  let userQRCode = await this.qrCodeDynamiqueRepository.findOne({
-    where: { id_user, statut: 'actif' },
-    order: { date_creation: 'DESC' }
-  });
-  
-  // 2. Si aucun QR code n'existe, en créer un nouveau
-  if (!userQRCode) {
-    const compte = await this.compteService.getUserCompte(id_user);
-    userQRCode = await this.createDynamicQrForUser(
-      id_user, 
-      compte?.numero_compte, 
-      60, 
-      compte?.devise
-    );
+    // Si aucun QR code n'existe, en créer un nouveau
+    if (!userQRCode) {
+      const compte = await this.compteService.getUserCompte(id_user);
+      userQRCode = await this.createDynamicQrForUser(
+        id_user, 
+        compte?.numero_compte, 
+        60, 
+        compte?.devise
+      );
+      return [userQRCode];
+    }
+    
+    // Vérifier si le QR code est expiré et le rafraîchir si besoin
+    // (uniquement quand c'est l'utilisateur propriétaire qui le demande)
+    const now = new Date();
+    if (now > userQRCode.date_expiration) {
+      await this.refreshQrCodeToken(userQRCode);
+    }
+    
     return [userQRCode];
   }
-  
-  // 3. Vérifier si le QR code est expiré
-  const now = new Date();
-  if (now > userQRCode.date_expiration) {
-    // 4. Mettre à jour le token et la date d'expiration du QR code existant
-    const compte = await this.compteService.getUserCompte(id_user);
-    
-    // Créer un nouveau payload et token
-    const payload = this.createUserPayload(
-      id_user, 
-      true, 
-      60, 
-      { 
-        accountNumber: compte?.numero_compte,
-        currency: compte?.devise
-      }
-    );
-    const token = this.generateTokenWithPayload(payload);
-    
-    // Mettre à jour le QR code existant
-    userQRCode.token = token;
-    userQRCode.date_expiration = new Date(payload.expiresAt || Date.now() + (60 * 1000));
-    
-    // Sauvegarder les modifications
-    await this.qrCodeDynamiqueRepository.save(userQRCode);
-  }
-  
-  return [userQRCode];
-}
-
-
-
-
-
-
-
-
-  //  * Récupère les QR codes dynamiques actifs d'un utilisateur spécifique
-  // async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
-  //   // 1. Mettre à jour les statuts des QR expirés
-  //   await this.updateExpiredQrCodesStatus(id_user);
-  
-  //   // 2. Rechercher les QR codes actifs
-  //   let activeQRCodes = await this.qrCodeDynamiqueRepository.find({
-  //     where: { id_user, statut: 'actif' },
-  //     order: { date_creation: 'DESC' }
-  //   });
-  
-  //   // 3. S'il n'y en a plus, on en crée automatiquement un nouveau
-  //   if (activeQRCodes.length === 0) {
-  //     const compte = await this.compteService.getUserCompte(id_user);
-  //     const newQr = await this.createDynamicQrForUser(id_user, compte?.numero_compte, 60, compte?.devise);
-  //     activeQRCodes = [newQr];
-  //   }
-  
-  //   return activeQRCodes;
-  // }
-  
 
   /**
    * Récupère tous les QR codes (statiques et dynamiques) d'un utilisateur spécifique
    * @returns Objet contenant les QR codes statiques et dynamiques
    */
   async getAllUserQrCodes(id_user: string): Promise<{ static: QrCodeStatique[], dynamic: QrCodeDynamique[] }> {
-    // D'abord mettre à jour le statut des QR codes expirés
-    await this.updateExpiredQrCodesStatus(id_user);
-    
     const staticQrCodes = await this.qrCodeStatiqueRepository.find({
       where: { 
         id_user,
@@ -571,15 +558,8 @@ async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
       }
     });
     
-    const dynamicQrCodes = await this.qrCodeDynamiqueRepository.find({
-      where: { 
-        id_user,
-        statut: 'actif'
-      },
-      order: {
-        date_creation: 'DESC'
-      }
-    });
+    // Pour les QR codes dynamiques, utiliser la méthode qui gère l'expiration
+    const dynamicQrCodes = await this.getUserDynamicQrCodes(id_user);
     
     return {
       static: staticQrCodes,
@@ -589,6 +569,8 @@ async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
 
   /**
    * Récupère un QR code spécifique (statique ou dynamique) par son ID
+   * Le rafraîchissement automatique est permis uniquement dans ce cas
+   * car il s'agit d'une méthode utilisée par l'utilisateur propriétaire
    */
   async getQrCodeById(id_qrcode: number, type: 'static' | 'dynamic'): Promise<QrCodeStatique | QrCodeDynamique | null> {
     if (type === 'static') {
@@ -604,95 +586,12 @@ async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
       if (qrCode && qrCode.statut === 'actif') {
         const now = new Date();
         if (now > qrCode.date_expiration) {
-          qrCode.statut = 'inactif';
-          await this.qrCodeDynamiqueRepository.save(qrCode);
+          // Mettre à jour le token au lieu de désactiver
+          await this.refreshQrCodeToken(qrCode);
         }
       }
       
       return qrCode;
     }
   }
-
-  
-
-
-  // async getUserDynamicQrCodes(id_user: string): Promise<QrCodeDynamique[]> {
-  //   // 1. Récupérer tous les QR codes de l'utilisateur
-  //   let userQRCodes = await this.qrCodeDynamiqueRepository.find({
-  //     where: { id_user, statut: 'actif' },
-  //     order: { date_creation: 'DESC' }
-  //   });
-  
-  //   // 2. Vérifier si des QR codes sont expirés et les mettre à jour
-  //   const now = new Date();
-  //   let needsUpdate = false;
-    
-  //   for (const qrCode of userQRCodes) {
-  //     if (now > qrCode.date_expiration) {
-  //       needsUpdate = true;
-  //       break;
-  //     }
-  //   }
-    
-  //   // 3. S'il y a des QR codes expirés ou pas de QR code du tout
-  //   if (needsUpdate || userQRCodes.length === 0) {
-  //     // S'il n'y a pas de QR code, en créer un nouveau
-  //     if (userQRCodes.length === 0) {
-  //       const compte = await this.compteService.getUserCompte(id_user);
-  //       const newQr = await this.createDynamicQrForUser(
-  //         id_user, 
-  //         compte?.numero_compte, 
-  //         60, 
-  //         compte?.devise
-  //       );
-  //       userQRCodes = [newQr];
-  //     }
-  //     // S'il y a des QR codes expirés, mettre à jour le premier
-  //     else {
-  //       const expiredQr = userQRCodes[0]; // Prendre le plus récent (premier après tri DESC)
-        
-  //       // Créer temporairement un nouveau QR code pour récupérer un nouveau token et date d'expiration
-  //       const compte = await this.compteService.getUserCompte(id_user);
-  //       const tempNewQr = await this.createDynamicQrForUser(
-  //         id_user, 
-  //         compte?.numero_compte, 
-  //         60, 
-  //         compte?.devise
-  //       );
-        
-  //       // Mettre à jour l'ancien QR code avec les nouvelles informations
-  //       expiredQr.token = tempNewQr.token;
-  //       expiredQr.date_expiration = tempNewQr.date_expiration;
-  //       // expiredQr.date_modification = new Date();
-        
-  //       // Sauvegarder les modifications
-  //       await this.qrCodeDynamiqueRepository.save(expiredQr);
-        
-  //       // Supprimer le QR code temporaire
-  //       await this.qrCodeDynamiqueRepository.delete(tempNewQr.id_qrcode);
-        
-  //       // Récupérer à nouveau les QR codes mis à jour
-  //       userQRCodes = await this.qrCodeDynamiqueRepository.find({
-  //         where: { id_user, statut: 'actif' },
-  //         order: { date_creation: 'DESC' }
-  //       });
-  //     }
-  //   }
-  
-  //   return userQRCodes;
-  // }
-
-
-
-  
-
-
-
-
-  /* 
-   * Méthodes pour les établissements de santé (à décommenter plus tard)
-   */
-  /*
-  // Code pour les établissements de santé...
-  */
 }

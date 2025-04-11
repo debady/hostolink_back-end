@@ -106,7 +106,8 @@ async getTransactionById(id: number) {
     // Trouver le QR code correspondant au token
     const qrCodeInfo = await this.getQrCodeInfoFromToken(token);
     if (!qrCodeInfo) {
-      throw new NotFoundException(`QR code avec token ${token} non trouvé`);
+      throw new NotFoundException(`token expiré `);
+      // throw new NotFoundException(`QR code avec token ${token} non trouvé`);
     }
 
    // Déterminer le type de QR code (statique ou dynamique)

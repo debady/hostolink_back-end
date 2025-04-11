@@ -17,11 +17,13 @@ export class TransactionInterneController {
   ) {}
 
   @Get('mes_transactions')
+   @UseGuards(JwtAuthGuard)
   async getMyTransactions(@Req() req) {
     return this.TransactionInterneService.getMyTransactions(req.user.id_user);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   async getTransactionById(@Param('id') id: string, @Req() req) {
     const transaction = await this.TransactionInterneService.getTransactionById(+id);
     
@@ -36,18 +38,21 @@ export class TransactionInterneController {
 
   // transaction via qr code
   @Post('paiement_qrcode')
+  @UseGuards(JwtAuthGuard)
   async payWithQr(@Req() req, @Body() payWithQrDto: PayWithQrDto) {
     return this.TransactionInterneService.createTransactionFromQrCode(req.user.id_user, payWithQrDto);
   }
 
   // transaction via numero de téléphone
   @Post('paiement_telephone')
+  @UseGuards(JwtAuthGuard)
   async payWithPhone(@Req() req, @Body() payWithPhoneDto: PayWithPhoneDto) {
     return this.TransactionInterneService.createTransactionFromPhone(req.user.id_user, payWithPhoneDto);
   }
 
   // transaction via email
   @Post('/paiement_email')
+  @UseGuards(JwtAuthGuard)
   async payWithEmail(@Req() req, @Body() payWithEmailDto: PayWithEmailDto) {
     try {
       const userId = req.user.id_user;
