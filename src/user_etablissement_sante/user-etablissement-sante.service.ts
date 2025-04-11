@@ -425,6 +425,15 @@ async getProfile(id: number) {
       url: uploaded.secure_url,
     };
   }
+
+  async findLastCreatedEtablissementId(): Promise<number | null> {
+    const dernier = await this.userRepo.find({
+      order: { creatAt: 'DESC' },
+      take: 1,
+    });
+    return dernier.length ? dernier[0].id_user_etablissement_sante : null;
+  }
+  
   
   
 }
