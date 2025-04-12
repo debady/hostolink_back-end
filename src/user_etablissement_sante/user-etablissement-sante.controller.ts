@@ -39,6 +39,7 @@ export class UserEtablissementSanteController {
   @Get('me')
   async getProfile(@Req() req: any) {
     const id = req.user.id_user_etablissement_sante;
+    
 
     return this.service.getProfile(id);
   }

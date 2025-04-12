@@ -198,4 +198,19 @@ export class AdministrateurController {
     return this.administrateurService.findAllEtablissements();
   }
 
+  // Recharge utilisateur par identifiant
+  @UseGuards(JwtAdminGuard)
+  @Post('recharger-user')
+  rechargerUser(@Request() req, @Body() body: { identifiant: string; montant: number }) {
+    return this.adminService.rechargerUser(body.identifiant, body.montant, req.user.id_admin_gestionnaire);
+  }
+  
+  @UseGuards(JwtAdminGuard)
+  @Post('recharger-etablissement')
+  rechargerEtablissement(@Request() req, @Body() body: { identifiant: string; montant: number }) {
+    return this.adminService.rechargerEtablissement(body.identifiant, body.montant, req.user.id_admin_gestionnaire);
+  }
+  
+
+
 }

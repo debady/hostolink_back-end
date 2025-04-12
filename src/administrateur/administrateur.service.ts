@@ -381,6 +381,67 @@ export class AdministrateurService {
       etablissements,
     };
   }
+
+
+  async rechargerUser(identifiant: string, montant: number, idAdmin: number) {
+    const [user] = await this.dataSource.query(
+      `SELECT * FROM utilisateur WHERE email = $1 OR telephone = $1 LIMIT 1`,
+      [identifiant],
+    );
+    if (!user) throw new NotFoundException("Utilisateur introuvable");
+  
+    const [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user = $1 LIMIT 1`,
+      [user.id_user],
+    );
+    if (!compte) throw new NotFoundException("Compte utilisateur introuvable");
+  
+    const nouveauSolde = compte.solde_compte + montant;
+  
+    await this.dataSource.transaction(async manager => {
+      await manager.query(`UPDATE compte SET solde_compte = $1 WHERE id_user = $2`, [nouveauSolde, user.id_user]);
+  
+      await manager.query(
+        `INSERT INTO admin_rechargements (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
+         VALUES ($1, 'user', $2, $3, $4, $5, $6)`,
+        [idAdmin, user.id_user, identifiant, montant, compte.solde_compte, nouveauSolde],
+      );
+    });
+  
+    return { message: '✅ Rechargement utilisateur effectué avec succès', nouveauSolde };
+  }
+  
+  async rechargerEtablissement(identifiant: string, montant: number, idAdmin: number) {
+    const [etab] = await this.dataSource.query(
+      `SELECT * FROM user_etablissement_sante WHERE email = $1 OR telephone = $1 LIMIT 1`,
+      [identifiant],
+    );
+    if (!etab) throw new NotFoundException("Établissement introuvable");
+  
+    const [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user_etablissement_sante = $1 LIMIT 1`,
+      [etab.id_user_etablissement_sante],
+    );
+    if (!compte) throw new NotFoundException("Compte établissement introuvable");
+  
+    const nouveauSolde = compte.solde_compte + montant;
+  
+    await this.dataSource.transaction(async manager => {
+      await manager.query(
+        `UPDATE compte SET solde_compte = $1 WHERE id_user_etablissement_sante = $2`,
+        [nouveauSolde, etab.id_user_etablissement_sante],
+      );
+  
+      await manager.query(
+        `INSERT INTO admin_rechargements (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
+         VALUES ($1, 'etablissement', $2, $3, $4, $5, $6)`,
+        [idAdmin, etab.id_user_etablissement_sante, identifiant, montant, compte.solde_compte, nouveauSolde],
+      );
+    });
+  
+    return { message: '✅ Rechargement établissement effectué avec succès', nouveauSolde,  montant_crédité: montant };
+  }
+  
   
   
   

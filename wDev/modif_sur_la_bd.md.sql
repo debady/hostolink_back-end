@@ -69,3 +69,26 @@ CREATE TABLE invitation_tracking (
     date_click TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_tracking_invitation FOREIGN KEY (code_invitation) REFERENCES invitation(code_invitation) ON DELETE CASCADE
 );
+
+------------- SAMEDI 12 AVRIL 2025 -----------------
+
+CREATE TABLE IF NOT EXISTS admin_rechargements (
+    id_rechargement SERIAL PRIMARY KEY,
+    id_admin INTEGER NOT NULL,
+    cible_type VARCHAR(20) NOT NULL CHECK (cible_type IN ('user', 'etablissement')),
+    cible_id INTEGER NOT NULL,
+    identifiant TEXT NOT NULL,
+    montant INTEGER NOT NULL,
+    nouveau_solde INTEGER NOT NULL,
+    ancien_solde INTEGER NOT NULL,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    mode VARCHAR(20) DEFAULT 'manuel'
+);
+
+
+ALTER TABLE admin_rechargements
+ADD CONSTRAINT fk_admin FOREIGN KEY (id_admin) REFERENCES administrateurs(id_admin_gestionnaire) ON DELETE CASCADE;
+
+
+ALTER TABLE admin_rechargements
+ALTER COLUMN cible_id TYPE TEXT;
