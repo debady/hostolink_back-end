@@ -1,0 +1,1 @@
+update compte set solde_compte = 0 where id_user_etablissement_sante != 0;

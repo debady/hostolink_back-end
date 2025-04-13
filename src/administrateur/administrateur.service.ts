@@ -442,7 +442,20 @@ export class AdministrateurService {
     return { message: '✅ Rechargement établissement effectué avec succès', nouveauSolde,  montant_crédité: montant };
   }
   
-  
+  // 🔹 Tous les rechargements
+  async getAllRechargements() {
+    return await this.dataSource.query(`SELECT * FROM admin_rechargements ORDER BY date DESC`);
+  }
+
+  // 🔹 Somme des frais (depuis transactions_frais)
+  async getTotalFraisTransactions() {
+    const result = await this.dataSource.query(`
+      SELECT COALESCE(SUM(montant_frais), 0) AS total_frais
+      FROM transactions_frais
+    `);
+    return { total_frais: parseInt(result[0].total_frais, 10) };
+  }
+
   
   
 }

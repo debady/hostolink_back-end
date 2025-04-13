@@ -210,6 +210,19 @@ export class AdministrateurController {
   rechargerEtablissement(@Request() req, @Body() body: { identifiant: string; montant: number }) {
     return this.adminService.rechargerEtablissement(body.identifiant, body.montant, req.user.id_admin_gestionnaire);
   }
+
+  // 🔹 Récupérer tous les rechargements
+    @Get('rechargements')
+    getAllRechargements() {
+      return this.administrateurService.getAllRechargements();
+    }
+
+    // 🔹 Total des frais de transaction
+    @Get('transactions/frais-total')
+    getTotalFraisTransactions() {
+      return this.administrateurService.getTotalFraisTransactions();
+    }
+
   
 
 
