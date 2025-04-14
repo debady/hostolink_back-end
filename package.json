@@ -48,6 +48,7 @@
     "firebase-admin": "^13.2.0",
     "geojson": "^0.5.0",
     "google-logging-utils": "^1.1.1",
+    "into-stream": "^8.0.1",
     "lodash": "^4.17.21",
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",

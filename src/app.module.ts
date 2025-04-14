@@ -30,6 +30,7 @@ import { PaiementModule } from './paiement_user_a_es/paiement.module';
 import { ExpertSanteModule } from './user_etablissement_sante/expert-sante.module';
 import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
 import { EtablissementSanteModule } from './localisation_etablissement_sante/etablissement_sante.module';
+import { InvitationModule } from './invitations/invitation.module';
 
 @Module({
   
@@ -42,10 +43,10 @@ import { EtablissementSanteModule } from './localisation_etablissement_sante/eta
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
-      database: process.env.DATABASE_NAME || 'hostolink_bd',
+      database: process.env.DATABASE_NAME || ' hostolink_bds_reviser_toutes',
       autoLoadEntities: true,
       synchronize: false, 
-      logging:true,
+      logging:false,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
   }),
 UserModule, 
@@ -53,7 +54,7 @@ AuthModule,
 ImageModule, 
 AdministrateurModule,
 GestionUtilisateurModule,
-
+InvitationModule,
 ListeNumeroEtablissementSanteModule,
 CloudinaryModule,
 AnnonceModule,
