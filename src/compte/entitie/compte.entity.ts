@@ -22,7 +22,7 @@ export class Compte {
   @Column({ type: 'integer', default: 0 })
   cumule_mensuel: number;
 
-  @Column({ type: 'integer', default: 1000000 })
+  @Column({ type: 'integer', default: 0 })
   plafond: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
@@ -52,7 +52,6 @@ export class Compte {
   @Column({ type: 'integer', nullable: true })
   id_user_etablissement_sante: number;
 
-  // Relation avec User (optionnelle mais utile pour les jointures)
   @OneToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'id_user' })
   user: User;

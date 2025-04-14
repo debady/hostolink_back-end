@@ -39,6 +39,7 @@ export class UserEtablissementSanteController {
   @Get('me')
   async getProfile(@Req() req: any) {
     const id = req.user.id_user_etablissement_sante;
+    
 
     return this.service.getProfile(id);
   }
@@ -73,16 +74,22 @@ export class UserEtablissementSanteController {
     return this.service.deleteAccountWithReason(id, dto);
   }
   
-  @UseGuards(JwtEtablissementAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('image_profil'))
   @Post('avatar')
   async uploadAvatar(
     @UploadedFile() file: Express.Multer.File,
     @Req() req: any,
   ) {
-    const idEtablissement = req.user.id_user_etablissement_sante;
-    return this.userEtablissementSanteService.uploadOrUpdateAvatar(idEtablissement, file);
+    // Si connecté avec JWT
+    const id =
+      req.user?.id_user_etablissement_sante ??
+      (await this.userEtablissementSanteService.findLastCreatedEtablissementId());
+  
+    if (!id) throw new BadRequestException('Impossible de déterminer l’établissement');
+  
+    return this.userEtablissementSanteService.uploadOrUpdateAvatar(id, file);
   }
+  
 
 
 

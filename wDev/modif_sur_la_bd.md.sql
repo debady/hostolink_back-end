@@ -40,3 +40,55 @@
 -- supperssion de la contrainte de l'enum de type de transaction
   ALTER TABLE transaction_interne
   DROP CONSTRAINT transaction_interne_type_transaction_check;
+
+
+---------- invitation ou partage de l'appli -------
+
+ALTER TABLE utilisateur
+ADD COLUMN code_invitation_utilise VARCHAR(100);
+
+
+CREATE TABLE invitation (
+    id_invitation SERIAL PRIMARY KEY,
+    id_user UUID NOT NULL,
+    code_invitation VARCHAR(100) UNIQUE NOT NULL,
+    nombre_partages INTEGER DEFAULT 0,
+    nombre_clicks INTEGER DEFAULT 0,
+    nombre_inscriptions INTEGER DEFAULT 0,
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_invitation_user FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
+);
+
+
+
+CREATE TABLE invitation_tracking (
+    id_tracking SERIAL PRIMARY KEY,
+    code_invitation VARCHAR(100) NOT NULL,
+    ip_visiteur VARCHAR(100),
+    user_agent TEXT,
+    date_click TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tracking_invitation FOREIGN KEY (code_invitation) REFERENCES invitation(code_invitation) ON DELETE CASCADE
+);
+
+------------- SAMEDI 12 AVRIL 2025 -----------------
+
+CREATE TABLE IF NOT EXISTS admin_rechargements (
+    id_rechargement SERIAL PRIMARY KEY,
+    id_admin INTEGER NOT NULL,
+    cible_type VARCHAR(20) NOT NULL CHECK (cible_type IN ('user', 'etablissement')),
+    cible_id INTEGER NOT NULL,
+    identifiant TEXT NOT NULL,
+    montant INTEGER NOT NULL,
+    nouveau_solde INTEGER NOT NULL,
+    ancien_solde INTEGER NOT NULL,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    mode VARCHAR(20) DEFAULT 'manuel'
+);
+
+
+ALTER TABLE admin_rechargements
+ADD CONSTRAINT fk_admin FOREIGN KEY (id_admin) REFERENCES administrateurs(id_admin_gestionnaire) ON DELETE CASCADE;
+
+
+ALTER TABLE admin_rechargements
+ALTER COLUMN cible_id TYPE TEXT;

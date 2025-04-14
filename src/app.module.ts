@@ -1,4 +1,4 @@
-// // // // ---------------------LOCAL ---------------------
+// // // ---------------------LOCAL ---------------------
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -177,6 +177,8 @@ export class AppModule {}
 // import { UserEtablissementSanteModule } from './user_etablissement_sante/user-etablissement-sante.module';
 // import { QrDynamiqueModule } from './qr-dynamique_user_es/qr-dynamique.module';
 // import { PaiementModule } from './paiement_user_a_es/paiement.module';
+// import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
+// import { EtablissementSanteModule } from './localisation_etablissement_sante/etablissement_sante.module';
 
 // @Module({
 //   imports: [
@@ -192,6 +194,31 @@ export class AppModule {}
 //       database: process.env.DATABASE_NAME || 'hostolink_bd',
 //       autoLoadEntities: false,
 //       synchronize: false, 
+//       logging:true,
+//       entities: [__dirname + '/**/*.entity{.ts,.js}'],
+//   }),
+// UserModule, 
+// AuthModule, 
+// ImageModule, 
+// AdministrateurModule,
+// GestionUtilisateurModule,
+
+// ListeNumeroEtablissementSanteModule,
+// CloudinaryModule,
+// AnnonceModule,
+// ThematiqueDiscussionModule,
+// FirebaseModule,
+// TransactionFraisModule,
+// TransactionInterneModule,
+// EtablissementSanteModule, 
+// UserEtablissementSante,
+// UserEtablissementSanteModule,
+// QrDynamiqueModule,
+// PaiementModule,
+// AdministrateurModule,
+// PaiementModule,
+// ExpertSanteModule
+//   ],
 //       logging:false,
 //       //  process.env.NODE_ENV !== 'production',
 //       extra: process.env.DB_SSL === 'true'
@@ -224,10 +251,11 @@ export class AppModule {}
 
 // })
 // export class AppModule {}
+// console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
 
 
-
-// // ----------en ligne ------------------
+// ----------en ligne -----------------
+// -
 // import { Module } from '@nestjs/common';
 // import { TypeOrmModule } from '@nestjs/typeorm';
 // import { ConfigModule } from '@nestjs/config';
@@ -244,6 +272,11 @@ export class AppModule {}
 // import { TransactionFraisModule } from './transaction-frais/transaction-frais.module';
 // import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
 // import { EtablissementSanteModule } from './localisation_etablissement_sante/etablissement_sante.module';
+// import { UserEtablissementSante } from './user_etablissement_sante/entities/user-etablissement-sante.entity';
+// import { UserEtablissementSanteModule } from './user_etablissement_sante/user-etablissement-sante.module';
+// import { QrDynamiqueModule } from './qr-dynamique_user_es/qr-dynamique.module';
+// import { PaiementModule } from './paiement_user_a_es/paiement.module';
+// import { ExpertSanteModule } from './user_etablissement_sante/expert-sante.module';
 
 
 // @Module({
@@ -268,20 +301,27 @@ export class AppModule {}
 //         ? { ssl: { rejectUnauthorized: false } }
 //         : undefined,
 //     }),
-//   UserModule, 
-//   AuthModule, 
-//   ImageModule, 
-//   AdministrateurModule,
-//   GestionUtilisateurModule,
-  
-//   ListeNumeroEtablissementSanteModule,
-//   CloudinaryModule,
-//   AnnonceModule,
-//   ThematiqueDiscussionModule,
-//   FirebaseModule,
-//   TransactionFraisModule,
-//   TransactionInterneModule,
-//   EtablissementSanteModule,  
+//     UserModule, 
+//     AuthModule, 
+//     ImageModule, 
+//     AdministrateurModule,
+//     GestionUtilisateurModule,
+    
+//     ListeNumeroEtablissementSanteModule,
+//     CloudinaryModule,
+//     AnnonceModule,
+//     ThematiqueDiscussionModule,
+//     FirebaseModule,
+//     TransactionFraisModule,
+//     TransactionInterneModule,
+//     EtablissementSanteModule, 
+//     UserEtablissementSante,
+//     UserEtablissementSanteModule,
+//     QrDynamiqueModule,
+//     PaiementModule,
+//     AdministrateurModule,
+//     PaiementModule,
+//     ExpertSanteModule,
 
 //   // PublicationModule,
 //   // CommentaireModule,

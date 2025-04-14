@@ -13,7 +13,8 @@ import {
   Delete,
   UnauthorizedException,
   Patch,
-  BadRequestException
+  BadRequestException,
+  Query
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateAdministrateurDto } from './dto/create-administrateur.dto';
@@ -197,5 +198,46 @@ export class AdministrateurController {
   async getAllEtablissements() {
     return this.administrateurService.findAllEtablissements();
   }
+
+  // Recharge utilisateur par identifiant
+  @UseGuards(JwtAdminGuard)
+  @Post('recharger-user')
+  rechargerUser(@Request() req, @Body() body: { identifiant: string; montant: number }) {
+    return this.adminService.rechargerUser(body.identifiant, body.montant, req.user.id_admin_gestionnaire);
+  }
+  
+  @UseGuards(JwtAdminGuard)
+  @Post('recharger-etablissement')
+  rechargerEtablissement(@Request() req, @Body() body: { identifiant: string; montant: number }) {
+    return this.adminService.rechargerEtablissement(body.identifiant, body.montant, req.user.id_admin_gestionnaire);
+  }
+
+  // 🔹 Récupérer tous les rechargements
+    @Get('rechargements')
+    getAllRechargements() {
+      return this.administrateurService.getAllRechargements();
+    }
+
+    // 🔹 Total des frais de transaction
+    @Get('transactions/frais-total')
+    getTotalFraisTransactions() {
+      return this.administrateurService.getTotalFraisTransactions();
+    }
+
+    @Get('utilisateur/find')
+    @UseGuards(JwtAdminGuard)
+    async findUser(
+      @Request() req,
+      @Query('identifiant') identifiant: string,
+      @Query('type') type: string,
+    ) {
+      return this.adminService.rechercherUtilisateurParIdentifiant(identifiant, type);
+    }
+    
+    
+
+
+  
+
 
 }

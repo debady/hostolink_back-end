@@ -128,7 +128,7 @@ DROP TYPE IF EXISTS role_admin_enum;
  solde_compte                | integer                     |           |          | 0
  solde_bonus                 | integer                     |           |          | 0
  cumule_mensuel              | integer                     |           |          | 0
- plafond                     | integer                     |           |          | 100000
+ plafond                     | integer                     |           |          | 0
  mode_paiement_preferentiel  | character varying(50)       |           |          |
  type_user                   | character varying(20)       |           | not null |
  devise                      | character varying(10)       |           | not null | 'XOF'::character varying

@@ -1,0 +1,3 @@
+update compte set solde_compte = 0 where id_user_etablissement_sante != 0;
+
+update transactions_frais set montant_frais = 78412252 where id_frais !=0; 
