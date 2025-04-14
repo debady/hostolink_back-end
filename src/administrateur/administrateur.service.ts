@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException, UnauthorizedException, Inject } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, NotFoundException, UnauthorizedException, Inject, Get, Query, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Image, ImageMotifEnum } from '../image/entities/image.entity';
 import { v2 as cloudinary } from 'cloudinary';
 import { DataSource } from 'typeorm';
+import { JwtAdminGuard } from 'src/auth/jwt-auth.guard';
 
 
 @Injectable()
@@ -456,6 +457,78 @@ export class AdministrateurService {
     return { total_frais: parseInt(result[0].total_frais, 10) };
   }
 
-  
+  @Get('utilisateur/find')
+@UseGuards(JwtAdminGuard)
+async findUser(@Query('identifiant') identifiant: string, @Query('type') type: string) {
+  if (!identifiant || !type) throw new BadRequestException('Identifiant et type requis');
+
+  let user;
+
+  switch (type.toLowerCase()) {
+    case 'email':
+      [user] = await this.dataSource.query(`SELECT * FROM utilisateur WHERE email = $1 LIMIT 1`, [identifiant]);
+      break;
+    case 'uuid':
+      [user] = await this.dataSource.query(`SELECT * FROM utilisateur WHERE id_user = $1 LIMIT 1`, [identifiant]);
+      break;
+    case 'numéro de téléphone':
+    case 'téléphone':
+    case 'telephone':
+      [user] = await this.dataSource.query(`SELECT * FROM utilisateur WHERE telephone = $1 LIMIT 1`, [identifiant]);
+      break;
+    default:
+      throw new BadRequestException('Type de recherche non supporté');
+  }
+
+  if (!user) throw new NotFoundException('Utilisateur introuvable');
+
+  const [compte] = await this.dataSource.query(
+    `SELECT * FROM compte WHERE id_user = $1 AND statut = 'actif' LIMIT 1`,
+    [user.id_user],
+  );
+
+  return {
+    utilisateur: {
+      id: user.id_user,
+      email: user.email,
+      telephone: user.telephone,
+      nom: user.nom,
+      image_profil: user.image_profil,
+      actif: compte?.statut === 'actif',
+      date_inscription: user.date_creation,
+    },
+  };
+}
+
+async rechercherUtilisateurParIdentifiant(identifiant: string, type: string) {
+  if (!identifiant || !type) {
+    throw new BadRequestException('Identifiant et type requis');
+  }
+
+  let query = '';
+  switch (type.toLowerCase()) {
+    case 'email':
+      query = `SELECT * FROM utilisateur WHERE email = $1 LIMIT 1`;
+      break;
+    case 'numéro de téléphone':
+    case 'numero de téléphone':
+    case 'téléphone':
+    case 'telephone':
+      query = `SELECT * FROM utilisateur WHERE telephone = $1 LIMIT 1`;
+      break;
+    case 'uuid':
+      query = `SELECT * FROM utilisateur WHERE id_user = $1 LIMIT 1`;
+      break;
+    default:
+      throw new BadRequestException('Type de recherche non valide');
+  }
+
+  const [user] = await this.dataSource.query(query, [identifiant]);
+
+  if (!user) throw new NotFoundException('Utilisateur introuvable');
+
+  return user;
+}
+
   
 }

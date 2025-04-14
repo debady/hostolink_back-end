@@ -13,7 +13,8 @@ import {
   Delete,
   UnauthorizedException,
   Patch,
-  BadRequestException
+  BadRequestException,
+  Query
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateAdministrateurDto } from './dto/create-administrateur.dto';
@@ -222,6 +223,19 @@ export class AdministrateurController {
     getTotalFraisTransactions() {
       return this.administrateurService.getTotalFraisTransactions();
     }
+
+    @Get('utilisateur/find')
+    @UseGuards(JwtAdminGuard)
+    async findUser(
+      @Request() req,
+      @Query('identifiant') identifiant: string,
+      @Query('type') type: string,
+    ) {
+      return this.adminService.rechercherUtilisateurParIdentifiant(identifiant, type);
+    }
+    
+    
+
 
   
 
