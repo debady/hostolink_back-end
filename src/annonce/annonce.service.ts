@@ -29,7 +29,6 @@ export class AnnonceService {
     const annonce = this.annonceRepository.create({
       titre_annonce: dto.titre_annonce,
       description_annonce: dto.description_annonce,
-      date: dto.date,
       url_images: dto.url_images,
       id_admin_gestionnaire: admin, // Associer l'entité Administrateur et non juste un ID
     });

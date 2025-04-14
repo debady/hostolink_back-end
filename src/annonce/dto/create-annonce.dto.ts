@@ -12,9 +12,9 @@ export class CreateAnnonceDto {
   @IsString()
   description_annonce: string;
 
-  @IsOptional()
-  @IsDateString()
-  date: string;
+  // @IsOptional()
+  // @IsDateString()
+  // date: string;
 
   @IsOptional()
   @IsUrl()

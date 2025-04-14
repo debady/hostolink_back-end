@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn
 import { Image } from '../../image/entities/image.entity';
 import { MessageThematique } from 'src/thematique_discussion/entities/message_thematique.entity';
 import { Otp } from './otp.entity';
+import { Invitation } from 'src/invitations/entities/invitation.entity';
 
 
 @Entity('utilisateur')  
@@ -59,5 +60,12 @@ export class User {
 
   @Column({ nullable: true })
   fcm_token: string;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  code_invitation_utilise: string;
+
+
+  @OneToMany(() => Invitation, invitation => invitation.user)
+  invitations: Invitation[];
 
 }
