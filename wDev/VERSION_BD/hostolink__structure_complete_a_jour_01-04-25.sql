@@ -218,7 +218,7 @@ CREATE TABLE public.compte (
     solde_compte integer DEFAULT 0,
     solde_bonus integer DEFAULT 0,
     cumule_mensuel integer DEFAULT 0,
-    plafond integer DEFAULT 100000,
+    plafond integer DEFAULT 0,
     mode_paiement_preferentiel character varying(50),
     type_user character varying(20) NOT NULL,
     devise character varying(10) DEFAULT 'XOF'::character varying NOT NULL,

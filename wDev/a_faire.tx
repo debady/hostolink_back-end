@@ -3,6 +3,7 @@ endpoint de trop generer de otp
 il y'a possibilité de creer un dossier pour chaque utilisateur automatiquement sur cloudinary du coup le faire 
 le code de mise a jour du champ compte verifier de la table utilisateur a ete supprimer revoir 
 
+dossier_hostolink_preset
 
 - créer un dossier avec les données  d'un user (simple ou es ) sur clouniray et inserer ces photo renommé
 - endpoint qui permet a l'user lui même de changer son mdp

@@ -1,6 +1,7 @@
-import { Controller, Post, Body, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from '../utilisateur/user.service';
+import { LoginEtablissementDto } from 'src/user_etablissement_sante/dto/login-etablissement.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -21,26 +22,46 @@ export class AuthController {
 
     try {
       const result = await this.authService.validateUser(body.identifier.trim(), body.password.trim());
-
+    
       if (!result) {
-        console.warn(`❌ Identifiant ou mot de passe incorrect pour : ${body.identifier}`);
         throw new BadRequestException('Identifiant ou mot de passe incorrect');
       }
-
-      console.log(`✅ Connexion réussie pour : ${result.user.email}`);
-      if (!result.user.compte_verifier) {
-        console.warn(`⚠️ Compte non vérifié pour : ${result.user.email}`);
+    
+      if (!result.access_token) {
+        // Génération OTP uniquement si non vérifié
+        await this.authService.sendOtpToUser(result.user);
+        return {
+          success: true,
+          message: 'Un OTP vous a été envoyé. Veuillez valider pour finaliser la connexion.',
+          compte_verifier: false,
+        };
       }
-
+    
+      // ✅ Si tout est bon
       return {
         success: true,
         message: 'Connexion réussie',
-        token: result.access_token, 
+        token: result.access_token,
+        compte_verifier: true,
       };
-
-    } catch (error) {
+    }
+     catch (error) {
       console.error(`❌ Erreur lors de la connexion pour ${body.identifier}:`, error);
       throw new InternalServerErrorException('Erreur lors de la connexion');
     }
   }
+
+  @Post('/login-etablissement')
+  async loginEtablissement(@Body() dto: LoginEtablissementDto) {
+    const user = await this.authService.validateUserEtablissementSante(dto.identifiant, dto.mot_de_passe);
+    if (!user) throw new UnauthorizedException('Identifiants invalides');
+
+    const token = await this.authService.loginEtablissement(user);
+
+    return {
+      token,
+      etablissement: user,
+    };
+  }
+
 }

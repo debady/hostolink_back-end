@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException, UnauthorizedException, Inject } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, NotFoundException, UnauthorizedException, Inject, Get, Query, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -8,6 +8,8 @@ import { LoginAdministrateurDto } from './dto/login-administrateur.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Image, ImageMotifEnum } from '../image/entities/image.entity';
 import { v2 as cloudinary } from 'cloudinary';
+import { DataSource } from 'typeorm';
+import { JwtAdminGuard } from 'src/auth/jwt-auth.guard';
 
 
 @Injectable()
@@ -21,7 +23,7 @@ export class AdministrateurService {
     @Inject('CLOUDINARY') private cloudinaryProvider: typeof cloudinary,
 
     @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
-
+    private readonly dataSource: DataSource
 
     
   ) {}
@@ -286,5 +288,247 @@ export class AdministrateurService {
   }
   
    
+  async crediterUtilisateur(id_user: string, montant: number) {
+    if (!id_user || !montant || montant <= 0) {
+      throw new BadRequestException('ID utilisateur et montant requis');
+    }
+  
+    const [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user = $1 AND statut = 'actif' LIMIT 1`,
+      [id_user],
+    );
+  
+    if (!compte) {
+      throw new NotFoundException('Compte utilisateur introuvable');
+    }
+  
+    await this.dataSource.query(
+      `UPDATE compte SET solde_compte = solde_compte + $1 WHERE id_compte = $2`,
+      [montant, compte.id_compte],
+    );
+  
+    return {
+      message: '✅ Solde crédité avec succès',
+      utilisateur: id_user,
+      montant_crédité: montant,
+    };
+  }
+
+  async crediterEtablissement(idEtab: number, montant: number) {
+    const [compte] = await this.dataSource.query(
+      `SELECT * FROM compte 
+       WHERE id_user_etablissement_sante = $1 
+       AND statut = 'actif' LIMIT 1`,
+      [idEtab],
+    );
+  
+    if (!compte) {
+      throw new NotFoundException("Compte établissement introuvable");
+    }
+  
+    await this.dataSource.query(
+      `UPDATE compte SET solde_compte = solde_compte + $1 
+       WHERE id_compte = $2`,
+      [montant, compte.id_compte],
+    );
+  
+    return { message: `✅ Crédit de ${montant} XOF effectué avec succès.` };
+  }
+
+  async findAllEtablissements(): Promise<{ total: number; etablissements: any[] }> {
+    const etabs = await this.dataSource.query(
+      `SELECT * FROM user_etablissement_sante ORDER BY id_user_etablissement_sante DESC`,
+    );
+  
+    const etablissements = await Promise.all(
+      etabs.map(async (etab) => {
+        const [compte] = await this.dataSource.query(
+          `SELECT * FROM compte WHERE id_user_etablissement_sante = $1 LIMIT 1`,
+          [etab.id_user_etablissement_sante],
+        );
+  
+        const [qrStatique] = await this.dataSource.query(
+          `SELECT * FROM qr_code_paiement_statique WHERE id_user_etablissement_sante = $1 LIMIT 1`,
+          [etab.id_user_etablissement_sante],
+        );
+  
+        const [qrDynamique] = await this.dataSource.query(
+          `SELECT * FROM qr_code_paiement_dynamique 
+           WHERE id_user_etablissement_sante = $1 AND statut = 'actif' 
+           AND date_expiration > NOW() 
+           ORDER BY date_creation DESC LIMIT 1`,
+          [etab.id_user_etablissement_sante],
+        );
+  
+        const [image] = await this.dataSource.query(
+          `SELECT url_image FROM images 
+           WHERE id_user_etablissement_sante = $1 
+           AND motif = 'photo_profile' LIMIT 1`,
+          [etab.id_user_etablissement_sante],
+        );
+  
+        return {
+          ...etab,
+          image_profil: image?.url_image || null,
+          compte: compte || null,
+          qr_code_statique: qrStatique || null,
+          qr_code_dynamique: qrDynamique || null,
+        };
+      }),
+    );
+  
+    return {
+      total: etablissements.length,
+      etablissements,
+    };
+  }
+
+
+  async rechargerUser(identifiant: string, montant: number, idAdmin: number) {
+    const [user] = await this.dataSource.query(
+      `SELECT * FROM utilisateur WHERE email = $1 OR telephone = $1 LIMIT 1`,
+      [identifiant],
+    );
+    if (!user) throw new NotFoundException("Utilisateur introuvable");
+  
+    const [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user = $1 LIMIT 1`,
+      [user.id_user],
+    );
+    if (!compte) throw new NotFoundException("Compte utilisateur introuvable");
+  
+    const nouveauSolde = compte.solde_compte + montant;
+  
+    await this.dataSource.transaction(async manager => {
+      await manager.query(`UPDATE compte SET solde_compte = $1 WHERE id_user = $2`, [nouveauSolde, user.id_user]);
+  
+      await manager.query(
+        `INSERT INTO admin_rechargements (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
+         VALUES ($1, 'user', $2, $3, $4, $5, $6)`,
+        [idAdmin, user.id_user, identifiant, montant, compte.solde_compte, nouveauSolde],
+      );
+    });
+  
+    return { message: '✅ Rechargement utilisateur effectué avec succès', nouveauSolde };
+  }
+  
+  async rechargerEtablissement(identifiant: string, montant: number, idAdmin: number) {
+    const [etab] = await this.dataSource.query(
+      `SELECT * FROM user_etablissement_sante WHERE email = $1 OR telephone = $1 LIMIT 1`,
+      [identifiant],
+    );
+    if (!etab) throw new NotFoundException("Établissement introuvable");
+  
+    const [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user_etablissement_sante = $1 LIMIT 1`,
+      [etab.id_user_etablissement_sante],
+    );
+    if (!compte) throw new NotFoundException("Compte établissement introuvable");
+  
+    const nouveauSolde = compte.solde_compte + montant;
+  
+    await this.dataSource.transaction(async manager => {
+      await manager.query(
+        `UPDATE compte SET solde_compte = $1 WHERE id_user_etablissement_sante = $2`,
+        [nouveauSolde, etab.id_user_etablissement_sante],
+      );
+  
+      await manager.query(
+        `INSERT INTO admin_rechargements (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
+         VALUES ($1, 'etablissement', $2, $3, $4, $5, $6)`,
+        [idAdmin, etab.id_user_etablissement_sante, identifiant, montant, compte.solde_compte, nouveauSolde],
+      );
+    });
+  
+    return { message: '✅ Rechargement établissement effectué avec succès', nouveauSolde,  montant_crédité: montant };
+  }
+  
+  // 🔹 Tous les rechargements
+  async getAllRechargements() {
+    return await this.dataSource.query(`SELECT * FROM admin_rechargements ORDER BY date DESC`);
+  }
+
+  // 🔹 Somme des frais (depuis transactions_frais)
+  async getTotalFraisTransactions() {
+    const result = await this.dataSource.query(`
+      SELECT COALESCE(SUM(montant_frais), 0) AS total_frais
+      FROM transactions_frais
+    `);
+    return { total_frais: parseInt(result[0].total_frais, 10) };
+  }
+
+  @Get('utilisateur/find')
+@UseGuards(JwtAdminGuard)
+async findUser(@Query('identifiant') identifiant: string, @Query('type') type: string) {
+  if (!identifiant || !type) throw new BadRequestException('Identifiant et type requis');
+
+  let user;
+
+  switch (type.toLowerCase()) {
+    case 'email':
+      [user] = await this.dataSource.query(`SELECT * FROM utilisateur WHERE email = $1 LIMIT 1`, [identifiant]);
+      break;
+    case 'uuid':
+      [user] = await this.dataSource.query(`SELECT * FROM utilisateur WHERE id_user = $1 LIMIT 1`, [identifiant]);
+      break;
+    case 'numéro de téléphone':
+    case 'téléphone':
+    case 'telephone':
+      [user] = await this.dataSource.query(`SELECT * FROM utilisateur WHERE telephone = $1 LIMIT 1`, [identifiant]);
+      break;
+    default:
+      throw new BadRequestException('Type de recherche non supporté');
+  }
+
+  if (!user) throw new NotFoundException('Utilisateur introuvable');
+
+  const [compte] = await this.dataSource.query(
+    `SELECT * FROM compte WHERE id_user = $1 AND statut = 'actif' LIMIT 1`,
+    [user.id_user],
+  );
+
+  return {
+    utilisateur: {
+      id: user.id_user,
+      email: user.email,
+      telephone: user.telephone,
+      nom: user.nom,
+      image_profil: user.image_profil,
+      actif: compte?.statut === 'actif',
+      date_inscription: user.date_creation,
+    },
+  };
+}
+
+async rechercherUtilisateurParIdentifiant(identifiant: string, type: string) {
+  if (!identifiant || !type) {
+    throw new BadRequestException('Identifiant et type requis');
+  }
+
+  let query = '';
+  switch (type.toLowerCase()) {
+    case 'email':
+      query = `SELECT * FROM utilisateur WHERE email = $1 LIMIT 1`;
+      break;
+    case 'numéro de téléphone':
+    case 'numero de téléphone':
+    case 'téléphone':
+    case 'telephone':
+      query = `SELECT * FROM utilisateur WHERE telephone = $1 LIMIT 1`;
+      break;
+    case 'uuid':
+      query = `SELECT * FROM utilisateur WHERE id_user = $1 LIMIT 1`;
+      break;
+    default:
+      throw new BadRequestException('Type de recherche non valide');
+  }
+
+  const [user] = await this.dataSource.query(query, [identifiant]);
+
+  if (!user) throw new NotFoundException('Utilisateur introuvable');
+
+  return user;
+}
+
   
 }

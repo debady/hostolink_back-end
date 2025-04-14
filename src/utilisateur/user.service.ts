@@ -137,70 +137,69 @@ export class UserService {
   }
 
 
-   async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
-      try {
-        identifier = identifier.trim();
-        const user = await this.userRepository.findOne({
-          where: [{ email: identifier }, { telephone: identifier }],
-        });
-    
-        if (!user) {
-          console.error(`❌ Échec : Utilisateur non trouvé pour ${identifier}`);
-          throw new BadRequestException("Utilisateur non trouvé");
-        }
-    
-        // ✅ Générer un OTP (4 à 6 chiffres)
-        const otpCode = Math.floor(1000 + Math.random() * 9000).toString(); 
-    
-        // ✅ Définir l'expiration à 5 minutes
-        const expirationDate = new Date();
-        expirationDate.setMinutes(expirationDate.getMinutes() + 5);
+  async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
+    try {
+      identifier = identifier.trim();
+      const user = await this.userRepository.findOne({
+        where: [{ email: identifier }, { telephone: identifier }],
+      });
   
-        await this.otpRepository.createQueryBuilder()
+      if (!user || !user.id_user) {
+        console.error(`❌ Échec : Utilisateur invalide ou introuvable pour ${identifier}`);
+        throw new BadRequestException("Utilisateur invalide ou introuvable");
+      }
+  
+      // ✅ Générer un OTP (4 chiffres)
+      const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+  
+      // ✅ Définir l'expiration à 5 minutes
+      const expirationDate = new Date();
+      expirationDate.setMinutes(expirationDate.getMinutes() + 5);
+  
+      // ✅ Créer le nouvel OTP
+      const otp = this.otpRepository.create({
+        otp_code: otpCode,
+        expires_at: expirationDate,
+        is_valid: true,
+        moyen_envoyer,
+        user,
+        id_user_etablissement_sante: undefined,
+      });
+  
+      // ✅ Sauvegarder d'abord le nouvel OTP
+      await this.otpRepository.save(otp);
+  
+      // ✅ Supprimer tous les anciens OTP de ce user (sauf le nouveau qu’on vient d’insérer)
+      await this.otpRepository.createQueryBuilder()
         .delete()
         .from(Otp)
-        .where("id_user = :id_user", {
-          id_user: user ? user.id_user : null,
+        .where("id_user = :id_user AND otp_code != :code", {
+          id_user: user.id_user,
+          code: otpCode,
         })
         .execute();
   
-        const otp = this.otpRepository.create({
-          otp_code: otpCode,
-          expires_at: expirationDate,
-          is_valid: true,
-          moyen_envoyer: moyen_envoyer,
-          user: user,  // ✅ Soit l'utilisateur...
-          id_user_etablissement_sante: undefined,  // ✅ ... soit un établissement de santé mais pas les deux !
-      });
-      
-          
-          
-        await this.otpRepository.save(otp);
-        console.log(`📌 OTP enregistré pour l'utilisateur ${user.id_user}: ${otpCode}`);
-
-  
-        if (moyen_envoyer === MoyenEnvoiEnum.SMS && identifier) {
-  
-          // await this.smsService.sendOtpSms(identifier, otpCode);
-          console.log(`📤 Envoi du SMS en cours vers ${Number} avec l'OTP ${otpCode}`);
-  
-        } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL && identifier) {
-  
-          // await this.emailService.sendOtpEmail(identifier, otpCode);
-          console.log("code envoyer par email à dev")
-        }
-  
-        console.log(`✅ Envoi d'un OTP à ${identifier} via ${moyen_envoyer}`);
-        console.log(`📤 OTP envoyer à ${identifier} est ${otpCode}`);
-        return { success: true, otp: otpCode };
-  
-      } catch (error) {
-        if (error instanceof BadRequestException) {
-          throw error;
-        }
-        throw new InternalServerErrorException("Erreur lors de la génération de l'OTP");
+      // 📤 Envoi simulé
+      if (moyen_envoyer === MoyenEnvoiEnum.SMS) {
+        // await this.smsService.sendOtpSms(identifier, otpCode);
+        console.log(`📤 SMS vers ${identifier} avec OTP ${otpCode}`);
+      } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL) {
+        // await this.emailService.sendOtpEmail(identifier, otpCode);
+        console.log(`📤 EMAIL à ${identifier} avec OTP ${otpCode}`);
       }
+  
+      console.log(`✅ OTP généré pour ${identifier} : ${otpCode}`);
+      return { success: true, otp: otpCode };
+  
+    } catch (error) {
+      console.error("❌ Erreur dans generateOtp :", error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException("Erreur lors de la génération de l'OTP");
     }
+  }
+  
     
   
     // verif otp
@@ -354,4 +353,12 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
 
     return isValid;
   }
+
+  async generateAndSendOtp(user: User): Promise<void> {
+    const identifier = user.email ?? user.telephone;
+    const moyen = user.email ? MoyenEnvoiEnum.EMAIL : MoyenEnvoiEnum.SMS;
+    await this.generateOtp(identifier!, moyen);
+  }
+
+  
 }
