@@ -39,7 +39,7 @@ export class Transaction {
   montant_envoyer: number;
 
   @Column('numeric', { precision: 15, scale: 2 })
-  montant_reçu: number;
+  montant_recu: number;
 
   @Column('numeric', { precision: 15, scale: 2, nullable: true })
   frais_preleve: number;

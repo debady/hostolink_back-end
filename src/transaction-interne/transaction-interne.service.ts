@@ -196,7 +196,7 @@ async getTransactionById(id: number) {
         id_etablissement_recepteur,
         id_etablissement_envoyeur,
         montant_envoyer: montant_envoyer,
-        montant_reçu: montantRecu,
+        montant_recu: montantRecu,
         frais_preleve: frais,
         statut: TransactionStatus.EN_ATTENTE,
         devise_transaction: compteExpéditeur.devise,
@@ -385,7 +385,7 @@ async createTransactionFromPhone(userId: string, payWithPhoneDto: PayWithPhoneDt
       id_etablissement_recepteur,
       id_etablissement_envoyeur,
       montant_envoyer: montant_envoyer,
-      montant_reçu: montantRecu,
+      montant_recu: montantRecu,
       frais_preleve: frais,
       statut: TransactionStatus.EN_ATTENTE,
       devise_transaction: compteExpéditeur.devise,
@@ -571,7 +571,7 @@ async createTransactionFromEmail(userId: string, payWithEmailDto: PayWithEmailDt
       id_etablissement_recepteur,
       id_etablissement_envoyeur,
       montant_envoyer: montant_envoyer,
-      montant_reçu: montantRecu,
+      montant_recu: montantRecu,
       frais_preleve: frais,
       statut: TransactionStatus.EN_ATTENTE,
       devise_transaction: compteExpéditeur.devise,
@@ -711,13 +711,13 @@ async rollbackTransaction(id: number, userId: string, rollbackDto: RollbackTrans
     }
 
     // Vérifier que le destinataire original a suffisamment de fonds pour le remboursement
-    if (compteOriginalRecepteur.solde_compte < originalTransaction.montant_reçu) {
+    if (compteOriginalRecepteur.solde_compte < originalTransaction.montant_recu) {
       throw new BadRequestException('Le bénéficiaire n\'a pas assez de fonds pour effectuer le remboursement');
     }
 
     // Le montant à rembourser est exactement le montant que le destinataire a reçu
-    const montantADebiter = originalTransaction.montant_reçu;
-    const montantACrediter = originalTransaction.montant_reçu; // Pas de frais supplémentaires
+    const montantADebiter = originalTransaction.montant_recu;
+    const montantACrediter = originalTransaction.montant_recu; // Pas de frais supplémentaires
 
     // Créer la transaction de remboursement
     const remboursementData: CreateTransactionDto = {
@@ -727,7 +727,7 @@ async rollbackTransaction(id: number, userId: string, rollbackDto: RollbackTrans
       id_etablissement_recepteur: originalTransaction.id_etablissement_envoyeur,
       id_etablissement_envoyeur: originalTransaction.id_etablissement_recepteur,
       montant_envoyer: montantADebiter, // Montant débité du destinataire original
-      montant_reçu: montantACrediter, // Même montant crédité à l'expéditeur original
+      montant_recu: montantACrediter, // Même montant crédité à l'expéditeur original
       frais_preleve: 0, // Pas de frais pour le remboursement
       statut: TransactionStatus.EN_ATTENTE,
       devise_transaction: originalTransaction.devise_transaction,
@@ -951,7 +951,7 @@ async getStats() {
     .select('transaction.statut', 'statut')
     .addSelect('COUNT(*)', 'count')
     .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
     .groupBy('transaction.statut')
     .getRawMany();
   
@@ -960,7 +960,7 @@ async getStats() {
     .select('transaction.type_transaction', 'type')
     .addSelect('COUNT(*)', 'count')
     .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
     .groupBy('transaction.type_transaction')
     .getRawMany();
   
@@ -968,14 +968,14 @@ async getStats() {
   const totalStats = await this.transactionRepository.createQueryBuilder('transaction')
     .select('COUNT(*)', 'count')
     .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
     .getRawOne();
   
   // Stats journalières (aujourd'hui)
   const dailyStats = await this.transactionRepository.createQueryBuilder('transaction')
     .select('COUNT(*)', 'count')
     .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
     .where('transaction.date_transaction >= :startDate', { startDate: today })
     .andWhere('transaction.date_transaction < :endDate', { endDate: tomorrow })
     .getRawOne();
@@ -984,7 +984,7 @@ async getStats() {
   const weeklyStats = await this.transactionRepository.createQueryBuilder('transaction')
     .select('COUNT(*)', 'count')
     .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
     .where('transaction.date_transaction >= :startDate', { startDate: weekStart })
     .andWhere('transaction.date_transaction < :endDate', { endDate: tomorrow })
     .getRawOne();
@@ -993,7 +993,7 @@ async getStats() {
   const monthlyStats = await this.transactionRepository.createQueryBuilder('transaction')
     .select('COUNT(*)', 'count')
     .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
     .where('transaction.date_transaction >= :startDate', { startDate: monthStart })
     .andWhere('transaction.date_transaction < :endDate', { endDate: tomorrow })
     .getRawOne();
@@ -1002,7 +1002,7 @@ async getStats() {
   const yearlyStats = await this.transactionRepository.createQueryBuilder('transaction')
     .select('COUNT(*)', 'count')
     .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
     .where('transaction.date_transaction >= :startDate', { startDate: yearStart })
     .andWhere('transaction.date_transaction < :endDate', { endDate: tomorrow })
     .getRawOne();
@@ -1012,7 +1012,7 @@ async getStats() {
     .select("to_char(transaction.date_transaction, 'DD-MM-YYYY')", 'date')
     .addSelect('COUNT(*)', 'count')
     .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
     .where('transaction.date_transaction >= :startDate', { startDate: weekStart })
     .groupBy("to_char(transaction.date_transaction, 'DD-MM-YYYY')")
     .orderBy('date', 'ASC')
@@ -1023,7 +1023,7 @@ async getStats() {
     .select("to_char(transaction.date_transaction, 'MM-YYYY')", 'month')
     .addSelect('COUNT(*)', 'count')
     .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-    .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+    .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
     .where('transaction.date_transaction >= :startDate', { startDate: yearStart })
     .groupBy("to_char(transaction.date_transaction, 'MM-YYYY')")
     .orderBy('month', 'ASC')
@@ -1032,7 +1032,7 @@ async getStats() {
   // Montant moyen des transactions
   const avgTransaction = await this.transactionRepository.createQueryBuilder('transaction')
     .select('AVG(transaction.montant_envoyer)', 'avg')
-    .addSelect('AVG(transaction.montant_reçu)', 'avg')
+    .addSelect('AVG(transaction.montant_recu)', 'avg')
     .getRawOne();
   
   // // Comptes les plus actifs (émetteurs)
@@ -1040,7 +1040,7 @@ async getStats() {
   //   .select('transaction.id_compte_expediteur', 'compte')
   //   .addSelect('COUNT(*)', 'count')
   //   .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-  //   .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+  //   .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
   //   .groupBy('transaction.id_compte_expediteur')
   //   .orderBy('count', 'DESC')
   //   .limit(5)
@@ -1051,7 +1051,7 @@ async getStats() {
   //   .select('transaction.compte_recepteur', 'compte')
   //   .addSelect('COUNT(*)', 'count')
   //   .addSelect('SUM(transaction.montant_envoyer)', 'total_motant_envoyer')
-  //   .addSelect('SUM(transaction.montant_reçu)', 'total_montant_reçu')
+  //   .addSelect('SUM(transaction.montant_recu)', 'total_montant_recu')
   //   .groupBy('transaction.compte_recepteur')
   //   .orderBy('count', 'DESC')
   //   .limit(5)

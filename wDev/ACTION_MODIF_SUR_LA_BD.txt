@@ -1,3 +1,6 @@
+----------- faire en priorité ---------
+ALTER TABLE transaction_interne RENAME COLUMN "montant_reçu" TO montant_recu;
+
 ------------- SOME -----------
 
 --Ajouter la colonne short_id à la table des QR codes dynamiques
@@ -25,7 +28,7 @@
 
 
 -- Création de la table `transaction_interne` mise à jour avec les ajustements nécessaires
-    CREATE TABLE public.transaction_internes (
+    CREATE TABLE public.transaction_interne (
         id_transaction SERIAL PRIMARY KEY,
         id_compte_expediteur INTEGER NOT NULL,
         id_utilisateur_envoyeur UUID,
@@ -33,7 +36,7 @@
         id_etablissement_recepteur INTEGER,
         id_etablissement_envoyeur INTEGER,
         montant_envoyer NUMERIC(15, 2) NOT NULL,
-        montant_reçu NUMERIC(15, 2) NOT NULL,
+        montant_recu NUMERIC(15, 2) NOT NULL,
         frais_preleve NUMERIC(15, 2),
         motif_annulation VARCHAR(255),
         statut VARCHAR(50), 
@@ -174,3 +177,34 @@
 
     ALTER TABLE admin_rechargements
     ALTER COLUMN cible_id TYPE TEXT;
+
+
+---------------- ENCIENNE TABLE ------------------
+hostolink_bd=# \d transaction_interne
+                                                         Table ½ public.transaction_interne ╗
+           Colonne           |            Type             | Collationnement | NULL-able |                         Par dÚfaut
+-----------------------------+-----------------------------+-----------------+-----------+-------------------------------------------------------------
+ id_transaction              | integer                     |                 | not null  | nextval('transaction_interne_id_transaction_seq'::regclass)
+ id_compte_expediteur        | integer                     |                 | not null  |
+ id_utilisateur_recepteur    | integer                     |                 |           |
+ id_etablissement_recepteur  | integer                     |                 |           |
+ montant                     | numeric(15,2)               |                 | not null  |
+ frais_transaction           | numeric(10,2)               |                 |           | 0.00
+ statut                      | character varying(20)       |                 |           | 'en attente'::character varying
+ devise_transaction          | character varying(10)       |                 | not null  |
+ type_transaction            | character varying(100)      |                 |           |
+ date_transaction            | timestamp without time zone |                 |           | CURRENT_TIMESTAMP
+ id_qrcode                   | integer                     |                 |           |
+ id_compte_recepteur         | integer                     |                 | not null  |
+ id_user_etablissement_sante | integer                     |                 |           |
+ motif_annulation            | character varying(50)       |                 |           |
+Index :
+    "transaction_interne_pkey" PRIMARY KEY, btree (id_transaction)
+Contraintes de vÚrification :
+    "transaction_interne_check" CHECK (id_utilisateur_recepteur IS NOT NULL OR id_etablissement_recepteur IS NOT NULL)
+Contraintes de clÚs ÚtrangÞres :
+    "fk_transaction_interne_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
+
+
+hostolink_bd=#
+

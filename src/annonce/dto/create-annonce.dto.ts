@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsDateString, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class CreateAnnonceDto {
   @IsNotEmpty()
@@ -11,10 +11,6 @@ export class CreateAnnonceDto {
   @IsOptional()
   @IsString()
   description_annonce: string;
-
-  // @IsOptional()
-  // @IsDateString()
-  // date: string;
 
   @IsOptional()
   @IsUrl()

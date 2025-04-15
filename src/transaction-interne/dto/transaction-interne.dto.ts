@@ -29,7 +29,7 @@ export class CreateTransactionDto {
 
   @IsNotEmpty()
   @IsNumber()
-  montant_reçu: number;
+  montant_recu: number;
 
   @IsOptional()
   @IsNumber()
