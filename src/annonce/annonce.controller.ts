@@ -9,10 +9,12 @@ export class AnnonceController {
 
   @Post()
   async createAnnonce(@Body() dto: CreateAnnonceDto) {
+    console.log(`📩 annonce creer avec succès `);
     return this.annonceService.createAnnonce(dto);
   }
   @Get()
   async getAllAnnonces() {
+    console.log(`📩 tous recup annonce `);
     return this.annonceService.getAllAnnonces();
   }
 

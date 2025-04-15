@@ -10,7 +10,9 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { RaisonSuppressionCompte } from './entities/raison-suppression.entity';
 import cloudinary from 'src/config/cloudinary';
-import toStream = require('buffer-to-stream');
+import toStream from 'buffer-to-stream';
+
+
 
 
 
@@ -438,4 +440,3 @@ async getProfile(id: number) {
   
   
 }
- 

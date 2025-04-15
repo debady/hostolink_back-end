@@ -146,6 +146,67 @@ export class CleanupService implements OnModuleInit {
   }
 
   /**
+   * Désactive tous les QR codes dynamiques expirés
+   */
+  // async deactivateExpiredQrCodes(): Promise<void> {
+  //   const now = new Date();
+    
+  //   const result = await this.qrCodeDynamiqueRepository.update(
+  //     { 
+  //       statut: 'actif',
+  //       date_expiration: LessThan(now)
+  //     },
+  //     { 
+  //       statut: 'inactif' 
+  //     }
+  //   );
+    
+    // this.logger.log(`${result.affected} QR codes dynamiques expirés ont été désactivés`);
+  // }
+
+  async deactivateExpiredQrCodes(): Promise<void> {
+    const now = new Date();
+  
+    // 1. Récupérer les utilisateurs affectés AVANT mise à jour
+    const expiredCodes = await this.qrCodeDynamiqueRepository.find({
+      where: {
+        statut: 'actif',
+        date_expiration: LessThan(now),
+      },
+      select: ['id_user'],
+    });
+  
+    const userIds = [...new Set(expiredCodes.map(code => code.id_user))]; // uniques
+  
+    // 2. Mettre à jour les statuts
+    const result = await this.qrCodeDynamiqueRepository.update(
+      {
+        statut: 'actif',
+        date_expiration: LessThan(now),
+      },
+      {
+        statut: 'inactif',
+      },
+    );
+    
+    // this.logger.log(`${result.affected} QR codes dynamiques expirés ont été désactivés`);
+  }
+
+  /**
+   * Supprime les QR codes dynamiques expirés depuis plus de 1 jours
+   */
+  async removeOldQrCodes(): Promise<void> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 1); // Supprimer les QR codes expirés depuis plus de 7 jours
+    
+    const result = await this.qrCodeDynamiqueRepository.delete({
+      date_expiration: LessThan(cutoffDate)
+    });
+    
+    // this.logger.log(`${result.affected} QR codes dynamiques anciens ont été supprimés`);
+  }
+
+  /**
    * Permet de déclencher manuellement le nettoyage
    */
   async manualCleanup(): Promise<{ deleted: number }> {
