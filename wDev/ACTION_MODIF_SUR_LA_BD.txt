@@ -90,8 +90,8 @@ ALTER TABLE transaction_interne RENAME COLUMN "montant_reçu" TO montant_recu;
 *-------------- NGUESSAN---- 
 
 --suppression de table unitile
-    qr_code_paiement_statique
-    cartes_qr_code_dynamique 
+    DROP table qr_code_paiement_statique;
+    DROP table cartes_qr_code_dynamique ;
 
 -- table expert et lier a l'es
     CREATE TABLE expert_sante (
