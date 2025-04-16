@@ -4,10 +4,11 @@ import { Invitation } from './entities/invitation.entity';
 import { User } from 'src/utilisateur/entities/user.entity';
 import { InvitationController } from './invitation.controller';
 import { InvitationService } from './invitation.service';
+import { InvitationTracking } from './entities/invitation_traking.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Invitation, User])],
+  imports: [TypeOrmModule.forFeature([Invitation, User,InvitationTracking])],
   controllers: [InvitationController],
   providers: [InvitationService],
 })

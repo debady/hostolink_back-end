@@ -36,6 +36,7 @@ export class AuthService {
     }
 
     console.log(`✅ Utilisateur trouvé : ${user.id_user} (${user.email || user.telephone})`);
+    
 
     // Vérification du mot de passe
     const isMatch = await bcrypt.compare(password, user.mdp);
