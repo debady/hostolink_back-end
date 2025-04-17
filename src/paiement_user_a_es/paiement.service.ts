@@ -117,7 +117,7 @@ import {
       return {
         message: '✅ Paiement effectué avec succès',
         montant_envoyé: montant,
-        montant_reçu: montantFinal,
+        montant_recu: montantFinal,
         frais_appliqués: frais,
         solde_utilisateur: compteUserMaj.solde_compte,
         solde_etablissement: compteEtabMaj.solde_compte,
@@ -222,7 +222,7 @@ import {
         message: '✅ Paiement effectué avec succès',
         identifiant_etablissement: identifiant,
         montant_envoyé: montant,
-        montant_reçu: montantFinal,
+        montant_recu: montantFinal,
         frais_appliqués: frais,
         solde_restant: soldeActuel?.solde_compte || null,
       };

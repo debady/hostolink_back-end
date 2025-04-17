@@ -1,57 +1,81 @@
-// src/transaction/entities/transaction.entity.ts
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-// import { Compte } from '../compte/entities/compte.entity';
-
-export enum TransactionType {
-  TRANSFERT = 'transfert',
-  PAIEMENT_QRCODE = 'paiement_qrcode'
-}
+// transaction.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 export enum TransactionStatus {
   EN_ATTENTE = 'en attente',
-  COMPLETEE = 'completee',
-  ECHOUEE = 'echouee',
-  ANNULEE = 'annulee'
+  REUSSIE = 'réussie',
+  ECHOUEE = 'échouée',
+  ANNULEE = 'annulée'
+}
+
+export enum TransactionType {
+  TRANSFERT = 'transfert',
+  PAIEMENT = 'paiement',
+  REMBOURSEMENT = 'remboursement',
+  RECHARGE = 'recharge'
 }
 
 @Entity('transaction_interne')
 export class Transaction {
-  @PrimaryGeneratedColumn('increment')
+  @PrimaryGeneratedColumn()
   id_transaction: number;
 
   @Column()
   id_compte_expediteur: number;
 
-  @Column()
-  id_compte_recepteur: number;
+  @Column({ nullable: true })
+  id_utilisateur_envoyeur: string; // UUID
 
   @Column({ nullable: true })
-  id_utilisateur_recepteur: number;
+  id_utilisateur_recepteur: string; // UUID
 
   @Column({ nullable: true })
   id_etablissement_recepteur: number;
 
-  @Column({ type: 'numeric', precision: 15, scale: 2 })
-  montant: number;
+  @Column({ nullable: true })
+  id_etablissement_envoyeur: number;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2, default: 0 })
-  frais_transaction: number;
+  @Column('numeric', { precision: 15, scale: 2 })
+  montant_envoyer: number;
 
-  @Column({ length: 20, default: TransactionStatus.EN_ATTENTE })
-  statut: string;
+  @Column('numeric', { precision: 15, scale: 2 })
+  montant_recu: number;
 
-  @Column({ length: 10 })
+  @Column('numeric', { precision: 15, scale: 2, nullable: true })
+  frais_preleve: number;
+
+  @Column({
+    type: 'varchar',
+    length: 20,
+    default: TransactionStatus.EN_ATTENTE
+  })
+  statut: TransactionStatus;
+
+  @Column({ type: 'varchar', length: 10, nullable: true })
   devise_transaction: string;
 
-  @Column({ length: 100, nullable: true })
-  type_transaction: string;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  motif_annulation: string;
+
+  
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  type_transaction: TransactionType;
+
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP'
+  })
   date_transaction: Date;
 
   @Column({ nullable: true })
-  id_qrcode: number;
+  id_qrcode_dynamique: number;
 
   @Column({ nullable: true })
-  id_user_etablissement_sante: number;
+  id_qrcode_statique: number;
+
+  @Column()
+  id_compte_recepteur: number;
 }

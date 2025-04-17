@@ -1,17 +1,21 @@
-// src/transaction/dto/create-transaction-frais.dto.ts
-import { IsNumber, IsEnum } from 'class-validator';
-import { ModePaiement, TypeTransactionFrais } from '../entite/transaction-frais.entity';
+// dto/create-transaction-frais.dto.ts
+import { IsNotEmpty, IsNumber, IsEnum } from 'class-validator';
+import { ModePayment, TransactionFraisType } from '../entite/transaction-frais.entity';
 
 export class CreateTransactionFraisDto {
+  @IsNotEmpty()
   @IsNumber()
   id_transaction: number;
 
+  @IsNotEmpty()
   @IsNumber()
   montant_frais: number;
 
-  @IsEnum(TypeTransactionFrais)
-  type_transaction: TypeTransactionFrais;
+  @IsNotEmpty()
+  @IsEnum(TransactionFraisType)
+  type_transaction: TransactionFraisType;
 
-  @IsEnum(ModePaiement)
-  mode_paiement: ModePaiement;
+  @IsNotEmpty()
+  @IsEnum(ModePayment)
+  mode_paiement: ModePayment;
 }

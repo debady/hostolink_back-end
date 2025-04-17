@@ -36,7 +36,6 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # dotenv environment variable files
-.env
 .env.development.local
 .env.test.local
 .env.production.local
@@ -57,13 +56,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 
 # mes ignores
-
-
-# src/image
-src/commentaire
-src/partage
-src/publication
-src/config/firebase-admin-sdk.json
-wDev/lisison_des_tables.sql
-wDev/liaison_tables_json.json
-src/config1/hostolink-sante-firebase-adminsdk-fbsvc-10c3095eb0.json
+wDev/importe_peut
+wDev/connect_supabase.bat
+wDev/Exporte_bd_supaabse_15.04.2025.bat
