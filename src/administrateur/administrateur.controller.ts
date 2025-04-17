@@ -14,20 +14,24 @@ import {
   UnauthorizedException,
   Patch,
   BadRequestException,
-  Query
+  Query,
+  NotFoundException
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateAdministrateurDto } from './dto/create-administrateur.dto';
 import { AdministrateurService } from './administrateur.service';
 import { LoginAdministrateurDto } from './dto/login-administrateur.dto';
 import { JwtAdminGuard } from '../auth/jwt-auth.guard';
+import { DataSource } from 'typeorm';
 
 @Controller('administrateurs')
 export class AdministrateurController {
   constructor(
     private readonly administrateurService: AdministrateurService,
-    private readonly adminService: AdministrateurService) {}
+    private readonly adminService: AdministrateurService,
+    private readonly dataSource: DataSource,
 
+  ) {}
   @Post('inscription')
   async inscrireAdmin(@Body() dto: CreateAdministrateurDto) {
     try {
@@ -57,6 +61,9 @@ export class AdministrateurController {
   @UseInterceptors(FileInterceptor('avatar', { dest: './uploads' }))
   async uploadAvatar(
     @Param('id') id: number,
+
+
+    
     @UploadedFile() avatar: Express.Multer.File,
   ) {
     try {
@@ -235,9 +242,29 @@ export class AdministrateurController {
     }
     
     
-
-
-  
+    // DEV ENDPOINT DE RECHARGEMENT PAR TOKEN DE QRCODE D'USER
+    @Get('qr-code-dynamique/verifier')
+    @UseGuards(JwtAdminGuard)
+    async verifierTokenDynamique(@Query('token') token: string) {
+      const [qr] = await this.dataSource.query(
+        `SELECT * FROM qr_code_paiement_dynamique WHERE token = $1 LIMIT 1`,
+        [token]
+      );
+      if (!qr) throw new NotFoundException("QR dynamique introuvable");
+      return { id_user: qr.id_user };
+    }
+    
+    @Get('qr-code-statique/verifier')
+    @UseGuards(JwtAdminGuard)
+    async verifierTokenStatique(@Query('token') token: string) {
+      const [qr] = await this.dataSource.query(
+        `SELECT * FROM qr_code_paiement_statique WHERE token = $1 LIMIT 1`,
+        [token]
+      );
+      if (!qr) throw new NotFoundException("QR statique introuvable");
+      return { id_user: qr.id_user };
+    }
+    
 
 
 }
