@@ -363,7 +363,6 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
 
 
 // Méthode à ajouter au UserService
-// Dans user.service.ts
   async findUserByPhone(telephone: string) {
     const user = await this.userRepository.findOne({
       where: { telephone, compte_verifier: true, actif: true }

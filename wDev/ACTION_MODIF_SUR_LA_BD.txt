@@ -208,3 +208,28 @@ Contraintes de clÚs ÚtrangÞres :
 
 hostolink_bd=#
 
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------ 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
+    ALTER TABLE administrateurs
+    ADD COLUMN nom VARCHAR(100),
+    ADD COLUMN prenom VARCHAR(100),
+    ADD COLUMN adresse TEXT,
+    ADD COLUMN solde_de_rechargement BIGINT DEFAULT 0,
+    ADD COLUMN cumule_des_transactions BIGINT DEFAULT 0;
+
+
+--------------- 20 avril --------------
+    suppression de la foreign key dans raison de suppresion de compte par raison 
+    ALTER TABLE raison_suppression_compte DROP CONSTRAINT fk_etab;
+
