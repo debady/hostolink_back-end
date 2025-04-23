@@ -3,7 +3,7 @@ import { Point } from 'geojson';
 
 @Entity('user_etablissement_sante')
 export class EtablissementSante {
-  @PrimaryGeneratedColumn({ name: 'id_etablissement' })
+  @PrimaryGeneratedColumn({ name: 'id_user_etablissement_sante' })
   id: number;
 
   @Column({ type: 'varchar', length: 255 })

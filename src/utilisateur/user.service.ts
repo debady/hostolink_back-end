@@ -17,6 +17,7 @@ import { ImageService } from 'src/image/image.service';
 import { CompteService } from 'src/compte/compte.service';
 import { QrCodeService } from 'src/qr-code/qr-code.service';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -130,6 +131,7 @@ export class UserService {
       ...user, 
       photo_profile: profileImage ? profileImage.url_image : null,
       compte,
+      mdp: user.mdp,
       // qrcodedynamique,
       // qrcodedstatique,
       allqrcodes,
@@ -363,7 +365,6 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
 
 
 // Méthode à ajouter au UserService
-// Dans user.service.ts
   async findUserByPhone(telephone: string) {
     const user = await this.userRepository.findOne({
       where: { telephone, compte_verifier: true, actif: true }
@@ -375,6 +376,19 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
     
     return user;
   }
-
+  async createUser(dto: CreateUserDto): Promise<User> {
+    const user = this.userRepository.create({
+      nom: dto.nom,
+      telephone: dto.telephone,
+      mdp: dto.mdp,
+      pays: dto.pays,
+      email: dto.email,
+      code_invitation_utilise: dto.code_invitation_utilise ?? null, // ajout ici
+    });
+  
+    const saved = await this.userRepository.save(user);
+    return saved;
+  }
+  
   
 }

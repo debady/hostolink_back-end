@@ -46,4 +46,20 @@ export class Administrateur {
   @OneToMany(() => Thematique, (thematique) => thematique.administrateur)
   thematiques_crees: Thematique[];
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  nom: string;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  prenom: string;
+
+  @Column({ type: 'text', nullable: true })
+  adresse: string;
+
+  @Column({ type: 'bigint', default: 0 })
+  solde_de_rechargement: number;
+
+  @Column({ type: 'bigint', default: 0 })
+  cumule_des_transactions: number;
+
+
 }

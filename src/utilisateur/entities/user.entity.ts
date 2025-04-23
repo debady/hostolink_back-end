@@ -62,7 +62,7 @@ export class User {
   fcm_token: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  code_invitation_utilise: string;
+  code_invitation_utilise: string | null;
 
 
   @OneToMany(() => Invitation, invitation => invitation.user)

@@ -10,7 +10,7 @@ export class RegisterUserDto {
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(4, { message: "Le mot de passe doit contenir au moins 6 caractères" })
+  @MinLength(4, { message: "Le mot de passe doit contenir au moins 4 caractères" })
   password: string;
 
   @IsOptional()

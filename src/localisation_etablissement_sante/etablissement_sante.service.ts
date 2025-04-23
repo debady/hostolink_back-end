@@ -42,7 +42,7 @@ export class EtablissementSanteService {
         geom: () =>
           `ST_SetSRID(ST_MakePoint(${insertedEtablissement.longitude}, ${insertedEtablissement.latitude}), 4326)`,
       })
-      .where('id_etablissement = :id', { id: insertedEtablissement.id })
+      .where('id_user_etablissement_sante = :id', { id: insertedEtablissement.id })
       .execute();
 
     return insertedEtablissement;

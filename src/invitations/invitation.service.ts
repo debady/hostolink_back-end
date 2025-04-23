@@ -33,8 +33,9 @@ export class InvitationService {
     if (existing) {
       return {
         code: existing.code_invitation,
-        lien: `http://localhost:3000/invite/${existing.code_invitation}`,
+        lien: `http://localhost:10000/invite/${existing.code_invitation}`,
       };
+
     }
 
     // Génère un nouveau code unique
@@ -49,7 +50,7 @@ export class InvitationService {
 
     return {
       code: nouvelleInvitation.code_invitation,
-      lien: `http://localhost:3000/invite/${nouvelleInvitation.code_invitation}`,
+      lien: `http://localhost:10000/invite/${nouvelleInvitation.code_invitation}`,
     };
   }
 
@@ -70,37 +71,69 @@ export class InvitationService {
     invitation.nombre_clicks += 1;
     await this.invitationRepository.save(invitation);
   }
+  
+  async incrementerNombrePartages(code_invitation: string): Promise<{ message: string }> {
+    const invitation = await this.invitationRepository.findOne({ where: { code_invitation } });
+    if (!invitation) {
+      throw new NotFoundException("Code d'invitation introuvable");
+    }
+  
+    invitation.nombre_partages += 1;
+    await this.invitationRepository.save(invitation);
+  
+    return { message: 'Partage comptabilisé avec succès' };
+  }
 
-  async applyBonus({ code_invitation, id_user_nouveau }: ApplyBonusDto): Promise<{ message: string }> {
+  async lierInviteAuParrain(id_user_nouveau: string, code_invitation: string): Promise<{ message: string }> {
     const invitation = await this.invitationRepository.findOne({ where: { code_invitation } });
     if (!invitation) {
       throw new NotFoundException("Code d'invitation invalide");
     }
-
-    const parrain = await this.userRepository.findOne({ where: { id_user: invitation.id_user } });
-    if (!parrain) {
-      throw new NotFoundException("Utilisateur parrain introuvable");
-    }
-
-    const compte = await this.compteRepository.findOne({ where: { id_user: parrain.id_user } });
-    if (!compte) {
-      throw new NotFoundException("Compte du parrain introuvable");
-    }
-
-    compte.solde_bonus += 500;
-    await this.compteRepository.save(compte);
-
-    invitation.nombre_inscriptions += 1;
-    await this.invitationRepository.save(invitation);
-
-    const nouveauUser = await this.userRepository.findOne({ where: { id_user: id_user_nouveau } });
-    if (!nouveauUser) {
+  
+    const nouveau = await this.userRepository.findOne({ where: { id_user: id_user_nouveau } });
+    if (!nouveau) {
       throw new NotFoundException("Nouvel utilisateur introuvable");
     }
-
-    nouveauUser.code_invitation_utilise = code_invitation;
-    await this.userRepository.save(nouveauUser);
-
-    return { message: "Bonus appliqué avec succès" };
+  
+    // Sauvegarder le lien
+    nouveau.code_invitation_utilise = code_invitation;
+    await this.userRepository.save(nouveau);
+  
+    return { message: "Utilisateur lié au parrain avec succès" };
   }
+  
+  
+
+  // async applyBonus({ code_invitation, id_user_nouveau }: ApplyBonusDto): Promise<{ message: string }> {
+  //   const invitation = await this.invitationRepository.findOne({ where: { code_invitation } });
+  //   if (!invitation) {
+  //     throw new NotFoundException("Code d'invitation invalide");
+  //   }
+
+  //   const parrain = await this.userRepository.findOne({ where: { id_user: invitation.id_user } });
+  //   if (!parrain) {
+  //     throw new NotFoundException("Utilisateur parrain introuvable");
+  //   }
+
+  //   const compte = await this.compteRepository.findOne({ where: { id_user: parrain.id_user } });
+  //   if (!compte) {
+  //     throw new NotFoundException("Compte du parrain introuvable");
+  //   }
+
+  //   compte.solde_bonus += 500;
+  //   await this.compteRepository.save(compte);
+
+  //   invitation.nombre_inscriptions += 1;
+  //   await this.invitationRepository.save(invitation);
+
+  //   const nouveauUser = await this.userRepository.findOne({ where: { id_user: id_user_nouveau } });
+  //   if (!nouveauUser) {
+  //     throw new NotFoundException("Nouvel utilisateur introuvable");
+  //   }
+
+  //   nouveauUser.code_invitation_utilise = code_invitation;
+  //   await this.userRepository.save(nouveauUser);
+
+  //   return { message: "Bonus appliqué avec succès" };
+  // }
 }

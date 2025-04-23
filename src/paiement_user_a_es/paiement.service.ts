@@ -72,19 +72,20 @@ import {
         // 3. Insertion dans transaction_interne D’ABORD
         const insertTransaction = await manager.query(
           `INSERT INTO transaction_interne 
-          (id_compte_expediteur, id_compte_recepteur, montant, frais_transaction, devise_transaction, statut, type_transaction, id_qrcode, id_user_etablissement_sante, id_etablissement_recepteur)
-          VALUES ($1, $2, $3, $4, 'XOF', 'effectué', 'paiement_qrcode', $5, $6, $7)
+          (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_qrcode_dynamique, id_etablissement_recepteur)
+          VALUES ($1, $2, $3, $4, $5, 'XOF', 'effectué', 'paiement_qrcode', $6, $7)
           RETURNING id_transaction`,
           [
             compteUtilisateur.id_compte,
             compteEtablissement.id_compte,
             montant,
+            montantFinal, // ✅ montant_recu
             frais,
             qr.id_qrcode,
             etabId,
-            etabId,
           ],
         );
+        
       
         const idTransaction = insertTransaction[0].id_transaction;
       
@@ -187,18 +188,19 @@ import {
         // ✅ c. Insérer d’abord dans transaction_interne
         const insertTransaction = await manager.query(
           `INSERT INTO transaction_interne 
-           (id_compte_expediteur, id_compte_recepteur, montant, frais_transaction, devise_transaction, statut, type_transaction, id_user_etablissement_sante, id_etablissement_recepteur)
-           VALUES ($1, $2, $3, $4, 'XOF', 'effectué', 'paiement_contact', $5, $6)
-           RETURNING id_transaction`,
+          (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_etablissement_recepteur)
+          VALUES ($1, $2, $3, $4, $5, 'XOF', 'effectué', 'paiement_contact', $6)
+          RETURNING id_transaction`,
           [
             compteUtilisateur.id_compte,
             compteEtablissement.id_compte,
             montant,
+            montantFinal, // ✅ montant_recu
             frais,
-            etabId,
             etabId,
           ],
         );
+        
       
         const idTransaction = insertTransaction[0].id_transaction;
       

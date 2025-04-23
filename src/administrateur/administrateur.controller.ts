@@ -14,20 +14,24 @@ import {
   UnauthorizedException,
   Patch,
   BadRequestException,
-  Query
+  Query,
+  NotFoundException
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateAdministrateurDto } from './dto/create-administrateur.dto';
 import { AdministrateurService } from './administrateur.service';
 import { LoginAdministrateurDto } from './dto/login-administrateur.dto';
 import { JwtAdminGuard } from '../auth/jwt-auth.guard';
+import { DataSource } from 'typeorm';
 
 @Controller('administrateurs')
 export class AdministrateurController {
   constructor(
     private readonly administrateurService: AdministrateurService,
-    private readonly adminService: AdministrateurService) {}
+    private readonly adminService: AdministrateurService,
+    private readonly dataSource: DataSource,
 
+  ) {}
   @Post('inscription')
   async inscrireAdmin(@Body() dto: CreateAdministrateurDto) {
     try {
@@ -57,6 +61,9 @@ export class AdministrateurController {
   @UseInterceptors(FileInterceptor('avatar', { dest: './uploads' }))
   async uploadAvatar(
     @Param('id') id: number,
+
+
+    
     @UploadedFile() avatar: Express.Multer.File,
   ) {
     try {
@@ -172,13 +179,16 @@ export class AdministrateurController {
 
     return this.adminService.rechercherParRole(role);
   }
-
-
   @UseGuards(JwtAdminGuard)
   @Post('crediter-utilisateur')
-  async crediterUtilisateur(@Body() body: { id_user: string; montant: number }) {
-    return this.adminService.crediterUtilisateur(body.id_user, body.montant);
+  async crediterUtilisateur(
+    @Request() req,
+    @Body() body: { id_user: string; montant: number },
+  ) {
+    const idAdmin = req.user.id_admin_gestionnaire;
+    return this.adminService.crediterUtilisateur(body.id_user, body.montant, idAdmin);
   }
+  
   
 
   @Post('crediter-etablissement')
@@ -186,11 +196,12 @@ export class AdministrateurController {
   async crediterEtablissement(
     @Body('id_etab') id: number,
     @Body('montant') montant: number,
+    @Request() req,
   ) {
     if (!id || !montant) {
       throw new BadRequestException('ID et montant requis');
     }
-    return this.administrateurService.crediterEtablissement(id, montant);
+    return this.administrateurService.crediterEtablissement(id, montant, req.user.id_admin_gestionnaire);
   }
 
   @Get('etablissements')
@@ -235,9 +246,65 @@ export class AdministrateurController {
     }
     
     
+    // DEV ENDPOINT DE RECHARGEMENT PAR TOKEN DE QRCODE D'USER
+    
+    @Get('qr-code-dynamique/verifier')
+    @UseGuards(JwtAdminGuard)
+    async verifierTokenDynamique(@Query('token') token: string) {
+      const [qr] = await this.dataSource.query(
+        `SELECT * FROM qr_code_paiement_dynamique WHERE token = $1 LIMIT 1`,
+        [token]
+      );
+      if (!qr) throw new NotFoundException("QR dynamique introuvable");
+      return { id_user: qr.id_user };
+    }
+    
+    @Get('qr-code-statique/verifier')
+    @UseGuards(JwtAdminGuard)
+    async verifierTokenStatique(@Query('token') token: string) {
+      const [qr] = await this.dataSource.query(
+        `SELECT * FROM qr_code_paiement_statique WHERE token = $1 LIMIT 1`,
+        [token]
+      );
+      if (!qr) throw new NotFoundException("QR statique introuvable");
+      return { id_user: qr.id_user };
+    }
+    
+  // ------------- RETAIT DES ES ET USERS
 
+  @UseGuards(JwtAdminGuard)
+  @Post('retirer-user')
+  async retirerUser(
+    @Request() req,
+    @Body() body: { identifiant: string; montant: number },
+  ) {
+    const { identifiant, montant } = body;
+    const idAdmin = req.user.id_admin_gestionnaire;
 
-  
+    // Trouver l'utilisateur par email, téléphone ou UUID
+    const user = await this.adminService.rechercherUtilisateurParIdentifiant(identifiant, 'uuid');
+    return this.adminService.retirerUtilisateur(user.id_user, montant, idAdmin);
+  }
+
+  @UseGuards(JwtAdminGuard)
+  @Post('retirer-etablissement')
+  async retirerEtablissement(
+    @Request() req,
+    @Body() body: { identifiant: string; montant: number },
+  ) {
+    const { identifiant, montant } = body;
+    const idAdmin = req.user.id_admin_gestionnaire;
+
+    // Trouver l'établissement par email ou téléphone
+    const [etab] = await this.dataSource.query(
+      `SELECT * FROM user_etablissement_sante WHERE email = $1 OR telephone = $1 OR id_user_etablissement_sante::text = $1 LIMIT 1`,
+      [identifiant],
+    );
+    if (!etab) throw new NotFoundException('Établissement introuvable');
+
+    return this.adminService.retirerEtablissement(etab.id_user_etablissement_sante, montant, idAdmin);
+  }
+
 
 
 }
