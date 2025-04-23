@@ -130,6 +130,7 @@ export class UserService {
       ...user, 
       photo_profile: profileImage ? profileImage.url_image : null,
       compte,
+      mdp: user.mdp,
       // qrcodedynamique,
       // qrcodedstatique,
       allqrcodes,
