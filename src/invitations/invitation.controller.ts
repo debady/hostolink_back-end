@@ -1,7 +1,8 @@
-import { Controller, Get, NotFoundException, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { InvitationService } from './invitation.service';
 import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ApplyBonusDto } from './dto/apply-bonus.dto';
 
 
 @Controller('invitation')
@@ -35,6 +36,11 @@ export class InvitationController {
     await this.invitationService.enregistrerClic(code, ip.toString(), userAgent);
 
     return { success: true, message: 'Clic enregistré avec succès' };
+  }
+
+  @Post('apply-bonus')
+  async appliquerBonus(@Body() dto: ApplyBonusDto) {
+    return await this.invitationService.applyBonus(dto);
   }
 }
 
