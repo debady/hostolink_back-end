@@ -33,7 +33,7 @@ export class InvitationService {
     if (existing) {
       return {
         code: existing.code_invitation,
-        lien: `https://hostolink.app/invite/${existing.code_invitation}`,
+        lien: `http://localhost:3000/invite/${existing.code_invitation}`,
       };
     }
 
@@ -49,7 +49,7 @@ export class InvitationService {
 
     return {
       code: nouvelleInvitation.code_invitation,
-      lien: `https://hostolink.app/invite/${nouvelleInvitation.code_invitation}`,
+      lien: `http://localhost:3000/invite/${nouvelleInvitation.code_invitation}`,
     };
   }
 
