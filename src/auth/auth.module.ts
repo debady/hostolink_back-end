@@ -9,6 +9,7 @@ import { AuthController } from './auth.controller';
 import { JwtAdminStrategy } from './jwt-admin.strategy';
 import { AdministrateurModule } from 'src/administrateur/administrateur.module';
 import { UserEtablissementSanteModule } from 'src/user_etablissement_sante/user-etablissement-sante.module';
+import { JwtAgentStrategy } from './jwt-agent.strategy';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { UserEtablissementSanteModule } from 'src/user_etablissement_sante/user-
     }),
   ],
   controllers: [AuthController], 
-  providers: [AuthService, JwtStrategy,JwtAdminStrategy], 
+  providers: [AuthService, JwtStrategy,JwtAdminStrategy, JwtAgentStrategy], 
   exports: [AuthService, JwtStrategy, PassportModule, JwtModule], 
 })
 export class AuthModule {}

@@ -8,6 +8,7 @@ import {
 import { CodeVerifOtp } from './code-verif-otp.entity';
 import { RaisonSuppressionCompte } from './raison-suppression.entity';
 import { ExpertSante } from './expert_sante.entity';
+import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
 
 @Entity('user_etablissement_sante')
 export class UserEtablissementSante {
@@ -55,6 +56,11 @@ export class UserEtablissementSante {
  
   @OneToMany(() => ExpertSante, (expert) => expert.user_etablissement_sante)
   experts: ExpertSante[];
+
+
+
+  @OneToMany(() => Conversation, conversation => conversation.etablissementSante)
+  conversations: Conversation[];
 
 
   

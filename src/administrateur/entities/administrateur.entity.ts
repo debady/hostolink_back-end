@@ -1,4 +1,6 @@
 import { Annonce } from 'src/annonce/entities/annonce.entity';
+import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
+import { QuestionsPredefinies } from 'src/Discussion_agent_client/questions_predefinies/entities/question-predefinie.entity';
 import { ListeNumeroEtablissementSante } from 'src/liste_etablissement/entities/liste_numero_vert_etablissement_sante.entity';
 import { Thematique } from 'src/thematique_discussion/entities/thematique.entity';
 
@@ -62,4 +64,13 @@ export class Administrateur {
   cumule_des_transactions: number;
 
 
+
+
+
+
+  @OneToMany(() => QuestionsPredefinies, question => question.assistant)
+  questions: QuestionsPredefinies[];
+
+  @OneToMany(() => Conversation, conversation => conversation.assistant)
+  conversations: Conversation[];
 }
