@@ -89,9 +89,11 @@ export class UserController {
       try {
         console.log(`📩 Génération OTP pour ${body.identifier} via ${body.moyen_envoyer}`);
         const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
+        const otp = await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
+
   
         await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
-        return { success: true, message: "OTP généré avec succès" };
+        return { success: true, message: "OTP généré avec succès", moyenEnvoyerFormatted,otp};
       } catch (error) {
         console.error("❌ Erreur generate-otp:", error);
         throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");

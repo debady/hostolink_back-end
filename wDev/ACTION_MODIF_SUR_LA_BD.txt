@@ -206,21 +206,8 @@ Contraintes de clÚs ÚtrangÞres :
     "fk_transaction_interne_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
 
 
-hostolink_bd=#
 
-
-
-
-
-
-
-
-
-
-
-
-
------------------------------------- 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
+------------- 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
     ALTER TABLE administrateurs
     ADD COLUMN nom VARCHAR(100),
     ADD COLUMN prenom VARCHAR(100),
