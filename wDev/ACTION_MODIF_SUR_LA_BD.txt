@@ -285,3 +285,7 @@ CREATE TABLE public.messages_assistant_client_image (
   CONSTRAINT messages_assistant_client_image_message_id_fkey
     FOREIGN KEY (message_id) REFERENCES messages_assistant_client(message_id)
 );
+
+
+--------------- 25 avril --------------
+ALTER TABLE "conversations" ADD COLUMN "auto_created" boolean NOT NULL DEFAULT true;

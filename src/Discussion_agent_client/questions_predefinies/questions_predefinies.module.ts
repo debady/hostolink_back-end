@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MessageAssistantClient } from '../message_assistant_client/entities/message-assistant-client.entity';
 import { MessageController } from '../message_assistant_client/message_assistant_client.controller';
@@ -9,6 +9,7 @@ import { CloudinaryModule } from 'src/upload/cloudinary.module';
 import { QuestionController } from './questions_predefinies.controller';
 import { QuestionService } from './questions_predefinies.service';
 import { QuestionsPredefinies } from './entities/question-predefinie.entity';
+import { ConversationsModule } from '../conversations/conversations.module';
 
 
 @Module({
@@ -20,6 +21,7 @@ import { QuestionsPredefinies } from './entities/question-predefinie.entity';
       CloudinaryService, 
       CloudinaryModule,
     ]),
+    forwardRef(() => ConversationsModule),
   ],
   controllers: [MessageController, QuestionController],
   providers: [QuestionService, MessageService, CloudinaryService,],

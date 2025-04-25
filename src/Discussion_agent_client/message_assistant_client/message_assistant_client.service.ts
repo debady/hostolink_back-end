@@ -1,12 +1,15 @@
+
+
 // src/services/message.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MessageAssistantClient } from './entities/message-assistant-client.entity';
 import { MessageAssistantClientImage } from '../messages_assistant_client_image/entities/message-assistant-client-image.entity';
 import { CreateMessageDto, CreateMessageWithImageDto } from './dto/message.dto';
 import { CreateImageDto } from '../messages_assistant_client_image/dto/image_message.dto';
-
+import { ConversationService } from '../conversations/conversations.service';
+// import { ConversationService } from '../Discussion_agent_client/conversations/conversations.service';
 
 @Injectable()
 export class MessageService {
@@ -15,6 +18,8 @@ export class MessageService {
     private messageRepository: Repository<MessageAssistantClient>,
     @InjectRepository(MessageAssistantClientImage)
     private imageRepository: Repository<MessageAssistantClientImage>,
+    @Inject(forwardRef(() => ConversationService))
+    private conversationService: ConversationService,
   ) {}
 
   async findByConversation(conversationId: number): Promise<MessageAssistantClient[]> {
@@ -38,20 +43,49 @@ export class MessageService {
     return message;
   }
 
-  async create(createMessageDto: CreateMessageDto): Promise<MessageAssistantClient> {
+  async create(createDto: CreateMessageDto): Promise<MessageAssistantClient> {
+    let conversationId = createDto.conversationId;
+    
+    // Si conversationId n'est pas fourni, obtenir ou créer automatiquement une conversation
+    if (!conversationId) {
+      const conversation = await this.conversationService.getOrCreateConversation(
+        createDto.userId,
+        createDto.etablissementSanteId,
+        createDto.assistantId,
+        createDto.questionSugererId
+      );
+      conversationId = conversation.id;
+    }
+  
+    // Créer le message
     const message = this.messageRepository.create({
-      ...createMessageDto,
+      conversationId: conversationId,
+      envoyerPar: createDto.envoyerPar,
+      messageText: createDto.messageText,
+      questionSugererId: createDto.questionSugererId,
       hasFile: false,
     });
-    
-    const savedMessage = await this.messageRepository.save(message);
-    return this.findOne(savedMessage.id);
+  
+    return await this.messageRepository.save(message);
   }
 
   async createWithImage(createMessageDto: CreateMessageWithImageDto): Promise<MessageAssistantClient> {
-    // Créer d'abord le message
+    // Vérifier si conversationId existe, sinon créer une conversation
+    let conversationId = createMessageDto.conversationId;
+    
+    if (!conversationId) {
+      const conversation = await this.conversationService.getOrCreateConversation(
+        createMessageDto.userId,
+        createMessageDto.etablissementSanteId,
+        createMessageDto.assistantId,
+        createMessageDto.questionSugererId
+      );
+      conversationId = conversation.id;
+    }
+    
+    // Créer le message
     const message = this.messageRepository.create({
-      conversationId: createMessageDto.conversationId,
+      conversationId: conversationId,
       envoyerPar: createMessageDto.envoyerPar,
       messageText: createMessageDto.messageText,
       QuestionsPredefinies: createMessageDto.QuestionsPredefinies || false,

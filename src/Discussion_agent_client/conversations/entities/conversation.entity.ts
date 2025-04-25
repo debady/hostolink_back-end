@@ -45,33 +45,45 @@
 // src/entities/conversation.entity.ts
 import { AgentAssistance } from 'src/agent-assistant/entities/agent-assistance.entity';
 import { MessageAssistantClient } from 'src/Discussion_agent_client/message_assistant_client/entities/message-assistant-client.entity';
+import { UserEtablissementSante } from 'src/user_etablissement_sante/entities/user-etablissement-sante.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, CreateDateColumn } from 'typeorm';
 import { User } from 'src/utilisateur/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn } from 'typeorm';
 
-
-@Entity('conversation')
+@Entity('conversations')
 export class Conversation {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'conversation_id' })
   id: number;
 
-  @Column({ type: 'uuid' })
+  @Column({ name: 'user_id', type: 'uuid', nullable: true })
   userId: string;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'id_etablissement_sante', nullable: true })
+  etablissementSanteId: number;
+
+  @Column({ name: 'assistant_id' })
   assistantId: number;
 
-  @Column({ default: false })
-  archivee: boolean;
+  @CreateDateColumn({ name: 'start_time', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  startTime: Date;
 
-  @CreateDateColumn({ name: 'date_creation' })
-  dateCreation: Date;
+  @Column({ name: 'status', length: 50, default: 'active' })
+  status: string;
 
-  @ManyToOne(() => AgentAssistance, (agent) => agent.conversations, { eager: true })
-  agent: AgentAssistance;
+  @Column({ name: 'auto_created', default: true })
+  autoCreated: boolean;
 
-  @ManyToOne(() => User, (user) => user.conversations, { eager: true })
-  utilisateur: User;
+  @ManyToOne(() => User, user => user.conversations)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-  @OneToMany(() => MessageAssistantClient, (message) => message.conversation)
+  @ManyToOne(() => AgentAssistance, assistant => assistant.conversations)
+  @JoinColumn({ name: 'assistant_id' })
+  assistant: AgentAssistance;
+
+  @ManyToOne(() => UserEtablissementSante, etablissement => etablissement.conversations)
+  @JoinColumn({ name: 'id_etablissement_sante' })
+  etablissementSante: UserEtablissementSante;
+
+  @OneToMany(() => MessageAssistantClient, message => message.conversation)
   messages: MessageAssistantClient[];
 }

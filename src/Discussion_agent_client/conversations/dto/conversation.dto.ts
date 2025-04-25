@@ -1,7 +1,6 @@
 // src/dtos/conversation.dto.ts
-import { IsUUID, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsUUID, IsNumber, IsOptional, IsString, IsBoolean } from 'class-validator';
 import { MessageResponseDto } from 'src/Discussion_agent_client/message_assistant_client/dto/message.dto';
-
 
 export class CreateConversationDto {
   @IsUUID()
@@ -18,6 +17,10 @@ export class CreateConversationDto {
   @IsNumber()
   @IsOptional()
   initialQuestionId?: number;
+  
+  // @IsBoolean()
+  // @IsOptional()
+  // autoCreated?: boolean = true;
 }
 
 export class UpdateConversationDto {
@@ -33,6 +36,7 @@ export class ConversationResponseDto {
   assistantId: number;
   startTime: Date;
   status: string;
+  // autoCreated: boolean;
 }
 
 export class ConversationDetailResponseDto extends ConversationResponseDto {

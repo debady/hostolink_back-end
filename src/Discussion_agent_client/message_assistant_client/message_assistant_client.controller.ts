@@ -1,3 +1,5 @@
+
+
 // src/controllers/message.controller.ts
 import { Controller, Get, Post, Body, Param, UseInterceptors, UploadedFile, UseGuards, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -6,6 +8,7 @@ import { CreateImageDto } from '../messages_assistant_client_image/dto/image_mes
 import { MessageService } from './message_assistant_client.service';
 import { CloudinaryService } from 'config/cloudinary.config';
 import { CreateMessageDto, CreateMessageWithImageDto } from './dto/message.dto';
+import { multerOptions } from 'config/multer.config';
 
 @Controller('messages')
 export class MessageController {
@@ -45,16 +48,19 @@ export class MessageController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async create(@Body() createMessageDto: CreateMessageDto) {
+    // Le service crée ou récupère automatiquement une conversation si nécessaire
     return this.messageService.create(createMessageDto);
   }
 
   @Post('with-image')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', multerOptions)) // <- multerOptions requis))
   async createWithImage(
     @Body() createMessageDto: CreateMessageDto,
     @UploadedFile() file: Express.Multer.File,
+    
   ) {
+
     // Upload de l'image sur Cloudinary (renvoie directement l'URL)
     const imageUrl = await this.cloudinaryService.uploadImage(file);
    
@@ -69,6 +75,7 @@ export class MessageController {
       ],
     };
    
+    // Le service crée ou récupère automatiquement une conversation si nécessaire
     return this.messageService.createWithImage(messageWithImageDto);
   }
 
