@@ -376,5 +376,30 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
     return user;
   }
 
+
+  // ✅ Récupérer tous les emails actifs et vérifiés
+async getAllEmails() {
+  const users = await this.userRepository.find({
+    select: ['email'],
+    where: { actif: true, compte_verifier: true },
+  });
+
+  return users
+    .filter(user => user.email)
+    .map(user => user.email);
+}
+
+// ✅ Récupérer tous les téléphones actifs et vérifiés
+async getAllTelephones() {
+  const users = await this.userRepository.find({
+    select: ['telephone'],
+    where: { actif: true, compte_verifier: true },
+  });
+
+  return users
+    .filter(user => user.telephone)
+    .map(user => user.telephone);
+}
+
   
 }

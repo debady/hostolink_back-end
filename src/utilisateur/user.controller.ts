@@ -154,4 +154,36 @@ export class UserController {
       console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
       return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
   }
+
+// ✅ Récupérer tous les emails
+@Get('all-emails')
+@UseGuards(JwtAuthGuard)
+async getAllEmails(@Req() req: AuthenticatedRequest) {
+  return await this.userService.getAllEmails();
+}
+
+// ✅ Récupérer tous les téléphones
+@Get('all-telephones')
+@UseGuards(JwtAuthGuard)
+async getAllTelephones(@Req() req: AuthenticatedRequest) {
+  return await this.userService.getAllTelephones();
+}
+
+// ✅ Vérifier si un email ou numéro existe
+@Post('check-identifier')
+@UseGuards(JwtAuthGuard)
+async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifier: string }) {
+  if (!body.identifier?.trim()) {
+    throw new BadRequestException("Identifiant requis.");
+  }
+
+  const user = await this.userService.findUserByIdentifier(body.identifier.trim());
+  if (user) {
+    return { success: true, message: "Identifiant trouvé", data: user };
+  } else {
+    return { success: false, message: "Identifiant non trouvé" };
+  }
+}
+
+
 }

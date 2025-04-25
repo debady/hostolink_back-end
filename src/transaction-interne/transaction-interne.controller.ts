@@ -21,11 +21,6 @@ export class TransactionInterneController {
     return this.TransactionInterneService.getMyTransactions(req.user.id_user);
   }
 
-
-
-  // endpoints pour recuprer les statistiques des transactions 
-  // il est placer là parce que l'endpoint /transaction/statistiques-des-transactions est confondu avec l'endpoint /transaction/:id.
-
   @Get('statistiques-des-transactions')
   @UseGuards(JwtAdminGuard)
   async getTransactionStats() {
@@ -107,12 +102,6 @@ export class TransactionInterneController {
       throw new InternalServerErrorException(`Erreur lors du paiement via email: ${error.message}`);
     }
 }
-
-
-
-
-
-
 
 
   //ces parties sont reservées à l'administrateur et elles permettent de bloqué et d'annulé une transaction mais 
