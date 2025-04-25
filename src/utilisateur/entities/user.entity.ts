@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
 import { Image } from '../../image/entities/image.entity';
 import { MessageThematique } from 'src/thematique_discussion/entities/message_thematique.entity';
 import { Otp } from './otp.entity';
@@ -67,5 +67,13 @@ export class User {
 
   @OneToMany(() => Invitation, invitation => invitation.user)
   invitations: Invitation[];
+
+  @Column({ type: 'uuid', nullable: true })
+  id_parrain?: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'id_parrain' })
+  parrain?: User;
+
 
 }

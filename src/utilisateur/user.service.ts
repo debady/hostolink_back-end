@@ -18,6 +18,7 @@ import { CompteService } from 'src/compte/compte.service';
 import { QrCodeService } from 'src/qr-code/qr-code.service';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Invitation } from 'src/invitations/entities/invitation.entity';
 
 @Injectable()
 export class UserService {
@@ -40,12 +41,15 @@ export class UserService {
 
     @InjectRepository(Otp)
     private readonly otpRepository: Repository<Otp>,
+    
 
+    @InjectRepository(Invitation)
+    private readonly invitationRepository: Repository<Invitation>,
 
   ) {}
   
   // ✅ Création d'un utilisateur sans mot de passe
-  async registerUser(identifier: string): Promise<{ success: boolean; id_user?: string; message: string }> {
+  async registerUser(identifier: string,code_invitation_utilise?: string): Promise<{ success: boolean; id_user?: string; message: string; }> {
     try {
       const existingUser = await this.userRepository.findOne({
         where: [{ email: identifier }, { telephone: identifier }],
@@ -65,10 +69,27 @@ export class UserService {
         telephone: identifier.includes('@') ? undefined : identifier,
         code_confirmation: Math.floor(1000 + Math.random() * 9000).toString(),
         date_inscription: new Date(),
+        code_invitation_utilise: code_invitation_utilise ?? null
       } as Partial<User>);
-
-      const savedUser = await this.userRepository.save(newUser);
+  
+      if (code_invitation_utilise) {
+        const invitation = await this.invitationRepository.findOne({
+          where: { code_invitation: code_invitation_utilise }
+        });
       
+        if (invitation) {
+          console.log("✅ Parrain trouvé :", invitation.id_user);
+          newUser.id_parrain = invitation.id_user;
+      
+          // Optionnel : on incrémente les inscriptions
+          invitation.nombre_inscriptions += 1;
+          await this.invitationRepository.save(invitation);
+        }
+      }
+      
+      // ✅ Seulement maintenant tu fais le save
+      const savedUser = await this.userRepository.save(newUser);
+  
       // ✅ Créer automatiquement un compte pour le nouvel utilisateur
       await this.compteService.createUserCompte(savedUser.id_user);
       
@@ -233,11 +254,40 @@ export class UserService {
           return { success: false, message: "Code OTP incorrect ou expiré" };
         }
         // ✅ Vérification et mise à jour du champ compte_verifier
-          if (!user.compte_verifier) {
-            user.compte_verifier = true;
-            await this.userRepository.save(user);
-            console.log(`✅ Le compte ${identifier} est maintenant vérifié.`);
-          }
+        if (!user.compte_verifier) {
+        user.compte_verifier = true;
+        await this.userRepository.save(user);
+        console.log(`✅ Le compte ${identifier} est maintenant vérifié.`);
+
+
+
+        // ✅ On sécurise avant d'utiliser id_parrain
+   if (!user.id_parrain) {
+    console.warn("❌ Aucun parrain associé à cet utilisateur.");
+    return { success: true, message: "Compte vérifié, pas de parrain." };
+  }
+
+  try {
+    const compteParrain = await this.compteService.getUserCompte(user.id_parrain);
+
+    if (!compteParrain) {
+      console.warn("❌ Compte parrain introuvable.");
+      return { success: true, message: "Compte vérifié, mais parrain introuvable." };
+    }
+
+    const montantBonus = 500;
+    const nouveauSolde = compteParrain.solde_bonus + montantBonus;
+
+    await this.compteService.updateCompteBonus(compteParrain.id_compte, nouveauSolde);
+
+    console.log(`✅ Bonus de ${montantBonus} F crédité au parrain : ${user.id_parrain}`);
+  } catch (error) {
+    console.error("❌ Erreur rewardParrainAfterOtp:", error);
+    return { success: true, message: "Compte vérifié, erreur lors du bonus." };
+  }
+
+         
+      }
 
     
         // ✅ Vérifier si l'OTP est expiré
@@ -376,19 +426,92 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
     
     return user;
   }
-  async createUser(dto: CreateUserDto): Promise<User> {
-    const user = this.userRepository.create({
-      nom: dto.nom,
-      telephone: dto.telephone,
-      mdp: dto.mdp,
-      pays: dto.pays,
-      email: dto.email,
-      code_invitation_utilise: dto.code_invitation_utilise ?? null, // ajout ici
-    });
   
-    const saved = await this.userRepository.save(user);
-    return saved;
+  // 💸 Récompenser le parrain après vérification OTP de l'invité
+async rewardParrainAfterOtp(user: User) {
+  try {
+    if (!user.id_parrain) {
+      console.log("❌ Aucun parrain associé à cet utilisateur.");
+      return;
+    }
+
+    // Récupérer le compte du parrain
+    const compteParrain = await this.compteService.getUserCompte(user.id_parrain);
+    if (!compteParrain) {
+      console.warn("❌ Compte parrain introuvable.");
+      return;
+    }
+
+    // Ajouter le bonus de parrainage
+    const montantBonus = 500;
+    const nouveauSolde = compteParrain.solde_bonus + montantBonus;
+
+    await this.compteService.updateCompteBonus(compteParrain.id_compte, nouveauSolde);
+
+    console.log(`✅ Bonus de ${montantBonus} F crédité au parrain : ${user.id_parrain}`);
+  } catch (error) {
+    console.error("❌ Erreur rewardParrainAfterOtp:", error);
   }
-  
+}
+// apres verification de l otp du nouveau utilisateur referer par l utilisateur
+async verifyOtpAndRewardParrain(identifier: string, otpCode: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const user = await this.userRepository.findOne({
+      where: [{ email: identifier }, { telephone: identifier }],
+    });
+
+    if (!user) {
+      return { success: false, message: "Utilisateur non trouvé" };
+    }
+
+    const otp = await this.otpRepository.findOne({
+      where: {
+        user: { id_user: user.id_user },
+        otp_code: otpCode,
+        is_valid: true
+      },
+      relations: ['user'],
+    });
+
+    if (!otp) {
+      return { success: false, message: "Code OTP incorrect ou expiré" };
+    }
+
+    if (new Date() > otp.expires_at) {
+      otp.is_valid = false;
+      await this.otpRepository.save(otp);
+      return { success: false, message: "Code OTP expiré" };
+    }
+
+    // ✅ Activer le compte
+    if (!user.compte_verifier) {
+      user.compte_verifier = true;
+      await this.userRepository.save(user);
+    }
+
+    // ✅ Désactiver l'OTP
+    otp.is_valid = false;
+    await this.otpRepository.save(otp);
+
+    // ✅ Récompenser le parrain si existe
+    if (user.id_parrain) {
+      const compteParrain = await this.compteService.getUserCompte(user.id_parrain);
+      if (compteParrain) {
+        const montantBonus = 500;
+        const nouveauBonus = compteParrain.solde_bonus + montantBonus;
+        await this.compteService.updateCompteBonus(compteParrain.id_compte, nouveauBonus);
+        console.log(`✅ Parrain ${user.id_parrain} a reçu ${montantBonus} F de bonus`);
+      }
+    }
+
+    return { success: true, message: "OTP vérifié et bonus parrain appliqué si existant." };
+
+  } catch (error) {
+    console.error("❌ Erreur verifyOtpAndRewardParrain:", error);
+    throw new InternalServerErrorException("Erreur OTP + bonus");
+  }
+}
+
+
   
 }

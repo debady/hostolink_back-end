@@ -7,7 +7,7 @@ import { randomBytes } from 'crypto';
 import { User } from 'src/utilisateur/entities/user.entity';
 import { InvitationTracking } from './entities/invitation_traking.entity';
 import { Compte } from 'src/compte/entitie/compte.entity';
-import { ApplyBonusDto } from './dto/apply-bonus.dto';
+
 
 @Injectable()
 export class InvitationService {
@@ -82,25 +82,28 @@ export class InvitationService {
     await this.invitationRepository.save(invitation);
   
     return { message: 'Partage comptabilisé avec succès' };
+
   }
 
-  async lierInviteAuParrain(id_user_nouveau: string, code_invitation: string): Promise<{ message: string }> {
-    const invitation = await this.invitationRepository.findOne({ where: { code_invitation } });
-    if (!invitation) {
-      throw new NotFoundException("Code d'invitation invalide");
-    }
+
   
-    const nouveau = await this.userRepository.findOne({ where: { id_user: id_user_nouveau } });
-    if (!nouveau) {
-      throw new NotFoundException("Nouvel utilisateur introuvable");
-    }
+  // async lierInviteAuParrain(id_user_nouveau: string, code_invitation: string): Promise<{ message: string }> {
+  //   const invitation = await this.invitationRepository.findOne({ where: { code_invitation } });
+  //   if (!invitation) {
+  //     throw new NotFoundException("Code d'invitation invalide");
+  //   }
   
-    // Sauvegarder le lien
-    nouveau.code_invitation_utilise = code_invitation;
-    await this.userRepository.save(nouveau);
+  //   const nouveau = await this.userRepository.findOne({ where: { id_user: id_user_nouveau } });
+  //   if (!nouveau) {
+  //     throw new NotFoundException("Nouvel utilisateur introuvable");
+  //   }
   
-    return { message: "Utilisateur lié au parrain avec succès" };
-  }
+  //   // Sauvegarder le lien
+  //   nouveau.code_invitation_utilise = code_invitation;
+  //   await this.userRepository.save(nouveau);
+  
+  //   return { message: "Utilisateur lié au parrain avec succès" };
+  // }
   
   
 

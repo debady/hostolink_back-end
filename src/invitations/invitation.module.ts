@@ -8,6 +8,7 @@ import { InvitationTracking } from './entities/invitation_traking.entity';
 import { Compte } from 'src/compte/entitie/compte.entity';
 
 
+
 @Module({
   imports: [TypeOrmModule.forFeature([Invitation, User,InvitationTracking,Compte])],
   controllers: [InvitationController],

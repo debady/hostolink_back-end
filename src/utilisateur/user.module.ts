@@ -8,10 +8,11 @@ import { Image } from 'src/image/entities/image.entity';
 import { CompteModule } from 'src/compte/compte.module';
 import { QrCodeModule } from 'src/qr-code/qr-code.module';
 import { Otp } from './entities/otp.entity';
+import { Invitation } from 'src/invitations/entities/invitation.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Image,Otp]), 
+    TypeOrmModule.forFeature([User, Image,Otp,Invitation,]), 
     forwardRef(() => CompteModule),
     forwardRef(() => QrCodeModule),
 

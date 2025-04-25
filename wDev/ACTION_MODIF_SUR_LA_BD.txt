@@ -86,6 +86,9 @@ ALTER TABLE transaction_interne RENAME COLUMN "montant_reçu" TO montant_recu;
         date_click TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT fk_tracking_invitation FOREIGN KEY (code_invitation) REFERENCES invitation(code_invitation) ON DELETE CASCADE
     );
+ //j ai ajouter cet champ a la table utilisateur
+ ALTER TABLE utilisateur ADD COLUMN id_parrain uuid;
+
 
 *-------------- NGUESSAN---- 
 

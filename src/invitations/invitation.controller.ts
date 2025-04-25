@@ -45,10 +45,10 @@ async incrementerPartage(@Body() dto: PartageInvitationDto) {
   return await this.invitationService.incrementerNombrePartages(dto.code_invitation);
 }
 // referencier le niveau utilisateur a celui qui l a invite
-@Post('lier-invite')
-async lierInvite(@Body() dto: LierInviteDto) {
-  return await this.invitationService.lierInviteAuParrain(dto.id_user_nouveau, dto.code_invitation);
-}
+// @Post('lier-invite')
+// async lierInvite(@Body() dto: LierInviteDto) {
+//   return await this.invitationService.lierInviteAuParrain(dto.id_user_nouveau, dto.code_invitation);
+// }
 
  // @Post('apply-bonus')
   // async appliquerBonus(@Body() dto: ApplyBonusDto) {

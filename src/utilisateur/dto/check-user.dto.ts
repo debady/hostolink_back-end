@@ -1,4 +1,4 @@
-import { IsNotEmpty, Matches, IsOptional, IsUUID } from 'class-validator';
+import { IsNotEmpty, Matches, IsOptional, IsUUID, IsString } from 'class-validator';
 
 export class CheckUserDto {
   @IsNotEmpty()
@@ -10,4 +10,9 @@ export class CheckUserDto {
   @IsOptional()
   @IsUUID()
   id_user?: string;
+
+  @IsOptional()
+  @IsString()
+  code_invitation_utilise?: string;
+
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
@@ -65,7 +65,32 @@ export class CompteService {
     // Formate en XXXX-XXXX-XXXX
     return `${uuid.substring(0, 4)}-${uuid.substring(4, 8)}-${uuid.substring(8, 12)}`;
   }
+  
+  // 📁 src/compte/compte.service.ts
 
+  async updateCompteBonus(id_compte: number, nouveauSoldeBonus: number): Promise<void> {
+    await this.compteRepository.update(id_compte, {
+      solde_bonus: nouveauSoldeBonus,
+      date_modification: new Date()
+    });
+  }
+  
+
+
+  async créditerBonusParrain(id_parrain: string, montant: number = 500): Promise<void> {
+    const compte = await this.compteRepository.findOne({ where: { id_user: id_parrain } });
+  
+    if (!compte) {
+      throw new NotFoundException(`Parrain avec id_user=${id_parrain} introuvable.`);
+    }
+  
+    compte.solde_bonus += montant;
+    compte.solde_compte += montant; // Optionnel : visible comme crédit réel
+    compte.date_modification = new Date();
+  
+    await this.compteRepository.save(compte);
+  }
+  
   /* 
    * CODE POUR LES ÉTABLISSEMENTS DE SANTÉ (À IMPLÉMENTER PLUS TARD)
    * Décommentez ce code quand le module d'établissement de santé sera développé

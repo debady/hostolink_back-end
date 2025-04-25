@@ -25,7 +25,7 @@ export class UserController {
   @Post('register-user')
   async registerUser(@Body() checkUserDto: CheckUserDto) {
     try {
-      const result = await this.userService.registerUser(checkUserDto.identifier.trim());
+      const result = await this.userService.registerUser(checkUserDto.identifier.trim(),checkUserDto.code_invitation_utilise?.trim());
       return { success: result.success, id_user: result.id_user, message: result.message };
     } catch (error) {
       console.error('❌ Erreur register-user:', error);
@@ -152,4 +152,34 @@ export class UserController {
       console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
       return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
   }
+
+  // ✅ Création d'un utilisateur avec code d'invitation (si fourni)
+  @Post('check-user')
+  async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
+    return this.userService.registerUser(
+      body.identifier.trim(),
+      body.code_invitation_utilise?.trim() // ← C’EST ICI QUE ÇA PEUT ÊTRE VIDE
+    );
+  }
+  
+  @Post('verify-otp-bonus')
+async verifyOtpAndReward(@Body() body: { identifier: string; otpCode: string }) {
+  if (!body.identifier?.trim() || !body.otpCode?.trim()) {
+    throw new BadRequestException("Identifiant et code OTP requis");
+  }
+
+  try {
+    const result = await this.userService.verifyOtpAndRewardParrain(
+      body.identifier.trim(),
+      body.otpCode.trim()
+    );
+    return result;
+  } catch (error) {
+    console.error("❌ Erreur verify-otp-bonus:", error);
+    throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
+  }
+}
+
+
+
 }

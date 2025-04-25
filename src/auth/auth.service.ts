@@ -8,6 +8,7 @@ import { MoyenEnvoiEnum } from 'src/utilisateur/entities/otp.entity';
 import { UserEtablissementSante } from 'src/user_etablissement_sante/entities/user-etablissement-sante.entity';
 import { InjectRepository } from '@nestjs/typeorm/dist/common/typeorm.decorators';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from 'src/utilisateur/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
 
     @InjectRepository(UserEtablissementSante)
     private userRepo: Repository<UserEtablissementSante>,
+   
   ) {}
 
     async validateUser(identifier: string, password: string): Promise<{ user: User; access_token: string | null }> {
@@ -95,6 +97,9 @@ export class AuthService {
       return this.jwtService.sign(payload);
     }
     
+    async register(identifier: string, code_invitation_utilise?: string) {
+      return this.userService.registerUser(identifier, code_invitation_utilise);
+    }
     
     
 
