@@ -136,4 +136,14 @@ export class TransactionInterneController {
 //   };
 // }
 
+
+
+@Post('info_qrcode')
+@UseGuards(JwtAuthGuard)
+async getUserInfoFromQrCode(@Body('token') token: string) {
+  return this.TransactionInterneService.getUserInfoFromQrCode(token);
+}
+
+
+
 }

@@ -11,6 +11,7 @@ import { CreateTransactionFraisDto } from 'src/transaction-frais/dto/transaction
 import { RollbackTransactionDto } from './rollback-dto/rollback-transaction.dto';
 import { PayWithPhoneDto } from './payer-avec/payer-avec-telephone.dto';
 import { PayWithEmailDto } from './payer-avec/payer-avec-email.dto';
+import { User } from 'src/utilisateur/entities/user.entity'; 
 
 // Interface pour le compte
 interface Compte {
@@ -1080,6 +1081,77 @@ async getStats() {
     // }
   };
 }
+
+
+// async getUserInfoFromQrCode(token: string) {
+//   const qrCodeInfo = await this.getQrCodeInfoFromToken(token);
+
+//   if (!qrCodeInfo) {
+//     throw new NotFoundException('QR Code invalide ou expiré');
+//   }
+
+//   let userInfo: User | null = null; // 👈 déclaration propre
+
+//   if (qrCodeInfo.id_user) {
+//     userInfo = await this.dataSource.manager.findOne(User, {  // 👈 sans `const` ici !!
+//       where: { id_user: qrCodeInfo.id_user },
+//       select: ['id_user', 'nom', 'prenom', 'telephone', 'email']
+//     });
+//   }
+
+//   if (!userInfo) {
+//     throw new NotFoundException('Utilisateur du QR Code non trouvé');
+//   }
+
+//   return {
+//     success: true,
+//     message: 'Données du destinataire récupérées',
+//     data: userInfo
+//   };
+// }
+
+
+async getUserInfoFromQrCode(token: string) {
+  const qrCodeInfo = await this.getQrCodeInfoFromToken(token);
+
+  if (!qrCodeInfo) {
+    throw new NotFoundException('QR Code invalide ou expiré');
+  }
+
+  let userInfo: User | null = null;
+
+  if (qrCodeInfo.id_user) {
+    userInfo = await this.dataSource.manager.findOne(User, {
+      where: { id_user: qrCodeInfo.id_user },
+      relations: ['images'], // 🧠 On charge les images liées
+      select: ['id_user', 'nom', 'prenom', 'telephone', 'email', 'actif'] // 🔥 ajoute 'actif' pour vérifier
+    });
+  }
+
+  if (!userInfo) {
+    throw new NotFoundException('Utilisateur du QR Code non trouvé');
+  }
+
+  // Extraire la première image (s'il y en a une)
+  let photoProfile: string | null = null;
+  if (userInfo.images && userInfo.images.length > 0) {
+    photoProfile = userInfo.images[0].url_image || 'https://res.cloudinary.com/dhrrk7vsd/image/upload/v1740668911/hostolink/i2d0l0c0tb13shazdu7l.jpg'; // ⚡ adapte selon ton champ (peut être 'url' ou 'lien')
+  }
+
+  return {
+    success: true,
+    message: 'Données du destinataire récupérées',
+    data: {
+      id_user: userInfo.id_user,
+      nom: userInfo.nom,
+      prenom: userInfo.prenom,
+      telephone: userInfo.telephone,
+      email: userInfo.email,
+      photo_profile: photoProfile, // 🖼️ ajout propre ici
+    }
+  };
+}
+
 
 
 
