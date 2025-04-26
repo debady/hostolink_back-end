@@ -220,3 +220,5 @@ Contraintes de clÚs ÚtrangÞres :
     suppression de la foreign key dans raison de suppresion de compte par raison 
     ALTER TABLE raison_suppression_compte DROP CONSTRAINT fk_etab;
 
+------------ SAMEDI 26 AVRIL 2025 --------------
+SELECT setval('transaction_interne_id_transaction_seq', (SELECT MAX(id_transaction) FROM transaction_interne));

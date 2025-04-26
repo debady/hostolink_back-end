@@ -131,6 +131,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async getMe(@Req() req: AuthenticatedRequest) {
     const user = await this.userService.getUserById(req.user.id_user);
+    
     return {
       success: true,
       data: user,
