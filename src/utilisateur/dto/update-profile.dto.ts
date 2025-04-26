@@ -1,8 +1,6 @@
 import { IsOptional, IsString, IsEmail, IsUUID, MaxLength } from 'class-validator';
 
 export class UpdateProfileDto {
-  @IsUUID()
-  id_user: string;
 
   @IsOptional()
   @IsString()

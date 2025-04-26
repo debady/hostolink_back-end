@@ -138,23 +138,21 @@ export class UserController {
     };
   }
   
-
-  // ✅ Mise à jour du profil utilisateur avec gestion de l'image de profil
-
   @Patch('/update-profile')
-    @UseGuards(JwtAuthGuard) 
-    @UseInterceptors(FileInterceptor('file'))
-
-    async updateProfile(
-      @Req() req: AuthenticatedRequest, 
-      @Body() updateProfileDto: UpdateProfileDto, 
-      @UploadedFile() file?: Express.Multer.File
-
-    ) {
-      const id_user = req.user.id_user; 
-      console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
-      return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async updateProfile(
+    @Req() req: AuthenticatedRequest, 
+    @Body() updateProfileDto: UpdateProfileDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const id_user = req.user.id_user; // 🔥 récupéré du token, pas du body
+    console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
+    console.log('🔵 id_user extrait du token:', id_user);
+  
+    return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
   }
+  
 
 // ✅ Récupérer tous les emails
 @Get('all-emails')
