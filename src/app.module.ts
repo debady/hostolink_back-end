@@ -17,7 +17,7 @@ import { AdministrateurModule } from './administrateur/administrateur.module';
 import { AnnonceModule } from './annonce/annonce.module';
 
 import { ThematiqueDiscussionModule } from './thematique_discussion/thematique_discussion.module';
-import { FirebaseModule } from './thematique_discussion/firebase/firebase.module';
+
 
 
 // ✅ transaction interne
@@ -62,7 +62,7 @@ import { InvitationModule } from './invitations/invitation.module';
   AnnonceModule,
 
   ThematiqueDiscussionModule,
-  FirebaseModule,
+ 
   TransactionFraisModule,
 
   TransactionInterneModule,

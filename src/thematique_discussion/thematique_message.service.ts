@@ -8,7 +8,8 @@ import { MessageThematique } from './entities/message_thematique.entity';
 import { Thematique } from './entities/thematique.entity';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { CreateThematiqueDto } from './dto/create-thematique.dto';
-import { FirebaseService } from './firebase/firebase.service';
+import { RepondreMessageExpertDto } from './dto/reponse-message-expert.dto';
+import { ExpertSante } from 'src/user_etablissement_sante/entities/expert_sante.entity';
 
 
 
@@ -27,7 +28,10 @@ export class ThematiqueDiscussionService {
     @InjectRepository(Administrateur)
     private readonly adminRepo: Repository<Administrateur>,
 
-    private readonly firebaseService: FirebaseService, // ✅ Injection du service Firebase
+    @InjectRepository(ExpertSante)
+    private readonly expertRepo: Repository<ExpertSante>,
+
+    // ✅ Injection du service Firebase
   ) {}
 
   // ✅ Créer un message dans une thématique
@@ -49,18 +53,20 @@ export class ThematiqueDiscussionService {
       expediteur,
       contenu: dto.contenu,
       type_message: dto.type_message,
+      url_image: dto.url_image || undefined,
+      status_reponse: false, 
     });
 
     const savedMessage = await this.messageRepo.save(message);
 
-    // 🔔 Envoi de la notification Firebase
-    if (expediteur.fcm_token) {
-      await this.firebaseService.sendNotification(
-        expediteur.fcm_token,
-        'Nouveau message',
-        dto.contenu,
-      );
-    }
+    // // 🔔 Envoi de la notification Firebase
+    // if (expediteur.fcm_token) {
+    //   await this.firebaseService.sendNotification(
+    //     expediteur.fcm_token,
+    //     'Nouveau message',
+    //     dto.contenu,
+    //   );
+    // }
 
     return savedMessage;
   }
@@ -88,15 +94,17 @@ export class ThematiqueDiscussionService {
   }
 
   async getMessagesByThematique(id_thematique_discussion: number): Promise<any[]> {
-    return this.messageRepo.find({
+    const messages = await this.messageRepo.find({
       where: {
         thematique: { id_thematique_discussion },
       },
-      relations: ['expediteur'], // Pour inclure l’utilisateur qui a envoyé le message
+      relations: ['expediteur', 'expert'],
       order: {
-        date_envoi: 'ASC', // Du plus ancien au plus récent
+        date_envoi: 'ASC',
       },
     });
+  
+    return messages;
   }
   
 
@@ -109,6 +117,27 @@ export class ThematiqueDiscussionService {
       },
       { est_lu: true }
     );
+  }
+  
+  async repondreEnTantQueExpert(dto: RepondreMessageExpertDto): Promise<MessageThematique> {
+    const thematique = await this.thematiqueRepo.findOneBy({
+      id_thematique_discussion: dto.id_thematique_discussion,
+    });
+    if (!thematique) throw new NotFoundException('Thématique non trouvée');
+  
+    const expert = await this.expertRepo.findOneBy({ id_expert: dto.id_expert });
+    if (!expert) throw new NotFoundException('Expert introuvable');
+  
+    const message = this.messageRepo.create({
+      thematique,
+      expert,
+      contenu: dto.contenu,
+      type_message: dto.type_message,
+      url_image: dto.url_image || undefined,
+      status_reponse: true,
+    });
+  
+    return await this.messageRepo.save(message);
   }
   
 }

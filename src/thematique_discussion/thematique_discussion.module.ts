@@ -6,7 +6,10 @@ import { User } from 'src/utilisateur/entities/user.entity';
 import { Administrateur } from 'src/administrateur/entities/administrateur.entity';
 import { MessageThematique } from './entities/message_thematique.entity';
 import { ThematiqueDiscussionService } from './thematique_message.service';
-import { FirebaseModule } from './firebase/firebase.module';
+
+import { ExpertSante } from 'src/user_etablissement_sante/entities/expert_sante.entity';
+import { UploadController } from './image/upload.controller';
+import { CloudinaryService } from './image/claudinary.service';
 
 
 @Module({
@@ -16,10 +19,11 @@ import { FirebaseModule } from './firebase/firebase.module';
       MessageThematique,
       User,
       Administrateur,
+      ExpertSante,
     ]),
-    FirebaseModule,
+    
   ],
-  controllers: [ThematiqueDiscussionController],
-  providers: [ThematiqueDiscussionService],
+  controllers: [ThematiqueDiscussionController,UploadController,],
+  providers: [ThematiqueDiscussionService,CloudinaryService],
 })
 export class ThematiqueDiscussionModule {}

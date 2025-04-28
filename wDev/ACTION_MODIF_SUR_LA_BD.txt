@@ -89,6 +89,14 @@ ALTER TABLE transaction_interne RENAME COLUMN "montant_reçu" TO montant_recu;
  //j ai ajouter cet champ a la table utilisateur
  ALTER TABLE utilisateur ADD COLUMN id_parrain uuid;
 
+ // j ai ajoute ceux ci a la table message_themamtique
+
+ ALTER TABLE messages_thematique
+ ADD COLUMN id_expert INTEGER REFERENCES expert_sante(id_expert) ON DELETE SET NULL;
+
+
+
+
 
 *-------------- NGUESSAN---- 
 

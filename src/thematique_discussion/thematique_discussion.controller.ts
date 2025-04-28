@@ -3,6 +3,7 @@ import { Controller, Post, Body, ParseIntPipe, Param, Get, NotFoundException, Pa
 import { CreateThematiqueDto } from './dto/create-thematique.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { ThematiqueDiscussionService } from './thematique_message.service';
+import { RepondreMessageExpertDto } from './dto/reponse-message-expert.dto';
 
 
 @Controller('thematiques') // <-- On change ici
@@ -34,6 +35,14 @@ export class ThematiqueDiscussionController {
      }
      return messages;
   }
+
+
+
+  @Post('/messages/repondre')
+  async repondreEnTantQueExpert(@Body() dto: RepondreMessageExpertDto) {
+  return this.thematiqueService.repondreEnTantQueExpert(dto);
+  }
+
 
   @Patch(':id/mark-as-read')
   async markMessagesAsRead(
