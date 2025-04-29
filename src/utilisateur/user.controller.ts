@@ -79,51 +79,30 @@ export class UserController {
       }
   }
 
-  // // ✅ Générer un OTP
-  //   @Post('generate')
-  //     async generateOtp(@Body() body: { identifier: string; moyen_envoyer: MoyenEnvoiEnum }) {
-  //       if (!body.identifier?.trim()) {
-  //         throw new BadRequestException("L'identifiant est requis");
-  //       }
-  
-  //     try {
-  //       console.log(`📩 Génération OTP pour ${body.identifier} via ${body.moyen_envoyer}`);
-  //       const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
-  //       const otp = await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
 
-  
-  //       // await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
-  //       return { success: true, message: "OTP généré avec succès", moyenEnvoyerFormatted,otp};
-  //     } catch (error) {
-  //       console.error("❌ Erreur generate-otp:", error);
-  //       throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");
-  //     }
-  //   }
-  
-  
-  //   // ✅ Vérifier un OTP
-  //   @Post('verify')
-  //   async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
-  //     if (!body.identifier?.trim() || !body.otpCode?.trim()) {
-  //       throw new BadRequestException("Identifiant et code OTP requis");
-  //     }
+    // ✅ Vérifier un OTP
+    @Post('verify')
+    async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
+      if (!body.identifier?.trim() || !body.otpCode?.trim()) {
+        throw new BadRequestException("Identifiant et code OTP requis");
+      }
 
-  //     try {
-  //       console.log(`📩 Vérification OTP pour ${body.identifier}`);
+      try {
+        console.log(`📩 Vérification OTP pour ${body.identifier}`);
         
-  //       const isValid = await this.userService.verifyOtp(
-  //         body.identifier.trim(), 
-  //         body.otpCode.trim()
-  //       );
+        const isValid = await this.userService.verifyOtp(
+          body.identifier.trim(), 
+          body.otpCode.trim()
+        );
 
-  //       console.log(`📢 Réponse verifyOtp: ${JSON.stringify(isValid)}`);
+        console.log(`📢 Réponse verifyOtp: ${JSON.stringify(isValid)}`);
 
-  //       return isValid;
-  //     } catch (error) {
-  //       console.error("❌ Erreur verify-otp:", error);
-  //       return { success: false, message: "Échec de la vérification de l'OTP" };
-  //     }
-  //   }
+        return isValid;
+      } catch (error) {
+        console.error("❌ Erreur verify-otp:", error);
+        return { success: false, message: "Échec de la vérification de l'OTP" };
+      }
+    }
 
 
 
