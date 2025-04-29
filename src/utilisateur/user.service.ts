@@ -189,7 +189,7 @@ export class UserService {
         // await this.smsService.sendOtpSms(identifier, otpCode);
         console.log(`📤 SMS vers ${identifier} avec OTP ${otpCode}`);
       } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL) {
-        // await this.emailService.sendOtpEmail(identifier, otpCode);
+        await this.emailService.sendOtpEmail(identifier, otpCode);
         console.log(`📤 EMAIL à ${identifier} avec OTP ${otpCode}`);
       }
   
