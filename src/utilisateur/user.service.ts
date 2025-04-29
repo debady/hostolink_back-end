@@ -17,6 +17,7 @@ import { ImageService } from 'src/image/image.service';
 import { CompteService } from 'src/compte/compte.service';
 import { QrCodeService } from 'src/qr-code/qr-code.service';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class UserService {
@@ -39,6 +40,9 @@ export class UserService {
 
     @InjectRepository(Otp)
     private readonly otpRepository: Repository<Otp>,
+
+
+    private readonly emailService: EmailService, 
 
 
   ) {}

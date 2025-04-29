@@ -220,10 +220,6 @@ Contraintes de clÚs ÚtrangÞres :
     suppression de la foreign key dans raison de suppresion de compte par raison 
     ALTER TABLE raison_suppression_compte DROP CONSTRAINT fk_etab;
 
-<<<<<<< HEAD
------------- SAMEDI 26 AVRIL 2025 --------------
-SELECT setval('transaction_interne_id_transaction_seq', (SELECT MAX(id_transaction) FROM transaction_interne));
-=======
 
 --------------- 24 avril --------------
 
@@ -254,7 +250,7 @@ CREATE TABLE public.conversations (
 
 CREATE TABLE public.messages_assistant_client(
   message_id SERIAL PRIMARY KEY,
-  conversation_id INTEGER NOT NULL,
+  conversation_id INTEGER NOT NULL,  
   envoyer_par VARCHAR(50) NOT NULL,
   message_text TEXT,
   sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -278,6 +274,5 @@ CREATE TABLE public.messages_assistant_client_image (
 );
 
 
---------------- 25 avril --------------
 ALTER TABLE "conversations" ADD COLUMN "auto_created" boolean NOT NULL DEFAULT true;
->>>>>>> 02806434b3d2162310cae927d8c026b48790cafc
+--------------- 25 avril --------------
