@@ -1,4 +1,61 @@
-// // ------------LOCAL -----------------
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { json, urlencoded } from 'express';
+import { join } from 'path';
+import * as dotenv from 'dotenv';
+
+// ✅ Charge les variables d'environnement
+dotenv.config();
+
+async function bootstrap() {
+  try {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+    // ✅ Validation globale des DTOs
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+
+    // ✅ Middleware express
+    app.use(json());
+    app.use(urlencoded({ extended: true }));
+
+    // ✅ CORS config (modifiable en prod dans .env)
+    app.enableCors({
+      origin: process.env.CORS_ORIGIN || '*',
+      methods: ['GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'DELETE'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: process.env.CORS_CREDENTIALS === 'true', // facultatif
+    });
+
+    // ✅ Servir des fichiers statiques si activé
+    if (process.env.SERVE_STATIC === 'true') {
+      app.useStaticAssets(join(__dirname, '..', 'public'));
+    }
+
+    const PORT = process.env.PORT || 3000;
+    await app.listen(PORT, '0.0.0.0');
+
+    console.log(`🚀 Le serveur tourne sur : http://localhost:${PORT}`);
+    console.log('📦 Connexion à PostgreSQL :', process.env.DATABASE_NAME);
+  } catch (error) {
+    console.error('❌ Erreur lors du démarrage de l’application :', error);
+    process.exit(1);
+  }
+}
+bootstrap();
+
+
+
+
+
+// // // ------------LOCAL -----------------
 
 // import { NestFactory } from '@nestjs/core';
 // import { AppModule } from './app.module';
@@ -59,31 +116,31 @@
 
 
 
-//  ----- config en ligne -------
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';
+// //  ----- config en ligne -------
+// import { NestFactory } from '@nestjs/core';
+// import { AppModule } from './app.module';
+// import { ValidationPipe } from '@nestjs/common';
+// import { NestExpressApplication } from '@nestjs/platform-express';
 
-async function bootstrap() {
-  try {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+// async function bootstrap() {
+//   try {
+//     const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
-    app.enableCors({
-      origin: '*',
-      methods: ['GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-      credentials: true,
-    });
+//     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+//     app.enableCors({
+//       origin: '*',
+//       methods: ['GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'DELETE'],
+//       allowedHeaders: ['Content-Type', 'Authorization'],
+//       credentials: true,
+//     });
 
-    const PORT = process.env.PORT || 10000;
-    await app.listen(PORT, '0.0.0.0');
+//     const PORT = process.env.PORT || 10000;
+//     await app.listen(PORT, '0.0.0.0');
 
-    console.log(`🚀 le Server Tourne sur le port : http://localhost:${PORT}`);
-  } catch (error) {
-    console.error('❌ erreur lors du demarrage de l application', error);
-    process.exit(1);
-  }
-}
-bootstrap();
+//     console.log(`🚀 le Server Tourne sur le port : http://localhost:${PORT}`);
+//   } catch (error) {
+//     console.error('❌ erreur lors du demarrage de l application', error);
+//     process.exit(1);
+//   }
+// }
+// bootstrap();

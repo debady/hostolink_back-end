@@ -120,41 +120,42 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
 
 
 
-  @Post('generate')
-  async generateOtp(@Body() body: { identifier: string; moyen_envoyer: MoyenEnvoiEnum }) {
-    if (!body.identifier?.trim()) {
-      throw new BadRequestException("L'identifiant est requis");
-    }
-  
-    try {
-      console.log(`📩 Génération OTP pour ${body.identifier} via ${body.moyen_envoyer}`);
-      const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
-  
-      const { success, otp } = await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
-  
-      // 🔵 Si c'est un téléphone ➔ retourner l'OTP directement
-      if (moyenEnvoyerFormatted === MoyenEnvoiEnum.SMS) {
+    @Post('generate')
+    async generateOtp(@Body() body: { identifier: string; moyen_envoyer: MoyenEnvoiEnum }) {
+      if (!body.identifier?.trim()) {
+        throw new BadRequestException("L'identifiant est requis");
+      }
+    
+      try {
+        const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
+        console.log(`📩 Génération OTP pour ${body.identifier} via ${moyenEnvoyerFormatted}`);
+    
+        const { otp } = await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
+    
+        // 🔵 Si c'est un téléphone ➔ afficher simplement le code
+        if (moyenEnvoyerFormatted === MoyenEnvoiEnum.SMS || moyenEnvoyerFormatted === MoyenEnvoiEnum.TELEPHONE) {
+          return {
+            success: true,
+            message: "OTP généré avec succès (affiché uniquement en mode SMS)",
+            moyen: moyenEnvoyerFormatted,
+            otp, // ✅ affiché dans la réponse
+          };
+        }
+    
+        // 🟣 Email → envoyer normalement (tu peux garder l’envoi réel si tu veux)
         return {
           success: true,
-          message: "OTP généré avec succès",
+          message: "OTP envoyé par email avec succès",
           moyen: moyenEnvoyerFormatted,
-          otp, // 🔥 Retour direct de l'OTP à Flutter
+          otp
         };
+      } catch (error) {
+        console.error("❌ Erreur generate-otp:", error);
+        throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");
       }
-  
-      // 🟣 Si c'est un email ➔ Message simple (l'email est déjà envoyé dans userService)
-      return {
-        success: true,
-        message: "OTP envoyé par email avec succès",
-        moyen: moyenEnvoyerFormatted,
-      };
-  
-    } catch (error) {
-      console.error("❌ Erreur generate-otp:", error);
-      throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");
     }
-  }
-  
+    
+    
 
   // ✅ Récupérer les infos de l'utilisateur connecté
   @Get('user/me')
