@@ -274,5 +274,37 @@ CREATE TABLE public.messages_assistant_client_image (
 );
 
 
-ALTER TABLE "conversations" ADD COLUMN "auto_created" boolean NOT NULL DEFAULT true;
 --------------- 25 avril --------------
+ALTER TABLE "conversations" ADD COLUMN "auto_created" boolean NOT NULL DEFAULT true;
+
+
+
+
+
+
+
+modif pour regler le probleme de suppression des token 
+
+
+hostolink_bd=# ALTER TABLE transaction_interne
+hostolink_bd-# ADD COLUMN qr_code_token VARCHAR(1000),
+hostolink_bd-# ADD COLUMN qr_code_valeur TEXT,
+hostolink_bd-# ADD COLUMN qr_code_short_id VARCHAR(16);
+ALTER TABLE
+hostolink_bd=# ALTER TABLE transaction_interne
+hostolink_bd-# DROP CONSTRAINT transaction_internes_id_qrcode_dynamique_fkey;
+ALTER TABLE
+hostolink_bd=# ALTER TABLE transaction_interne
+hostolink_bd-# DROP CONSTRAINT transaction_internes_id_qrcode_dynamique_fkey;
+ERREUR:  la contrainte « transaction_internes_id_qrcode_dynamique_fkey » de la relation « transaction_interne » n'existe pas
+hostolink_bd=#
+
+
+
+
+
+
+
+
+
+

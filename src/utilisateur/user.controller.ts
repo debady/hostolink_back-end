@@ -1,7 +1,8 @@
 import { Controller, Post, Body, BadRequestException, InternalServerErrorException, Get, UseGuards,  Req, 
   Patch, 
   UploadedFile, 
-  UseInterceptors } from '@nestjs/common';
+  UseInterceptors, 
+  NotFoundException} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { CheckUserDto } from './dto/check-user.dto';
@@ -10,6 +11,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { MoyenEnvoiEnum } from './entities/otp.entity';
+import { AuthService } from 'src/auth/auth.service';
 
 interface AuthenticatedRequest extends Request {
   user: { id_user: string };
@@ -19,6 +21,7 @@ interface AuthenticatedRequest extends Request {
 export class UserController {
   constructor(
     private readonly userService: UserService,
+    private readonly authService: AuthService,
   ) {}
 
   // ✅ Création d'un utilisateur (sans mot de passe)
@@ -92,32 +95,40 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
         throw new InternalServerErrorException("Erreur lors de la vérification du PIN");
       }
   }
-
-
-    // ✅ Vérifier un OTP
-    @Post('verify')
-    async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
-      if (!body.identifier?.trim() || !body.otpCode?.trim()) {
-        throw new BadRequestException("Identifiant et code OTP requis");
-      }
-
-      try {
-        console.log(`📩 Vérification OTP pour ${body.identifier}`);
-        
-        const isValid = await this.userService.verifyOtp(
-          body.identifier.trim(), 
-          body.otpCode.trim()
-        );
-
-        console.log(`📢 Réponse verifyOtp: ${JSON.stringify(isValid)}`);
-
-        return isValid;
-      } catch (error) {
-        console.error("❌ Erreur verify-otp:", error);
-        return { success: false, message: "Échec de la vérification de l'OTP" };
-      }
+  
+  @Post('verify')
+  async verifyOtp(@Body() body: { identifier: string; otpCode: string }) {
+    if (!body.identifier?.trim() || !body.otpCode?.trim()) {
+      throw new BadRequestException("Identifiant et code OTP requis");
     }
-
+  
+    try {
+      const identifier = body.identifier.trim();
+      const otpCode = body.otpCode.trim();
+  
+      console.log(`📩 Vérification OTP pour ${identifier}`);
+  
+      const result = await this.userService.verifyOtp(identifier, otpCode);
+  
+      if (!result.success) return result;
+  
+      const user = await this.userService.findUserByIdentifier(identifier);
+      if (!user) throw new NotFoundException("Utilisateur introuvable.");
+  
+      const token = await this.authService.generateJwtTokenFromUser(user);
+  
+      return {
+        success: true,
+        message: result.message,
+        token, // ✅ maintenant le front Flutter pourra rediriger
+      };
+    } catch (error) {
+      console.error("❌ Erreur verify-otp:", error);
+      return { success: false, message: "Échec de la vérification de l'OTP" };
+    }
+  }
+  
+  
 
 
     @Post('generate')

@@ -11,9 +11,7 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
-  generateJwt(_arg0: { id: number; }) {
-    throw new Error('Method not implemented.');
-  }
+
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
@@ -23,6 +21,17 @@ export class AuthService {
     @InjectRepository(UserEtablissementSante)
     private userRepo: Repository<UserEtablissementSante>,
   ) {}
+
+  async generateJwtTokenFromUser(user: User): Promise<string> {
+    const payload = {
+      id_user: user.id_user,
+      email: user.email,
+      telephone: user.telephone,
+    };
+  
+    return this.jwtService.sign(payload);
+  }
+  
 
     async validateUser(identifier: string, password: string): Promise<{ user: User; access_token: string | null }> {
 

@@ -21,6 +21,7 @@ import { EmailService } from './email.service';
 
 @Injectable()
 export class UserService {
+  AuthService: any;
 
   constructor(
     @InjectRepository(User)
@@ -208,6 +209,14 @@ export class UserService {
       }
       throw new InternalServerErrorException("Erreur lors de la génération de l'OTP");
     }
+  }
+
+  async generateJwtToken(user: User): Promise<string> {
+    return this.AuthService.sign({
+      id_user: user.id_user,
+      email: user.email,
+      telephone: user.telephone,
+    });
   }
   
   

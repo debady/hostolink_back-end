@@ -10,16 +10,17 @@ import { QrCodeModule } from 'src/qr-code/qr-code.module';
 import { Otp } from './entities/otp.entity';
 import { EmailService } from './email.service';
 import { OtpCleanerService } from './nettoyeur.service';
+import { AuthModule } from 'src/auth/auth.module'; // ✅
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Image,Otp]), 
+    TypeOrmModule.forFeature([User, Image, Otp]),
+    forwardRef(() => AuthModule), // ✅ Correction ICI
     forwardRef(() => CompteModule),
     forwardRef(() => QrCodeModule),
-
   ],
   controllers: [UserController],
-  providers: [UserService, ImageService,EmailService,OtpCleanerService], 
-  exports: [UserService,TypeOrmModule], 
+  providers: [UserService, ImageService, EmailService, OtpCleanerService], 
+  exports: [UserService, TypeOrmModule], 
 })
 export class UserModule {}
