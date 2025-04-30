@@ -34,28 +34,42 @@ export class UserController {
   }
 
   // ✅ Définition du mot de passe après inscription
-  @Post('define-password')
-  async definePassword(@Body() registerUserDto: RegisterUserDto) {
-    if (!registerUserDto.identifier?.trim() || !registerUserDto.password?.trim()) {
-      throw new BadRequestException('Identifiant et mot de passe sont obligatoires');
-    }
+// ✅ Définition du mot de passe + génération immédiate d'un OTP
+@Post('define-password')
+async definePassword(@Body() registerUserDto: RegisterUserDto) {
+  const identifier = registerUserDto.identifier?.trim();
+  const password = registerUserDto.password?.trim();
 
-    try {
-      const success = await this.userService.setUserPassword(
-        registerUserDto.identifier.trim(),
-        registerUserDto.password.trim()
-      );
-
-      if (!success) {
-        throw new InternalServerErrorException("Échec de la mise à jour du mot de passe.");
-      }
-
-      return { success: true, message: 'Mot de passe défini avec succès' };
-    } catch (error) {
-      console.error("❌ Erreur define-password:", error);
-      throw new InternalServerErrorException(error.message || "Erreur lors de la mise à jour du mot de passe");
-    }
+  if (!identifier || !password) {
+    throw new BadRequestException('Identifiant et mot de passe sont obligatoires');
   }
+
+  try {
+    const success = await this.userService.setUserPassword(identifier, password);
+
+    if (!success) {
+      throw new InternalServerErrorException("Échec de la mise à jour du mot de passe.");
+    }
+
+    // ✅ Déterminer si c'est un email ou un téléphone
+    const moyen: MoyenEnvoiEnum = identifier.includes('@') ? MoyenEnvoiEnum.EMAIL : MoyenEnvoiEnum.SMS;
+
+    // ✅ Générer automatiquement un OTP
+    const { otp } = await this.userService.generateOtp(identifier, moyen);
+
+    // ✅ Retourner la réponse
+    return {
+      success: true,
+      message: `Mot de passe défini. Un OTP a été envoyé via ${moyen}.${otp}`,
+      // otp: moyen === MoyenEnvoiEnum.SMS ? otp : undefined, // on affiche le code uniquement si SMS
+    };
+
+  } catch (error) {
+    console.error("❌ Erreur define-password:", error);
+    throw new InternalServerErrorException(error.message || "Erreur lors de la mise à jour du mot de passe");
+  }
+}
+
 
   // ✅ Vérification du PIN de connexion
   @Post('verify-pin')

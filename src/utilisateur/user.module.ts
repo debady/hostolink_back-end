@@ -9,6 +9,7 @@ import { CompteModule } from 'src/compte/compte.module';
 import { QrCodeModule } from 'src/qr-code/qr-code.module';
 import { Otp } from './entities/otp.entity';
 import { EmailService } from './email.service';
+import { OtpCleanerService } from './nettoyeur.service';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { EmailService } from './email.service';
 
   ],
   controllers: [UserController],
-  providers: [UserService, ImageService,EmailService], 
+  providers: [UserService, ImageService,EmailService,OtpCleanerService], 
   exports: [UserService,TypeOrmModule], 
 })
 export class UserModule {}

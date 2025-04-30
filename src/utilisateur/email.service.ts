@@ -12,7 +12,7 @@ export class EmailService {
       secure: false,
       auth: {
         user: 'startup@explora-studio.com',
-        pass: 'Deb@dy4470#Deb@dy4470#', // ⚠️ Ne JAMAIS commiter ça en prod
+        pass: 'Deb@dy4470#Deb@dy4470#', 
       },
     });
   }
@@ -25,10 +25,7 @@ export class EmailService {
         subject: '🔐 Code de vérification - Hostolink',
         html: `
           <div style="max-width:600px;margin:auto;padding:20px;font-family:'Arial',sans-serif;background:#f9f9f9;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);">
-            <div style="text-align:center;">
-              <img src="https://res.cloudinary.com/dhrrk7vsd/image/upload/v1740668911/hostolink/axdjirzolotfs3sjrb2v.jpg" alt="Hostolink Banner" style="width:100%;max-width:560px;border-radius:8px 8px 0 0;" />
-            </div>
-
+            
             <div style="padding:30px;background:white;border-radius:0 0 8px 8px;">
               <h2 style="color:#2e6c80;text-align:center;">Votre code OTP</h2>
               <p style="font-size:16px;">Bonjour,</p>
@@ -42,6 +39,11 @@ export class EmailService {
                 Ce code est valable pendant <strong>5 minutes</strong>. Ne le partagez avec personne.
               </p>
 
+              <div style="text-align:center;">
+              <img src="https://res.cloudinary.com/dhrrk7vsd/image/upload/v1740668911/hostolink/axdjirzolotfs3sjrb2v.jpg" alt="Hostolink Banner" style="width:100%;max-width:560px;border-radius:8px 8px 0 0;" />
+            </div>
+
+
               <hr style="margin:40px 0;" />
 
               <div style="text-align:center;">
@@ -54,6 +56,7 @@ export class EmailService {
                 </p>
               </div>
             </div>
+            
           </div>
         `,
       };
