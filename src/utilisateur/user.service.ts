@@ -144,17 +144,17 @@ export class UserService {
     
     // Récupération des informations du compte de l'utilisateur
     const compte = await this.compteService.getUserCompte(id_user);
-    // const qrcodedynamique = await this.qrCodeService.getUserDynamicQrCodes(id_user);
-    // const qrcodedstatique = await this.qrCodeService.getUserStaticQrCode(id_user);
+    const qrcodedynamique = await this.qrCodeService.getUserDynamicQrCodes(id_user);
+    const qrcodedstatique = await this.qrCodeService.getUserStaticQrCode(id_user);
     const allqrcodes = await this.qrCodeService.getAllUserQrCodes(id_user);
 
     return { 
       ...user, 
-      photo_profile: profileImage ? profileImage.url_image : null,
-      compte,
       mdp: user.mdp,
-      // qrcodedynamique,
-      // qrcodedstatique,
+      photo_profile: profileImage ? profileImage.url_image : 'https://res.cloudinary.com/dhrrk7vsd/image/upload/v1745581355/hostolink/default_icone_pyiudn.png',
+      compte,
+      qrcodedynamique,
+      qrcodedstatique,
       allqrcodes,
     };
   }
@@ -512,6 +512,31 @@ async verifyOtpAndRewardParrain(identifier: string, otpCode: string): Promise<{ 
   }
 }
 
+
+
+  // ✅ Récupérer tous les emails actifs et vérifiés
+async getAllEmails() {
+  const users = await this.userRepository.find({
+    select: ['email'],
+    where: { actif: true, compte_verifier: true },
+  });
+
+  return users
+    .filter(user => user.email)
+    .map(user => user.email);
+}
+
+// ✅ Récupérer tous les téléphones actifs et vérifiés
+async getAllTelephones() {
+  const users = await this.userRepository.find({
+    select: ['telephone'],
+    where: { actif: true, compte_verifier: true },
+  });
+
+  return users
+    .filter(user => user.telephone)
+    .map(user => user.telephone);
+}
 
   
 }

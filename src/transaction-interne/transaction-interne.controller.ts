@@ -21,11 +21,6 @@ export class TransactionInterneController {
     return this.TransactionInterneService.getMyTransactions(req.user.id_user);
   }
 
-
-
-  // endpoints pour recuprer les statistiques des transactions 
-  // il est placer là parce que l'endpoint /transaction/statistiques-des-transactions est confondu avec l'endpoint /transaction/:id.
-
   @Get('statistiques-des-transactions')
   @UseGuards(JwtAdminGuard)
   async getTransactionStats() {
@@ -109,12 +104,6 @@ export class TransactionInterneController {
 }
 
 
-
-
-
-
-
-
   //ces parties sont reservées à l'administrateur et elles permettent de bloqué et d'annulé une transaction mais 
 
   @Post(':id/bloque_transaction') // bloque la transaction encore en attente
@@ -146,5 +135,15 @@ export class TransactionInterneController {
 //     data: await this.TransactionInterneService.getUserStats(id_user)
 //   };
 // }
+
+
+
+@Post('info_qrcode')
+@UseGuards(JwtAuthGuard)
+async getUserInfoFromQrCode(@Body('token') token: string) {
+  return this.TransactionInterneService.getUserInfoFromQrCode(token);
+}
+
+
 
 }

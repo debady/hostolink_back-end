@@ -217,21 +217,8 @@ Contraintes de clÚs ÚtrangÞres :
     "fk_transaction_interne_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
 
 
-hostolink_bd=#
 
-
-
-
-
-
-
-
-
-
-
-
-
------------------------------------- 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
+------------- 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
     ALTER TABLE administrateurs
     ADD COLUMN nom VARCHAR(100),
     ADD COLUMN prenom VARCHAR(100),
@@ -244,3 +231,5 @@ hostolink_bd=#
     suppression de la foreign key dans raison de suppresion de compte par raison 
     ALTER TABLE raison_suppression_compte DROP CONSTRAINT fk_etab;
 
+------------ SAMEDI 26 AVRIL 2025 --------------
+SELECT setval('transaction_interne_id_transaction_seq', (SELECT MAX(id_transaction) FROM transaction_interne));

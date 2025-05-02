@@ -89,9 +89,11 @@ export class UserController {
       try {
         console.log(`📩 Génération OTP pour ${body.identifier} via ${body.moyen_envoyer}`);
         const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
+        const otp = await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
+
   
         await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
-        return { success: true, message: "OTP généré avec succès" };
+        return { success: true, message: "OTP généré avec succès", moyenEnvoyerFormatted,otp};
       } catch (error) {
         console.error("❌ Erreur generate-otp:", error);
         throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");
@@ -129,57 +131,84 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async getMe(@Req() req: AuthenticatedRequest) {
     const user = await this.userService.getUserById(req.user.id_user);
+    
     return {
       success: true,
       data: user,
     };
   }
   
-
-  // ✅ Mise à jour du profil utilisateur avec gestion de l'image de profil
-
   @Patch('/update-profile')
-    @UseGuards(JwtAuthGuard) 
-    @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async updateProfile(
+    @Req() req: AuthenticatedRequest, 
+    @Body() updateProfileDto: UpdateProfileDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const id_user = req.user.id_user; // 🔥 récupéré du token, pas du body
+    console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
+    console.log('🔵 id_user extrait du token:', id_user);
+  
+    return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
+  }
+  
 
-    async updateProfile(
-      @Req() req: AuthenticatedRequest, 
-      @Body() updateProfileDto: UpdateProfileDto, 
-      @UploadedFile() file?: Express.Multer.File
+// ✅ Récupérer tous les emails
+@Get('all-emails')
+@UseGuards(JwtAuthGuard)
+async getAllEmails(@Req() req: AuthenticatedRequest) {
+  return await this.userService.getAllEmails();
+}
 
-    ) {
-      const id_user = req.user.id_user; 
-      console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
-      return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
+// ✅ Récupérer tous les téléphones
+@Get('all-telephones')
+@UseGuards(JwtAuthGuard)
+async getAllTelephones(@Req() req: AuthenticatedRequest) {
+  return await this.userService.getAllTelephones();
+}
+
+// ✅ Vérifier si un email ou numéro existe
+@Post('check-identifier')
+@UseGuards(JwtAuthGuard)
+async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifier: string }) {
+  if (!body.identifier?.trim()) {
+    throw new BadRequestException("Identifiant requis.");
+  }
+
+  const user = await this.userService.findUserByIdentifier(body.identifier.trim());
+  if (user) {
+    return { success: true, message: "Identifiant trouvé", data: user };
+  } else {
+    return { success: false, message: "Identifiant non trouvé" };
   }
 
   // ✅ Création d'un utilisateur avec code d'invitation (si fourni)
-  @Post('check-user')
-  async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
-    return this.userService.registerUser(
-      body.identifier.trim(),
-      body.code_invitation_utilise?.trim() // ← C’EST ICI QUE ÇA PEUT ÊTRE VIDE
-    );
-  }
-  
-  @Post('verify-otp-bonus')
-async verifyOtpAndReward(@Body() body: { identifier: string; otpCode: string }) {
-  if (!body.identifier?.trim() || !body.otpCode?.trim()) {
-    throw new BadRequestException("Identifiant et code OTP requis");
-  }
+// @Post('check-user')
+//   async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
+//     return this.userService.registerUser(
+//       body.identifier.trim(),
+//       body.code_invitation_utilise?.trim() // ← C’EST ICI QUE ÇA PEUT ÊTRE VIDE
+//     );
+// }
 
-  try {
-    const result = await this.userService.verifyOtpAndRewardParrain(
-      body.identifier.trim(),
-      body.otpCode.trim()
-    );
-    return result;
-  } catch (error) {
-    console.error("❌ Erreur verify-otp-bonus:", error);
-    throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
-  }
+// @Post('verify-otp-bonus')
+//   async verifyOtpAndReward(@Body() body: { identifier: string; otpCode: string }) {
+//   if (!body.identifier?.trim() || !body.otpCode?.trim()) {
+//     throw new BadRequestException("Identifiant et code OTP requis");
+// }
+
+//   try {
+//     const result = await this.userService.verifyOtpAndRewardParrain(
+//       body.identifier.trim(),
+//       body.otpCode.trim()
+//     );
+//     return result;
+//   } catch (error) {
+//     console.error("❌ Erreur verify-otp-bonus:", error);
+//     throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
+//   }
+// }
+
 }
-
-
-
 }
