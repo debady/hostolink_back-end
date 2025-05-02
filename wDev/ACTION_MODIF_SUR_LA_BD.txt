@@ -213,13 +213,6 @@ hostolink_bd=#
 
 
 
-
-
-
-
-
-
-
 ------------------------------------ 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
     ALTER TABLE administrateurs
     ADD COLUMN nom VARCHAR(100),
@@ -289,3 +282,8 @@ CREATE TABLE public.messages_assistant_client_image (
 
 --------------- 25 avril --------------
 ALTER TABLE "conversations" ADD COLUMN "auto_created" boolean NOT NULL DEFAULT true;
+
+
+--------------- 29 avril --------------
+ALTER TABLE transaction_interne
+DROP CONSTRAINT transaction_interne_id_qrcode_dynamique_fkey;

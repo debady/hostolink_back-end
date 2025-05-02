@@ -15,10 +15,21 @@ export class QrDynamiqueService implements OnModuleInit {
   onModuleInit() {
     this.startQrGenerationLoop();
   }
-
+  /**
+     * Génère un identifiant court unique
+     * @returns Identifiant court de 16 caractères
+     */
+    public generateShortId(): string {
+      // Générer un ID court de 16 caractères hexadécimaux
+      return crypto.randomBytes(8).toString('hex');
+    }
+    
   private startQrGenerationLoop() {
+    
     setInterval(async () => {
       try {
+
+        
         // console.log('⏳ Génération automatique des QR dynamiques...');
 
         const etablissements = await this.dataSource.query(`
@@ -28,6 +39,9 @@ export class QrDynamiqueService implements OnModuleInit {
         for (const etab of etablissements) {
           const id = etab.id_user_etablissement_sante;
 
+          // // Générer un identifiant court
+          // const shortId = this.generateShortId();
+
           // Supprimer l’ancien QR dynamique
           await this.qrRepo.delete({ id_user_etablissement_sante: id });
 
@@ -35,6 +49,8 @@ export class QrDynamiqueService implements OnModuleInit {
           const token = this.generateToken();
           const expiration = new Date(Date.now() + 60 * 1000);
           const valeur = `HST_DYNAMIC_${id}_${token}`;
+          // Générer un identifiant court
+          const short_id = this.generateShortId();
 
           const qr = this.qrRepo.create({
             qr_code_valeur: valeur,
@@ -42,6 +58,7 @@ export class QrDynamiqueService implements OnModuleInit {
             date_creation: new Date(),
             statut: 'actif',
             token,
+            short_id,
             id_user_etablissement_sante: id,
           });
 

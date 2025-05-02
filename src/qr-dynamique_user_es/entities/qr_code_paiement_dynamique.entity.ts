@@ -5,6 +5,9 @@ export class QrCodePaiementDynamique {
   @PrimaryGeneratedColumn()
   id_qrcode: number;
 
+  @Column({ length: 16, nullable: true })
+  short_id: string;
+
   @Column({ type: 'text', nullable: true })
   qr_code_valeur: string;
 

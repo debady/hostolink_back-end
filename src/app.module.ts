@@ -99,8 +99,8 @@ export class AppModule {}
 console.log('📌 Connexion à PostgreSQL avec URL :', process.env.DB_HOST);
 
 
-// ----------en ligne -----------------
-// -
+// // ----------en ligne -----------------
+
 // import { Module } from '@nestjs/common';
 // import { TypeOrmModule } from '@nestjs/typeorm';
 // import { ConfigModule } from '@nestjs/config';

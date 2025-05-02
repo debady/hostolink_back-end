@@ -11,6 +11,7 @@ import { DeleteAccountDto } from './dto/delete-account.dto';
 import { RaisonSuppressionCompte } from './entities/raison-suppression.entity';
 import cloudinary from 'src/config/cloudinary';
 import toStream from 'buffer-to-stream';
+import * as crypto from 'crypto';
 
 
 
@@ -195,17 +196,57 @@ private async createOrEnsureQrStatique(idEtab: number) {
   );
 }
 
-// Génération d’un QR dynamique
-private async createOrEnsureQrDynamique(idEtab: number) {
-  const token = this.generateToken();
-  const expiration = new Date(Date.now() + 5 * 60 * 1000); // expire après 5 min
 
-  await this.dataSource.query(
-    `INSERT INTO qr_code_paiement_dynamique (qr_code_valeur, statut, token, id_user_etablissement_sante, date_expiration)
-     VALUES ($1, 'actif', $2, $3, $4)`,
-    [`HST_DYNAMIC_${idEtab}_${token}`, token, idEtab, expiration],
+
+ /**
+     * Génère un identifiant court unique
+     * @returns Identifiant court de 16 caractères
+     */
+    public generateShortId(): string {
+      // Générer un ID court de 16 caractères hexadécimaux
+      return crypto.randomBytes(8).toString('hex');
+    }
+    
+
+private async createOrEnsureQrDynamique(idEtab: number) {
+  
+  const token = this.generateToken();
+  const expiration = new Date(Date.now() + 5 * 60 * 1000);
+  
+
+  // 1️⃣ Vérifier s’il existe déjà un QR pour cet établissement
+  const [existing] = await this.dataSource.query(
+    `SELECT id_qrcode, short_id FROM qr_code_paiement_dynamique 
+     WHERE id_user_etablissement_sante = $1
+     ORDER BY date_creation DESC LIMIT 1`,
+    [idEtab],
   );
+
+  if (existing) {
+    // 2️⃣ ✅ Mettre à jour uniquement les champs dynamiques (pas short_id)
+    await this.dataSource.query(
+      `UPDATE qr_code_paiement_dynamique
+       SET token = $1, statut = 'actif', date_expiration = $2, date_creation = NOW()
+       WHERE id_qrcode = $3`,
+      [token, expiration, existing.id_qrcode],
+    );
+  } else {
+    // 3️⃣ 🚀 Générer un short_id unique UNE SEULE FOIS
+    const shortId = this.generateShortId();
+    const valeur = `HST_DYNAMIC_${idEtab}_${token}`;
+
+    await this.dataSource.query(
+      `INSERT INTO qr_code_paiement_dynamique 
+       (qr_code_valeur, short_id, statut, token, id_user_etablissement_sante, date_expiration, date_creation)
+       VALUES ($1, $2, 'actif', $3, $4, $5, NOW())`,
+      [valeur, shortId, token, idEtab, expiration],
+    );
+  }
 }
+
+
+
+
 
 // Génère un token aléatoire (peut être déplacé dans un utilitaire si besoin)
 private generateToken(): string {
