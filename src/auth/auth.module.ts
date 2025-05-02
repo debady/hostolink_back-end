@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -9,9 +9,11 @@ import { AuthController } from './auth.controller';
 import { JwtAdminStrategy } from './jwt-admin.strategy';
 import { AdministrateurModule } from 'src/administrateur/administrateur.module';
 import { UserEtablissementSanteModule } from 'src/user_etablissement_sante/user-etablissement-sante.module';
+import { JwtAgentStrategy } from './jwt-agent.strategy';
 
 @Module({
   imports: [
+    forwardRef(() => UserModule),
     AdministrateurModule,
     ConfigModule, 
     UserModule, 
@@ -27,7 +29,7 @@ import { UserEtablissementSanteModule } from 'src/user_etablissement_sante/user-
     }),
   ],
   controllers: [AuthController], 
-  providers: [AuthService, JwtStrategy,JwtAdminStrategy], 
+  providers: [AuthService, JwtStrategy,JwtAdminStrategy, JwtAgentStrategy], 
   exports: [AuthService, JwtStrategy, PassportModule, JwtModule], 
 })
 export class AuthModule {}

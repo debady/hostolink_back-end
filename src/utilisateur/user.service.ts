@@ -17,11 +17,10 @@ import { ImageService } from 'src/image/image.service';
 import { CompteService } from 'src/compte/compte.service';
 import { QrCodeService } from 'src/qr-code/qr-code.service';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { Invitation } from 'src/invitations/entities/invitation.entity';
 
 @Injectable()
 export class UserService {
+  AuthService: any;
 
   constructor(
     @InjectRepository(User)
@@ -41,10 +40,7 @@ export class UserService {
 
     @InjectRepository(Otp)
     private readonly otpRepository: Repository<Otp>,
-    
 
-    @InjectRepository(Invitation)
-    private readonly invitationRepository: Repository<Invitation>,
 
   ) {}
   
@@ -159,7 +155,6 @@ export class UserService {
     };
   }
 
-
   async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
     try {
       identifier = identifier.trim();
@@ -192,7 +187,7 @@ export class UserService {
       // ✅ Sauvegarder d'abord le nouvel OTP
       await this.otpRepository.save(otp);
   
-      // ✅ Supprimer tous les anciens OTP de ce user (sauf le nouveau qu’on vient d’insérer)
+      // ✅ Supprimer tous les anciens OTP de ce user (sauf celui-ci)
       await this.otpRepository.createQueryBuilder()
         .delete()
         .from(Otp)
@@ -202,16 +197,22 @@ export class UserService {
         })
         .execute();
   
-      // 📤 Envoi simulé
-      if (moyen_envoyer === MoyenEnvoiEnum.SMS) {
-        // await this.smsService.sendOtpSms(identifier, otpCode);
-        console.log(`📤 SMS vers ${identifier} avec OTP ${otpCode}`);
-      } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL) {
-        // await this.emailService.sendOtpEmail(identifier, otpCode);
-        console.log(`📤 EMAIL à ${identifier} avec OTP ${otpCode}`);
+      // ✅ Envoi de l'OTP uniquement si EMAIL
+      if (moyen_envoyer === MoyenEnvoiEnum.EMAIL) {
+        if (!user.email) {
+          throw new BadRequestException("Impossible d'envoyer l'OTP : aucun email renseigné.");
+        }
+  
+        await this.emailService.sendOtpEmail(user.email, otpCode);
+        console.log(`📤 EMAIL envoyé à ${user.email} avec OTP ${otpCode}`);
       }
   
-      console.log(`✅ OTP généré pour ${identifier} : ${otpCode}`);
+      // ✅ Affichage dans la console pour les tests si SMS
+      if (moyen_envoyer === MoyenEnvoiEnum.SMS) {
+        console.log(`📤 SMS simulé à ${user.telephone} avec OTP ${otpCode}`);
+      }
+  
+      // ✅ Retourne toujours le code OTP côté Flutter (utile en test/dev)
       return { success: true, otp: otpCode };
   
     } catch (error) {
@@ -222,6 +223,15 @@ export class UserService {
       throw new InternalServerErrorException("Erreur lors de la génération de l'OTP");
     }
   }
+
+  async generateJwtToken(user: User): Promise<string> {
+    return this.AuthService.sign({
+      id_user: user.id_user,
+      email: user.email,
+      telephone: user.telephone,
+    });
+  }
+  
   
     
   

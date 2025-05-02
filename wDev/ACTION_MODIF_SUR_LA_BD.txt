@@ -231,5 +231,91 @@ Contraintes de clÚs ÚtrangÞres :
     suppression de la foreign key dans raison de suppresion de compte par raison 
     ALTER TABLE raison_suppression_compte DROP CONSTRAINT fk_etab;
 
------------- SAMEDI 26 AVRIL 2025 --------------
-SELECT setval('transaction_interne_id_transaction_seq', (SELECT MAX(id_transaction) FROM transaction_interne));
+
+--------------- 24 avril --------------
+
+CREATE TABLE public.questions_predefinies (
+  question_id SERIAL PRIMARY KEY,
+  question_text TEXT NOT NULL,
+  assistant_id INTEGER NOT NULL,
+  category VARCHAR(255),
+  is_active BOOLEAN DEFAULT TRUE,
+  CONSTRAINT questions_predefinies_assistant_id_fkey
+    FOREIGN KEY (assistant_id) REFERENCES agent_assistance(id_agent_assistance)
+);
+
+CREATE TABLE public.conversations (
+  conversation_id SERIAL PRIMARY KEY,
+  user_id UUID,
+  id_etablissement_sante INTEGER,
+  assistant_id INTEGER NOT NULL,
+  start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(50) DEFAULT 'active',
+  CONSTRAINT conversations_user_id_fkey
+    FOREIGN KEY (user_id) REFERENCES utilisateur(id_user),
+  CONSTRAINT conversations_id_etablissement_sante_fkey
+    FOREIGN KEY (id_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante),
+  CONSTRAINT conversations_assistant_id_fkey
+    FOREIGN KEY (assistant_id) REFERENCES agent_assistance(id_agent_assistance)
+);
+
+CREATE TABLE public.messages_assistant_client(
+  message_id SERIAL PRIMARY KEY,
+  conversation_id INTEGER NOT NULL,  
+  envoyer_par VARCHAR(50) NOT NULL,
+  message_text TEXT,
+  sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  question_predefinie BOOLEAN DEFAULT FALSE,
+  question_sugerer INTEGER,
+  has_file BOOLEAN DEFAULT FALSE,
+  CONSTRAINT messages_assistant_client_conversation_id_fkey
+    FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id),
+  CONSTRAINT messages_assistant_client_question_sugerer_fkey
+    FOREIGN KEY (question_sugerer) REFERENCES questions_predefinies(question_id)
+);
+
+CREATE TABLE public.messages_assistant_client_image (
+  image_id SERIAL PRIMARY KEY,
+  message_id INTEGER NOT NULL,
+  image_url TEXT NOT NULL,
+  alt_text TEXT,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT messages_assistant_client_image_message_id_fkey
+    FOREIGN KEY (message_id) REFERENCES messages_assistant_client(message_id)
+);
+
+
+--------------- 25 avril --------------
+ALTER TABLE "conversations" ADD COLUMN "auto_created" boolean NOT NULL DEFAULT true;
+
+
+
+
+
+
+
+modif pour regler le probleme de suppression des token 
+
+
+hostolink_bd=# ALTER TABLE transaction_interne
+hostolink_bd-# ADD COLUMN qr_code_token VARCHAR(1000),
+hostolink_bd-# ADD COLUMN qr_code_valeur TEXT,
+hostolink_bd-# ADD COLUMN qr_code_short_id VARCHAR(16);
+ALTER TABLE
+hostolink_bd=# ALTER TABLE transaction_interne
+hostolink_bd-# DROP CONSTRAINT transaction_internes_id_qrcode_dynamique_fkey;
+ALTER TABLE
+hostolink_bd=# ALTER TABLE transaction_interne
+hostolink_bd-# DROP CONSTRAINT transaction_internes_id_qrcode_dynamique_fkey;
+ERREUR:  la contrainte « transaction_internes_id_qrcode_dynamique_fkey » de la relation « transaction_interne » n'existe pas
+hostolink_bd=#
+
+
+
+
+
+
+
+
+
+

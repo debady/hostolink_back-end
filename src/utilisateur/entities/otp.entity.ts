@@ -4,6 +4,7 @@ import { User } from '../../utilisateur/entities/user.entity';
 export enum MoyenEnvoiEnum {
   SMS = 'SMS',
   EMAIL = 'email',
+  TELEPHONE = "TELEPHONE",
 }
 
 @Entity('code_verif_otp')

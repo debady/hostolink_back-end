@@ -27,6 +27,9 @@ export class CloudinaryService {
   // ✅ Fonction pour uploader une image et récupérer son URL
   // ✅ Fonction pour uploader une image sur Cloudinary
   async uploadImage(file: Express.Multer.File): Promise<string> {
+    if (!file || !file.buffer) {
+      throw new Error('image non télécharger ou invalide');
+    }
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream({ folder: 'numéros_verts' }, (error, result) => {
         if (error) {

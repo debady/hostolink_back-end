@@ -3,6 +3,7 @@ import { Image } from '../../image/entities/image.entity';
 import { MessageThematique } from 'src/thematique_discussion/entities/message_thematique.entity';
 import { Otp } from './otp.entity';
 import { Invitation } from 'src/invitations/entities/invitation.entity';
+import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
 
 
 @Entity('utilisateur')  
@@ -68,12 +69,9 @@ export class User {
   @OneToMany(() => Invitation, invitation => invitation.user)
   invitations: Invitation[];
 
-  @Column({ type: 'uuid', nullable: true })
-  id_parrain?: string;
 
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'id_parrain' })
-  parrain?: User;
 
+  @OneToMany(() => Conversation, conversation => conversation.user)
+  conversations: Conversation[];
 
 }
