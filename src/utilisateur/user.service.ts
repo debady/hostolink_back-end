@@ -17,9 +17,11 @@ import { ImageService } from 'src/image/image.service';
 import { CompteService } from 'src/compte/compte.service';
 import { QrCodeService } from 'src/qr-code/qr-code.service';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class UserService {
+  AuthService: any;
 
   constructor(
     @InjectRepository(User)
@@ -39,6 +41,9 @@ export class UserService {
 
     @InjectRepository(Otp)
     private readonly otpRepository: Repository<Otp>,
+
+
+    private readonly emailService: EmailService, 
 
 
   ) {}
@@ -122,21 +127,20 @@ export class UserService {
     
     // Récupération des informations du compte de l'utilisateur
     const compte = await this.compteService.getUserCompte(id_user);
-    // const qrcodedynamique = await this.qrCodeService.getUserDynamicQrCodes(id_user);
-    // const qrcodedstatique = await this.qrCodeService.getUserStaticQrCode(id_user);
+    const qrcodedynamique = await this.qrCodeService.getUserDynamicQrCodes(id_user);
+    const qrcodedstatique = await this.qrCodeService.getUserStaticQrCode(id_user);
     const allqrcodes = await this.qrCodeService.getAllUserQrCodes(id_user);
 
     return { 
       ...user, 
-      photo_profile: profileImage ? profileImage.url_image : null,
-      compte,
       mdp: user.mdp,
-      // qrcodedynamique,
-      // qrcodedstatique,
+      photo_profile: profileImage ? profileImage.url_image : 'https://res.cloudinary.com/dhrrk7vsd/image/upload/v1745581355/hostolink/default_icone_pyiudn.png',
+      compte,
+      qrcodedynamique,
+      qrcodedstatique,
       allqrcodes,
     };
   }
-
 
   async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
     try {
@@ -170,7 +174,7 @@ export class UserService {
       // ✅ Sauvegarder d'abord le nouvel OTP
       await this.otpRepository.save(otp);
   
-      // ✅ Supprimer tous les anciens OTP de ce user (sauf le nouveau qu’on vient d’insérer)
+      // ✅ Supprimer tous les anciens OTP de ce user (sauf celui-ci)
       await this.otpRepository.createQueryBuilder()
         .delete()
         .from(Otp)
@@ -180,16 +184,22 @@ export class UserService {
         })
         .execute();
   
-      // 📤 Envoi simulé
-      if (moyen_envoyer === MoyenEnvoiEnum.SMS) {
-        // await this.smsService.sendOtpSms(identifier, otpCode);
-        console.log(`📤 SMS vers ${identifier} avec OTP ${otpCode}`);
-      } else if (moyen_envoyer === MoyenEnvoiEnum.EMAIL) {
-        // await this.emailService.sendOtpEmail(identifier, otpCode);
-        console.log(`📤 EMAIL à ${identifier} avec OTP ${otpCode}`);
+      // ✅ Envoi de l'OTP uniquement si EMAIL
+      if (moyen_envoyer === MoyenEnvoiEnum.EMAIL) {
+        if (!user.email) {
+          throw new BadRequestException("Impossible d'envoyer l'OTP : aucun email renseigné.");
+        }
+  
+        await this.emailService.sendOtpEmail(user.email, otpCode);
+        console.log(`📤 EMAIL envoyé à ${user.email} avec OTP ${otpCode}`);
       }
   
-      console.log(`✅ OTP généré pour ${identifier} : ${otpCode}`);
+      // ✅ Affichage dans la console pour les tests si SMS
+      if (moyen_envoyer === MoyenEnvoiEnum.SMS) {
+        console.log(`📤 SMS simulé à ${user.telephone} avec OTP ${otpCode}`);
+      }
+  
+      // ✅ Retourne toujours le code OTP côté Flutter (utile en test/dev)
       return { success: true, otp: otpCode };
   
     } catch (error) {
@@ -200,6 +210,15 @@ export class UserService {
       throw new InternalServerErrorException("Erreur lors de la génération de l'OTP");
     }
   }
+
+  async generateJwtToken(user: User): Promise<string> {
+    return this.AuthService.sign({
+      id_user: user.id_user,
+      email: user.email,
+      telephone: user.telephone,
+    });
+  }
+  
   
     
   
@@ -375,6 +394,31 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
     
     return user;
   }
+
+
+  // ✅ Récupérer tous les emails actifs et vérifiés
+async getAllEmails() {
+  const users = await this.userRepository.find({
+    select: ['email'],
+    where: { actif: true, compte_verifier: true },
+  });
+
+  return users
+    .filter(user => user.email)
+    .map(user => user.email);
+}
+
+// ✅ Récupérer tous les téléphones actifs et vérifiés
+async getAllTelephones() {
+  const users = await this.userRepository.find({
+    select: ['telephone'],
+    where: { actif: true, compte_verifier: true },
+  });
+
+  return users
+    .filter(user => user.telephone)
+    .map(user => user.telephone);
+}
 
   
 }

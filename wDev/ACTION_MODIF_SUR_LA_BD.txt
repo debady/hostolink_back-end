@@ -206,7 +206,6 @@ Contraintes de clÚs ÚtrangÞres :
     "fk_transaction_interne_user_etablissement_sante" FOREIGN KEY (id_user_etablissement_sante) REFERENCES user_etablissement_sante(id_user_etablissement_sante) ON DELETE CASCADE
 
 
-hostolink_bd=#
 
 
 
@@ -214,6 +213,7 @@ hostolink_bd=#
 
 
 ------------------------------------ 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
+------------- 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
     ALTER TABLE administrateurs
     ADD COLUMN nom VARCHAR(100),
     ADD COLUMN prenom VARCHAR(100),
@@ -256,7 +256,7 @@ CREATE TABLE public.conversations (
 
 CREATE TABLE public.messages_assistant_client(
   message_id SERIAL PRIMARY KEY,
-  conversation_id INTEGER NOT NULL,
+  conversation_id INTEGER NOT NULL,  
   envoyer_par VARCHAR(50) NOT NULL,
   message_text TEXT,
   sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -287,3 +287,33 @@ ALTER TABLE "conversations" ADD COLUMN "auto_created" boolean NOT NULL DEFAULT t
 --------------- 29 avril --------------
 ALTER TABLE transaction_interne
 DROP CONSTRAINT transaction_interne_id_qrcode_dynamique_fkey;
+
+
+
+
+
+modif pour regler le probleme de suppression des token 
+
+
+hostolink_bd=# ALTER TABLE transaction_interne
+hostolink_bd-# ADD COLUMN qr_code_token VARCHAR(1000),
+hostolink_bd-# ADD COLUMN qr_code_valeur TEXT,
+hostolink_bd-# ADD COLUMN qr_code_short_id VARCHAR(16);
+ALTER TABLE
+hostolink_bd=# ALTER TABLE transaction_interne
+hostolink_bd-# DROP CONSTRAINT transaction_internes_id_qrcode_dynamique_fkey;
+ALTER TABLE
+hostolink_bd=# ALTER TABLE transaction_interne
+hostolink_bd-# DROP CONSTRAINT transaction_internes_id_qrcode_dynamique_fkey;
+ERREUR:  la contrainte « transaction_internes_id_qrcode_dynamique_fkey » de la relation « transaction_interne » n'existe pas
+hostolink_bd=#
+
+
+
+
+
+
+
+
+
+
