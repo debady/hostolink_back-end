@@ -40,7 +40,8 @@ export class PaiementController {
       body.montant,
       idUser,
     );
-  }
+  } 
+
 
   @UseGuards(JwtAuthGuard)
   @Post('vers-etablissement/email-ou-tel')

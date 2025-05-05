@@ -36,6 +36,7 @@ import { MessageAssistantClientModule } from './Discussion_agent_client/message_
 import { ConversationsModule } from './Discussion_agent_client/conversations/conversations.module';
 import { MessagesAssistantClientImageModule } from './Discussion_agent_client/messages_assistant_client_image/messages_assistant_client_image.module';
 import { EmailModule } from './email/dreams-houses-email.module';
+import { DocumentsIdentiteModule } from './documents_identite/documents_identite.module';
 
 @Module({
   imports: [
@@ -86,6 +87,8 @@ import { EmailModule } from './email/dreams-houses-email.module';
 
     // dr-hses
     EmailModule,
+
+    DocumentsIdentiteModule,
   ],
 })
 export class AppModule {}
@@ -233,6 +236,9 @@ export class AppModule {}
 // import { ConversationsModule } from './Discussion_agent_client/conversations/conversations.module';
 // import { MessagesAssistantClientImageModule } from './Discussion_agent_client/messages_assistant_client_image/messages_assistant_client_image.module';
 // import { ScheduleModule } from '@nestjs/schedule';
+// import { DocumentsIdentiteModule } from './documents-identite/documents_identite.module';
+// import { DocumentsIdentiteService } from './documents_identite/documents_identite.service';
+// import { DocumentsIdentiteController } from './documents_identite/documents_identite.controller';
 
 // @Module({
 //   imports: [
