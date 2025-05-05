@@ -2,11 +2,7 @@
 import { Administrateur } from 'src/administrateur/entities/administrateur.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 
-export enum TypeEtablissementEnum {
-  HOPITAL = 'hopital',
-  CLINIQUE = 'clinique',
-  PHARMACIE = 'pharmacie',
-}
+
 
 @Entity('liste_numero_vert_etablissement_sante')
 export class ListeNumeroEtablissementSante {
@@ -39,8 +35,8 @@ export class ListeNumeroEtablissementSante {
   @Column({ type: 'double precision', nullable: false })
   longitude: number;
 
-  @Column({ type: 'enum', enum: TypeEtablissementEnum, nullable: false })
-  type_etablissement: TypeEtablissementEnum;
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  type_etablissement: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true }) // ✅ Nullable pour les établissements sans site web
   site_web?: string;

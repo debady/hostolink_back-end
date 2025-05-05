@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, IsNumber, IsInt, IsEnum } from 'class-validator';
-import { TypeEtablissementEnum } from '../entities/liste_numero_vert_etablissement_sante.entity';
+
 
 export class CreateListeNumeroVertEtablissementSanteDto {
   @IsInt()
@@ -37,10 +37,10 @@ export class CreateListeNumeroVertEtablissementSanteDto {
   @IsString()
   site_web?: string;
   
+  @IsString()
   @IsNotEmpty()
-  @IsEnum(TypeEtablissementEnum, { message: "Le type d'établissement doit être 'hopital', 'clinique' ou 'pharmacie'" })
-  type_etablissement: TypeEtablissementEnum;
-  
+  type_etablissement: string;
+
   @IsNotEmpty()
   @IsString()
   categorie: string;

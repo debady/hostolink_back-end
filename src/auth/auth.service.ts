@@ -8,6 +8,7 @@ import { MoyenEnvoiEnum } from 'src/utilisateur/entities/otp.entity';
 import { UserEtablissementSante } from 'src/user_etablissement_sante/entities/user-etablissement-sante.entity';
 import { InjectRepository } from '@nestjs/typeorm/dist/common/typeorm.decorators';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from 'src/utilisateur/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
 
     @InjectRepository(UserEtablissementSante)
     private userRepo: Repository<UserEtablissementSante>,
+   
   ) {}
 
   async generateJwtTokenFromUser(user: User): Promise<string> {
@@ -35,7 +37,7 @@ export class AuthService {
 
     async validateUser(identifier: string, password: string): Promise<{ user: User; access_token: string | null }> {
 
-    console.log(`🔐 Tentative de connexion avec l'identifiant : ${identifier}`);
+    //console.log(`🔐 Tentative de connexion avec l'identifiant : ${identifier}`);
 
     const user = await this.userService.findUserByIdentifier(identifier);
 
@@ -44,7 +46,8 @@ export class AuthService {
       throw new BadRequestException('Identifiant ou mot de passe incorrect');
     }
 
-    console.log(`✅ Utilisateur trouvé : ${user.id_user} (${user.email || user.telephone})`);
+    //console.log(`✅ Utilisateur trouvé : ${user.id_user} (${user.email || user.telephone})`);
+    
 
     // Vérification du mot de passe
     const isMatch = await bcrypt.compare(password, user.mdp);
@@ -103,6 +106,9 @@ export class AuthService {
       return this.jwtService.sign(payload);
     }
     
+    async register(identifier: string, code_invitation_utilise?: string) {
+      return this.userService.registerUser(identifier, code_invitation_utilise);
+    }
     
     
 

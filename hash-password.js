@@ -15,5 +15,5 @@ const saltRounds = 10;
 const hash = bcrypt.hashSync(motDePasse, saltRounds);
 
 // Afficher le résultat
-console.log("✅ Hash généré pour le mot de passe :", motDePasse);
-console.log("🔐 Hash :", hash);
+//console.log("✅ Hash généré pour le mot de passe :", motDePasse);
+//console.log("🔐 Hash :", hash);

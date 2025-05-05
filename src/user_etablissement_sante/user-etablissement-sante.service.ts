@@ -112,7 +112,7 @@ isTokenRevoked(token: string): boolean {
     });
 
     await this.otpRepo.save(otp);
-    console.log(otp)
+    //console.log(otp)
   }
 
   async verifyOtp(email: string, code: string) {
@@ -366,7 +366,7 @@ async getProfile(id: number) {
     });
     await this.raisonRepo.save(raison);
 
-    console.log('🔍 ID utilisateur à supprimer :', id);
+    //console.log('🔍 ID utilisateur à supprimer :', id);
 
     // Supprimer l’établissement
     await this.userRepo.delete(id);

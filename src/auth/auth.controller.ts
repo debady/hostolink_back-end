@@ -2,6 +2,7 @@ import { Controller, Post, Body, BadRequestException, InternalServerErrorExcepti
 import { AuthService } from './auth.service';
 import { UserService } from '../utilisateur/user.service';
 import { LoginEtablissementDto } from 'src/user_etablissement_sante/dto/login-etablissement.dto';
+import { CreateUserDto } from 'src/utilisateur/dto/create-user.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -13,7 +14,7 @@ export class AuthController {
   // ✅ Connexion et génération du token JWT
   @Post('login')
   async login(@Body() body: { identifier: string; password: string }) {
-    console.log(`🔐 Tentative de connexion pour l'identifiant : ${body.identifier}`);
+    //console.log(`🔐 Tentative de connexion pour l'identifiant : ${body.identifier}`);
 
     if (!body.identifier?.trim() || !body.password?.trim()) {
       console.warn(`❌ Identifiant ou mot de passe manquant : ${body.identifier}`);
@@ -63,5 +64,12 @@ export class AuthController {
       etablissement: user,
     };
   }
+//pour le nouveau utilisateur inscripte par liens d invitation
+@Post('register')
+async register(@Body() registerDto: CreateUserDto) {
+  const identifier = registerDto.email ?? registerDto.telephone;
+
+  return this.authService.register(identifier, registerDto.code_invitation_utilise);
+}
 
 }

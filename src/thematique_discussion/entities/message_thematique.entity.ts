@@ -9,6 +9,7 @@ import {
  
 import { User } from 'src/utilisateur/entities/user.entity';
 import { Thematique } from './thematique.entity';
+import { ExpertSante } from 'src/user_etablissement_sante/entities/expert_sante.entity';
 
   
   
@@ -36,5 +37,22 @@ import { Thematique } from './thematique.entity';
   
     @Column({ default: false })
     est_lu: boolean;
+
+    @Column({ nullable: true })
+    url_image?: string;
+
+    @Column({ type: 'int', default: 0 })
+    nbre_like: number;
+
+    @Column({ default: false })
+    status_reponse: boolean;
+
+
+   @ManyToOne(() => ExpertSante, { nullable: true, onDelete: 'SET NULL' })
+   @JoinColumn({ name: 'id_expert' })
+   expert?: ExpertSante; // ✅ Ce champ doit exister
+
+  
+
   }
   

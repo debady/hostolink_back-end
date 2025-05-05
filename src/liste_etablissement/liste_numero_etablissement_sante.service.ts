@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ListeNumeroEtablissementSante, TypeEtablissementEnum } from './entities/liste_numero_vert_etablissement_sante.entity';
 import { CreateListeNumeroVertEtablissementSanteDto } from './dto/create-liste-numero-vert-etablissement-sante.dto';
 import { ResponseListeNumeroVertEtablissementSanteDto } from './dto/response_liste_numero_vert_etablissement_sante.dto';
 import { CloudinaryService } from 'src/upload/cloudinary.service';
 import { Administrateur } from 'src/administrateur/entities/administrateur.entity';
 import { UpdateListeNumeroVertEtablissementSanteDto } from './dto/update-liste-numero-vert-etablissement-sante.dto';
+import { ListeNumeroEtablissementSante } from './entities/liste_numero_vert_etablissement_sante.entity';
 
 @Injectable()
 export class ListeNumeroEtablissementSanteService {
@@ -25,17 +25,13 @@ export class ListeNumeroEtablissementSanteService {
    * ✅ Créer un numéro vert
    */
   async create(dto: CreateListeNumeroVertEtablissementSanteDto, file?: Express.Multer.File) {
-    let imageUrl = '';
+    let imageUrl =dto.image ?? '';
 
 
     // ✅ Vérifie que `categorie` et `type_etablissement` sont bien renseignés
-    const categoriesValides = ['hopital', 'clinique', 'pharmacie'];
+    const categoriesValides = ['hopital', 'clinique', 'pharmacie','urgence'];
     if (!categoriesValides.includes(dto.categorie.toLowerCase())) {
       throw new BadRequestException(`La catégorie '${dto.categorie}' n'est pas valide.`);
-    }
-
-    if (!Object.values(TypeEtablissementEnum).includes(dto.type_etablissement as TypeEtablissementEnum)) {
-      throw new BadRequestException(`Le type d'établissement doit être 'hopital', 'clinique' ou 'pharmacie'.`);
     }
 
     // ✅ Vérifier si une image est envoyée, et l'uploader sur Cloudinary
@@ -55,9 +51,10 @@ export class ListeNumeroEtablissementSanteService {
     // ✅ Créer l'entité avec l'URL Cloudinary
     const newNumero = this.listeNumeroRepo.create({
       ...dto,
-      image: imageUrl,  // Stocker l'URL Cloudinary dans la base de données
-      type_etablissement: dto.type_etablissement.toLowerCase() as TypeEtablissementEnum,
-      administrateur: admin, // Associer à l'administrateur
+      image: imageUrl,
+      type_etablissement: dto.type_etablissement.toLowerCase(),
+      categorie: dto.categorie.toLowerCase(),
+      administrateur: admin,
     });
 
     return await this.listeNumeroRepo.save(newNumero);
@@ -134,7 +131,8 @@ export class ListeNumeroEtablissementSanteService {
     await this.listeNumeroRepo.update(id, {
       ...dto,
       image: imageUrl,
-      type_etablissement: dto.type_etablissement as TypeEtablissementEnum, 
+      type_etablissement: dto.type_etablissement?.toLowerCase() ?? '',
+      categorie: dto.categorie?.toLowerCase() ?? '',
     });
 
     return { message: 'Établissement mis à jour avec succès', id };

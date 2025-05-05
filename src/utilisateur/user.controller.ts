@@ -28,7 +28,7 @@ export class UserController {
   @Post('register-user')
   async registerUser(@Body() checkUserDto: CheckUserDto) {
     try {
-      const result = await this.userService.registerUser(checkUserDto.identifier.trim());
+      const result = await this.userService.registerUser(checkUserDto.identifier.trim(),checkUserDto.code_invitation_utilise?.trim());
       return { success: result.success, id_user: result.id_user, message: result.message };
     } catch (error) {
       console.error('❌ Erreur register-user:', error);
@@ -106,7 +106,7 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
       const identifier = body.identifier.trim();
       const otpCode = body.otpCode.trim();
   
-      console.log(`📩 Vérification OTP pour ${identifier}`);
+      //console.log(`📩 Vérification OTP pour ${identifier}`);
   
       const result = await this.userService.verifyOtp(identifier, otpCode);
   
@@ -139,7 +139,7 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
     
       try {
         const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
-        console.log(`📩 Génération OTP pour ${body.identifier} via ${moyenEnvoyerFormatted}`);
+        //console.log(`📩 Génération OTP pour ${body.identifier} via ${moyenEnvoyerFormatted}`);
     
         const { otp } = await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
     
@@ -189,8 +189,8 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const id_user = req.user.id_user; // 🔥 récupéré du token, pas du body
-    console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
-    console.log('🔵 id_user extrait du token:', id_user);
+    //console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
+    //console.log('🔵 id_user extrait du token:', id_user);
   
     return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
   }
@@ -224,8 +224,34 @@ async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifi
   } else {
     return { success: false, message: "Identifiant non trouvé" };
   }
+
+  // ✅ Création d'un utilisateur avec code d'invitation (si fourni)
+// @Post('check-user')
+//   async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
+//     return this.userService.registerUser(
+//       body.identifier.trim(),
+//       body.code_invitation_utilise?.trim() // ← C’EST ICI QUE ÇA PEUT ÊTRE VIDE
+//     );
+// }
+
+// @Post('verify-otp-bonus')
+//   async verifyOtpAndReward(@Body() body: { identifier: string; otpCode: string }) {
+//   if (!body.identifier?.trim() || !body.otpCode?.trim()) {
+//     throw new BadRequestException("Identifiant et code OTP requis");
+// }
+
+//   try {
+//     const result = await this.userService.verifyOtpAndRewardParrain(
+//       body.identifier.trim(),
+//       body.otpCode.trim()
+//     );
+//     return result;
+//   } catch (error) {
+//     console.error("❌ Erreur verify-otp-bonus:", error);
+//     throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
+//   }
+// }
+
+
 }
-
-
-
 }

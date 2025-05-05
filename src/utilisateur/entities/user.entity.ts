@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
 import { Image } from '../../image/entities/image.entity';
 import { MessageThematique } from 'src/thematique_discussion/entities/message_thematique.entity';
 import { Otp } from './otp.entity';
@@ -63,7 +63,7 @@ export class User {
   fcm_token: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  code_invitation_utilise: string;
+  code_invitation_utilise: string | null;
 
 
   @OneToMany(() => Invitation, invitation => invitation.user)

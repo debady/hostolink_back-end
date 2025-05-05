@@ -23,12 +23,12 @@ async function requestNotificationPermission() {
     if (permission === 'granted') {
       // Obtenir le jeton
       const token = await messaging().getToken({ vapidKey: "YOUR_VAPID_KEY" }); //YOUR VAPID KEY IS VERY IMPORTANT
-      console.log('Jeton FCM :', token);
+      //console.log('Jeton FCM :', token);
       // Envoyer le jeton à votre serveur pour le stockage et une utilisation ultérieure.
       // ... envoyer à votre backend (en utilisant fetch ou similaire) ...
 
     } else {
-      console.log('Autorisation de notification refusée');
+      //console.log('Autorisation de notification refusée');
     }
   } catch (error) {
     console.error('Erreur lors de la demande d\'autorisation de notification :', error);

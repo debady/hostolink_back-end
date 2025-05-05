@@ -19,7 +19,7 @@ export class QrDynamiqueService implements OnModuleInit {
   private startQrGenerationLoop() {
     setInterval(async () => {
       try {
-        // console.log('⏳ Génération automatique des QR dynamiques...');
+        // //console.log('⏳ Génération automatique des QR dynamiques...');
 
         const etablissements = await this.dataSource.query(`
           SELECT id_user_etablissement_sante FROM user_etablissement_sante
@@ -46,7 +46,7 @@ export class QrDynamiqueService implements OnModuleInit {
           });
 
           await this.qrRepo.save(qr);
-          // console.log(`✅ QR dynamique généré pour établissement ID ${id} : ${valeur}`);
+          // //console.log(`✅ QR dynamique généré pour établissement ID ${id} : ${valeur}`);
         }
       } catch (err) {
         console.error('❌ Erreur QR dynamique :', err.message);
@@ -66,7 +66,7 @@ export class QrDynamiqueService implements OnModuleInit {
     });
 
     if (actif) {
-      console.log('✅ QR dynamique actif trouvé');
+      //console.log('✅ QR dynamique actif trouvé');
       return actif;
     }
 
@@ -86,7 +86,7 @@ export class QrDynamiqueService implements OnModuleInit {
     });
 
     const saved = await this.qrRepo.save(qr);
-    // console.log('🔄 Nouveau QR dynamique généré pour ID:', idEtablissement);
+    // //console.log('🔄 Nouveau QR dynamique généré pour ID:', idEtablissement);
     return saved;
   }
 
@@ -104,7 +104,7 @@ export class QrDynamiqueService implements OnModuleInit {
     qr.statut = 'expiré';
     await this.qrRepo.save(qr);
 
-    console.log('✅ QR utilisé et invalidé :', token);
+    //console.log('✅ QR utilisé et invalidé :', token);
     return {
       message: 'QR Code validé avec succès',
       etablissement_id: qr.id_user_etablissement_sante,

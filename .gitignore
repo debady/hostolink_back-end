@@ -61,4 +61,3 @@ wDev/connect_supabase.bat
 wDev/Exporte_bd_supaabse_15.04.2025.bat
 
 .env
-.env.production

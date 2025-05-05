@@ -5,11 +5,13 @@ import { AnnonceController } from './annonce.controller';
 import { Annonce } from './entities/annonce.entity';
 import { Administrateur } from 'src/administrateur/entities/administrateur.entity';
 import { AdministrateurModule } from 'src/administrateur/administrateur.module';
+import { UploadModule } from './image/upload.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Annonce, Administrateur]), // Ajouter Administrateur ici
-    AdministrateurModule
+    AdministrateurModule,
+    UploadModule,
   ],
   controllers: [AnnonceController],
   providers: [AnnonceService],
