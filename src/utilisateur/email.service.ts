@@ -47,7 +47,7 @@ export class EmailService {
               <hr style="margin:40px 0;" />
 
               <div style="text-align:center;">
-                <img src="https://res.cloudinary.com/dhrrk7vsd/image/upload/v1740670387/hostolink/iqub8qpjfockmrboozmz.png" alt="Logo Explora Studio" style="height:40px;margin-bottom:10px;" />
+                <img src="https://res.cloudinary.com/dhrrk7vsd/image/upload/v1745780034/i4ilg4vprelrecqpfb1x_x3lnf7.jpg" alt="Logo Explora Studio" style="height:40px;margin-bottom:10px;" />
                 <p style="font-size:14px;color:#999;margin:0;">
                   Hostolink – propulsé par Explora Studio
                 </p>
