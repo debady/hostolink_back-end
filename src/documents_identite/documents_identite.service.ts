@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { DocumentsIdentiteEntity } from './documents_identite.entity';
+import { DocumentsIdentiteEntity } from './entities/documents_identite.entity';
 import { CloudinaryService } from '../../config/cloudinary.config';
 import { CreateDocumentsIdentiteDto } from './dto/create-documents-identite.dto';
 

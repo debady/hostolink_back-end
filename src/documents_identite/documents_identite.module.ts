@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DocumentsIdentiteEntity } from './documents_identite.entity';
+import { DocumentsIdentiteEntity } from './entities/documents_identite.entity';
 import { DocumentsIdentiteService } from './documents_identite.service';
 import { DocumentsIdentiteController } from './documents_identite.controller';
 import { CloudinaryService } from '../../config/cloudinary.config';
