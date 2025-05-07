@@ -40,7 +40,7 @@ export class JwtEtablissementStrategy extends PassportStrategy(Strategy, 'jwt-et
     const user = await this.userRepo.findOne({ where: { id_user_etablissement_sante: payload.id } });
     if (!user) return null;
   
-    console.log(`✅ [ETAB] Authentifié : ${user.nom} (${user.id_user_etablissement_sante})`);
+    //console.log(`✅ [ETAB] Authentifié : ${user.nom} (${user.id_user_etablissement_sante})`);
     return user;
   }
   

@@ -370,9 +370,9 @@ return {
       ]);
     });
 
-    console.log("⛏ cumul AVANT :", admin.cumule_des_transactions);
-    console.log("💰 montant :", montant);
-    console.log("🧮 cumul APRÈS :", nouveauCumul);
+    //console.log("⛏ cumul AVANT :", admin.cumule_des_transactions);
+    //console.log("💰 montant :", montant);
+    //console.log("🧮 cumul APRÈS :", nouveauCumul);
 
   
     return {
@@ -453,9 +453,9 @@ return {
       ]);
     });
 
-    console.log("⛏ cumul AVANT :", admin.cumule_des_transactions);
-    console.log("💰 montant :", montant);
-    console.log("🧮 cumul APRÈS :", nouveauCumul);
+    //console.log("⛏ cumul AVANT :", admin.cumule_des_transactions);
+    //console.log("💰 montant :", montant);
+    //console.log("🧮 cumul APRÈS :", nouveauCumul);
 
       
     return {

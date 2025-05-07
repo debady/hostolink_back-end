@@ -219,7 +219,34 @@ import {
         `SELECT solde_compte FROM compte WHERE id_compte = $1`,
         [compteUtilisateur.id_compte],
       );
+
+      const beneficiaire = {
+        nom: etab.nom,
+        telephone: etab.telephone,
+        categorie: etab.categorie,
+        email: etab.email,
+      };
+      
+
+      const [photo] = await this.dataSource.query(
+        `SELECT url_image FROM images 
+         WHERE id_user_etablissement_sante = $1 AND motif = 'photo_profile' 
+         ORDER BY date DESC LIMIT 1`,
+        [etab.id_user_etablissement_sante],
+      );
+      
+
+      
     
+      // return {
+      //   message: '✅ Paiement effectué avec succès',
+      //   identifiant_etablissement: identifiant,
+      //   montant_envoyé: montant,
+      //   montant_recu: montantFinal,
+      //   frais_appliqués: frais,
+      //   solde_restant: soldeActuel?.solde_compte || null,
+      // };
+
       return {
         message: '✅ Paiement effectué avec succès',
         identifiant_etablissement: identifiant,
@@ -227,7 +254,11 @@ import {
         montant_recu: montantFinal,
         frais_appliqués: frais,
         solde_restant: soldeActuel?.solde_compte || null,
+        beneficiaire,
+        photo: photo?.url_image ?? null, // ✅ Valeur sûre
+
       };
+      
     }
     
   }

@@ -344,6 +344,10 @@ hostolink_bd=#
 
 
 
+---------------NGUESSAN |  05 Mai 2025 ------------ 
+- Ajour du champs de vérification de modif des données de l'utilisateur afin de l'empêcher de modifier ses données hors mis sn mot_de_passe
+alter table utilisateur add column is_modif_infos boolean default false;
+
 
 
 

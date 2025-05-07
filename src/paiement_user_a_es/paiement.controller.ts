@@ -5,6 +5,7 @@ import {
     UseGuards,
     Req,
     BadRequestException,
+    Get,
   } from '@nestjs/common';
   import { PaiementService } from './paiement.service';
   import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -39,6 +40,16 @@ import {
       req.user.id_user,
     );
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('test-token')
+  getTokenTest(@Req() req) {
+    return {
+      message: "Token valide",
+      utilisateur: req.user,
+    };
+  }
+
 
 }
   

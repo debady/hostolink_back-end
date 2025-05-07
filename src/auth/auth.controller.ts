@@ -14,7 +14,7 @@ export class AuthController {
   // ✅ Connexion et génération du token JWT
   @Post('login')
   async login(@Body() body: { identifier: string; password: string }) {
-    console.log(`🔐 Tentative de connexion pour l'identifiant : ${body.identifier}`);
+    //console.log(`🔐 Tentative de connexion pour l'identifiant : ${body.identifier}`);
 
     if (!body.identifier?.trim() || !body.password?.trim()) {
       console.warn(`❌ Identifiant ou mot de passe manquant : ${body.identifier}`);

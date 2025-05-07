@@ -22,7 +22,7 @@ export class CompteService {
     
     if (existingCompte) {
       // Un compte existe déjà, donc on le retourne simplement
-      console.log(`Un compte existe déjà pour l'utilisateur ${id_user}`);
+      //console.log(`Un compte existe déjà pour l'utilisateur ${id_user}`);
       return existingCompte;
     }
     
@@ -104,7 +104,7 @@ export class CompteService {
     
     if (existingCompte) {
       // Un compte existe déjà, donc on le retourne simplement
-      console.log(`Un compte existe déjà pour l'établissement ${id_user_etablissement_sante}`);
+      //console.log(`Un compte existe déjà pour l'établissement ${id_user_etablissement_sante}`);
       return existingCompte;
     }
     

@@ -37,7 +37,7 @@ export class AuthService {
 
     async validateUser(identifier: string, password: string): Promise<{ user: User; access_token: string | null }> {
 
-    console.log(`🔐 Tentative de connexion avec l'identifiant : ${identifier}`);
+    //console.log(`🔐 Tentative de connexion avec l'identifiant : ${identifier}`);
 
     const user = await this.userService.findUserByIdentifier(identifier);
 
@@ -46,7 +46,7 @@ export class AuthService {
       throw new BadRequestException('Identifiant ou mot de passe incorrect');
     }
 
-    console.log(`✅ Utilisateur trouvé : ${user.id_user} (${user.email || user.telephone})`);
+    //console.log(`✅ Utilisateur trouvé : ${user.id_user} (${user.email || user.telephone})`);
     
 
     // Vérification du mot de passe

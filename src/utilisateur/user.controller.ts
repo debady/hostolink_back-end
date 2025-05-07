@@ -106,7 +106,7 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
       const identifier = body.identifier.trim();
       const otpCode = body.otpCode.trim();
   
-      console.log(`📩 Vérification OTP pour ${identifier}`);
+      //console.log(`📩 Vérification OTP pour ${identifier}`);
   
       const result = await this.userService.verifyOtp(identifier, otpCode);
   
@@ -139,7 +139,7 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
     
       try {
         const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
-        console.log(`📩 Génération OTP pour ${body.identifier} via ${moyenEnvoyerFormatted}`);
+        //console.log(`📩 Génération OTP pour ${body.identifier} via ${moyenEnvoyerFormatted}`);
     
         const { otp } = await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
     
@@ -189,8 +189,8 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const id_user = req.user.id_user; // 🔥 récupéré du token, pas du body
-    console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
-    console.log('🔵 id_user extrait du token:', id_user);
+    //console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
+    //console.log('🔵 id_user extrait du token:', id_user);
   
     return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
   }
