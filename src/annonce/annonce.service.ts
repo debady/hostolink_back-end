@@ -34,6 +34,7 @@ export class AnnonceService {
     });
 
     return await this.annonceRepository.save(annonce);
+    
   }
 
   async getAllAnnonces(): Promise<Annonce[]> {

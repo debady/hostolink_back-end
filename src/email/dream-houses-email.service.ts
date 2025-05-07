@@ -27,7 +27,7 @@ export class EmailService {
 
   async uploadImageFromBuffer(buffer: Buffer): Promise<string> {
     try {
-      console.log('📦 Buffer reçu pour upload (taille) :', buffer?.length);
+      //console.log('📦 Buffer reçu pour upload (taille) :', buffer?.length);
   
       const result = await new Promise<any>((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -40,7 +40,7 @@ export class EmailService {
               console.error('❌ Erreur Cloudinary :', error);
               reject(error);
             } else {
-              console.log('✅ Upload réussi. URL =', result?.secure_url);
+              //console.log('✅ Upload réussi. URL =', result?.secure_url);
               resolve(result);
             }
           }

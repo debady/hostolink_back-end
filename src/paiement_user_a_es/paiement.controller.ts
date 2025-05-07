@@ -55,4 +55,14 @@ export class PaiementController {
       req.user.id_user,
     );
   }
+  @UseGuards(JwtAuthGuard)
+  @Get('test-token')
+  getTokenTest(@Req() req) {
+    return {
+      message: "Token valide",
+      utilisateur: req.user,
+    };
+  }
+
+
 }

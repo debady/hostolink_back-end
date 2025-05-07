@@ -86,6 +86,17 @@ ALTER TABLE transaction_interne RENAME COLUMN "montant_reçu" TO montant_recu;
         date_click TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT fk_tracking_invitation FOREIGN KEY (code_invitation) REFERENCES invitation(code_invitation) ON DELETE CASCADE
     );
+ //j ai ajouter cet champ a la table utilisateur
+ ALTER TABLE utilisateur ADD COLUMN id_parrain uuid;
+
+ // j ai ajoute ceux ci a la table message_themamtique
+
+ ALTER TABLE messages_thematique
+ ADD COLUMN id_expert INTEGER REFERENCES expert_sante(id_expert) ON DELETE SET NULL;
+
+
+
+
 
 *-------------- NGUESSAN---- 
 
@@ -310,19 +321,10 @@ hostolink_bd=#
 
 
 
---------------- 05 Mai --------------
+---------------NGUESSAN |  05 Mai 2025 ------------ 
+- Ajour du champs de vérification de modif des données de l'utilisateur afin de l'empêcher de modifier ses données hors mis sn mot_de_passe
+alter table utilisateur add column is_modif_infos boolean default false;
 
-CREATE TABLE documents_identite (
-  id_document SERIAL PRIMARY KEY,
-  id_user UUID NOT NULL,
-  type_document VARCHAR(50) NOT NULL,       
-  url_recto TEXT NOT NULL,                  
-  url_verso TEXT,   
-  url_photo_profile TEXT NOT NULL,                        
-  statut_validation VARCHAR(20) DEFAULT 'en_attente',
-  date_envoi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_user FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
-);
 
 
 

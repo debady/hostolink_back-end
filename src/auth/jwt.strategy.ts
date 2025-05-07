@@ -26,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: { id_user: string }) {
-    console.log('🔐 Validation du payload JWT :', payload);
+    //console.log('🔐 Validation du payload JWT :', payload);
 
     const user = await this.userService.getUserById(payload.id_user);
     if (!user) {
@@ -34,7 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       return null; 
     }
 
-    console.log(`✅ JWT validé pour l'utilisateur : ${user.id_user}`);
+    //console.log(`✅ JWT validé pour l'utilisateur : ${user.id_user}`);
 
     return user; 
   }

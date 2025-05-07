@@ -26,7 +26,7 @@ export class FirebaseService implements OnModuleInit {
         const serviceAccount = JSON.parse(fs.readFileSync(absoluteServiceAccountPath, 'utf8'));
         
 
-      console.log('✅ Firebase Admin SDK initialisé avec succès !');
+      //console.log('✅ Firebase Admin SDK initialisé avec succès !');
     }
   }
 }

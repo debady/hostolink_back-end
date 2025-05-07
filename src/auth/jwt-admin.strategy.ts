@@ -27,7 +27,7 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
       throw new UnauthorizedException('Accès refusé');
     }
 
-    console.log('Payload JWT:', payload); 
+    //console.log('Payload JWT:', payload); 
     return admin;
   }
 }

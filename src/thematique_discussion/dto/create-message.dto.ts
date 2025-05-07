@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUUID, IsInt, IsIn } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, IsInt, IsIn, IsOptional } from 'class-validator';
 
 export class CreateMessageDto {
   @IsInt()
@@ -16,4 +16,8 @@ export class CreateMessageDto {
   @IsString()
   @IsIn(['texte', 'image']) // Type de message autorisé
   type_message: string;
+
+  @IsString()
+  @IsOptional() // ✅ Ajoute ça
+  url_image?: string;
 }

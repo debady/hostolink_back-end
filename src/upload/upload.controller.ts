@@ -9,7 +9,7 @@ export class UploadController {
   @Post('upload-image')
   @UseInterceptors(FileInterceptor('file'))
   async uploadLogo(@UploadedFile() file: Express.Multer.File) {
-    console.log('Requête reçue pour upload', file);
+    //console.log('Requête reçue pour upload', file);
     
     if (!file) {
       throw new Error('Aucun fichier reçu. Vérifiez votre requête.');

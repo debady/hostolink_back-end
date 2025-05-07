@@ -13,7 +13,7 @@ export class QrCodeController {
   @Post('dynamic')
   @UseGuards(JwtAuthGuard)
   async generateDynamicQrCode(@Req() req, @Body() body: { expiresIn?: number }) {
-    // console.log('Request received for dynamic QR code');
+    // //console.log('Request received for dynamic QR code');
     const id_user = req.user.id_user;
     const expiresIn = body.expiresIn || 60; // Par défaut 60 secondes
     
