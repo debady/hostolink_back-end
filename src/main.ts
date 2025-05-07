@@ -1,9 +1,10 @@
-import { NestFactory } from "@nestjs/core";
-import { NestExpressApplication } from "@nestjs/platform-express";
-import { AppModule } from "./app.module";
-import { ValidationPipe } from "@nestjs/common/pipes";
-import { json, urlencoded } from "express";
-import { join } from "path";
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { json, urlencoded } from 'express';
+import { join } from 'path';
+import * as dotenv from 'dotenv';
 
 // ✅ Charge les variables d'environnement
 dotenv.config();
