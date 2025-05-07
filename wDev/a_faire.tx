@@ -34,3 +34,6 @@
              - endpoint qui permet a l'etablissement de santé de payer un utilisateur 
              - endpoint qui permet a l'etablissement de santé de payer un e.s 
              - quand un e.s demande un otp le temps de d'aatendre avant de redemander n'est pas renouveler ou trop long que 1 min 
+
+
+             dans historique de transaction il faudrais songer a repectorier les données du beneficiaire ou expediteur
