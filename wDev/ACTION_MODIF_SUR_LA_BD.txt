@@ -94,6 +94,38 @@ ALTER TABLE transaction_interne RENAME COLUMN "montant_reçu" TO montant_recu;
  ALTER TABLE messages_thematique
  ADD COLUMN id_expert INTEGER REFERENCES expert_sante(id_expert) ON DELETE SET NULL;
 
+ *******COMMENT EXPORTE UNE TABLE POSTGRES******
+ pg_dump -U postgres -d hostolink_bds_reviser_toutes -t liste_numero_vert_etablissement_sante -f "C:\Users\SOHAPI\Desktop\projet_paiement\hostolink_back-end\liste_numero_vert.sql"
+
+************MODULE APPEL VIDEO*************
+
+CREATE TABLE appel_video (
+    id_appel UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id_user UUID NOT NULL,
+    id_expert INTEGER NOT NULL,
+    canal_agora TEXT NOT NULL,
+    token_agora TEXT NOT NULL,
+    status_appel VARCHAR(20) DEFAULT 'en_attente',
+    date_debut TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_fin TIMESTAMP,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    compte_rendu TEXT,
+
+    CONSTRAINT fk_appel_user FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE,
+    CONSTRAINT fk_appel_expert FOREIGN KEY (id_expert) REFERENCES expert_sante(id_expert) ON DELETE CASCADE
+);
+CREATE TABLE disponibilite_expert (
+    id_expert INTEGER PRIMARY KEY,
+    est_connecte BOOLEAN DEFAULT false,
+    derniere_connexion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    zone_couverte VARCHAR(100),
+
+    CONSTRAINT fk_dispo_expert FOREIGN KEY (id_expert) REFERENCES expert_sante(id_expert) ON DELETE CASCADE
+);
+
+
+
 
 
 
