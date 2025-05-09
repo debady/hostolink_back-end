@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { UserEtablissementSante } from './user-etablissement-sante.entity';
+import { DisponibiliteExpert } from 'src/appel_video/entities/disponibilite_expert.entity';
 
 @Entity()
 export class ExpertSante {
@@ -27,4 +28,8 @@ export class ExpertSante {
 
   @Column({ nullable: true })
   url_profile: string;
+
+  @OneToMany(() => DisponibiliteExpert, dispo => dispo.expert)
+  disponibilites: DisponibiliteExpert[];
+
 }

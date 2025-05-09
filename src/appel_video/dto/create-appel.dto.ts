@@ -16,4 +16,3 @@ export class CreateAppelDto {
   @IsString()
   urgence_type?: string;
 }
-

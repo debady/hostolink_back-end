@@ -34,6 +34,7 @@ import { QuestionsPredefiniesModule } from './Discussion_agent_client/questions_
 import { MessageAssistantClientModule } from './Discussion_agent_client/message_assistant_client/message_assistant_client.module';
 import { ConversationsModule } from './Discussion_agent_client/conversations/conversations.module';
 import { MessagesAssistantClientImageModule } from './Discussion_agent_client/messages_assistant_client_image/messages_assistant_client_image.module';
+import { AppelVideoModule } from './appel_video/appel_video_module';
 
 @Module({
   imports: [
@@ -50,7 +51,7 @@ import { MessagesAssistantClientImageModule } from './Discussion_agent_client/me
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'postgres',
-      database: process.env.DATABASE_NAME || 'hostolink_bd',
+      database: process.env.DATABASE_NAME || 'hostolink_bds_reviser_toutes',
       synchronize: false, // ❗️mettre true UNIQUEMENT en dev
       logging: false,
       autoLoadEntities: true,
@@ -81,6 +82,7 @@ import { MessagesAssistantClientImageModule } from './Discussion_agent_client/me
     MessageAssistantClientModule,
     ConversationsModule,
     MessagesAssistantClientImageModule,
+    AppelVideoModule,
   ],
 })
 export class AppModule {}

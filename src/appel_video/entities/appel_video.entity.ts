@@ -43,6 +43,7 @@ import {
     longitude: number;
   
     @Column({ type: 'text', nullable: true })
-    compte_rendu: string;
+    compte_rendu: string | null;
+
   }
   
