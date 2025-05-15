@@ -38,7 +38,7 @@ import { MessagesAssistantClientImageModule } from './Discussion_agent_client/me
 @Module({
   imports: [
     // ✅ Fichiers .env accessibles partout
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env', }),
 
     // ✅ CRON et tâches planifiées
     ScheduleModule.forRoot(),
@@ -49,7 +49,7 @@ import { MessagesAssistantClientImageModule } from './Discussion_agent_client/me
       host: process.env.DATABASE_HOST || 'localhost',
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'postgres',
+      password: process.env.DATABASE_PASSWORD || 'mdp_dev_sohapigroup',
       database: process.env.DATABASE_NAME || 'hostolink_bd',
       synchronize: false, // ❗️mettre true UNIQUEMENT en dev
       logging: false,
