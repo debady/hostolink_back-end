@@ -65,19 +65,61 @@ export class EtablissementSanteService {
   }
 
   // calcul dans la distance en fonctione de la postion
-  async findNearby(lat: number, lng: number, distance: number): Promise<EtablissementSante[]> {
-    return this.etablissementSanteRepo.findNearby(lat, lng, distance); // ✅ Utilisation du repository
-  }
+ async findNearby(lat: number, lng: number, distanceKm: number): Promise<EtablissementSante[]> {
+  const distanceMeters = distanceKm * 1000;
+
+  return this.etablissementSanteRepository
+    .createQueryBuilder('etablissement')
+    .where(`
+      ST_DWithin(
+        etablissement.geom::geography,
+        ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+        :distance
+      )
+    `, {
+      lat,
+      lng,
+      distance: distanceMeters
+    })
+    .getMany();
+}
+
 
   // search par category
+  // async findNearbyByCategory(
+  //   lat: number,
+  //   lng: number,
+  //   distance: number,
+  //   categorie: string,
+  // ): Promise<EtablissementSante[]> {
+  //   return this.etablissementSanteRepo.findNearbyByCategory(lat, lng, distance, categorie);
+  // }
   async findNearbyByCategory(
-    lat: number,
-    lng: number,
-    distance: number,
-    categorie: string,
-  ): Promise<EtablissementSante[]> {
-    return this.etablissementSanteRepo.findNearbyByCategory(lat, lng, distance, categorie);
-  }
+  lat: number,
+  lng: number,
+  distanceKm: number,
+  categorie: string,
+): Promise<EtablissementSante[]> {
+  const distanceMeters = distanceKm * 1000;
+
+  return this.etablissementSanteRepository
+    .createQueryBuilder('etablissement')
+    .where(`
+      ST_DWithin(
+        etablissement.geom::geography,
+        ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+        :distance
+      )
+      AND etablissement.categorie ILIKE :categorie
+    `, {
+      lat,
+      lng,
+      distance: distanceMeters,
+      categorie
+    })
+    .getMany();
+}
+
 
   // search par nom
   async findByName(nom: string): Promise<EtablissementSante[]> {

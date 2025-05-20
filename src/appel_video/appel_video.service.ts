@@ -15,6 +15,8 @@ import { User } from 'src/utilisateur/entities/user.entity';
 import { TerminerAppelDto } from './dto/terminer-appel.dto';
 import { DisponibiliteExpert } from './entities/disponibilite_expert.entity';
 import { UpdateAppelStatusDto } from './dto/update-appel-video.dto';
+import { RtcTokenBuilder, RtcRole } from 'agora-access-token';
+import { MajDisponibiliteDto } from './dto/disponibilite-expert.dto';
   
   @Injectable()
   export class AppelVideoService {
@@ -31,6 +33,28 @@ import { UpdateAppelStatusDto } from './dto/update-appel-video.dto';
       @InjectRepository(ExpertSante)
       private readonly expertRepo: Repository<ExpertSante>,
     ) {}
+
+    private async genererTokenAgora(canal: string, uid: number): Promise<string> {
+    const appID = process.env.AGORA_APP_ID;
+    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
+
+    if (!appID || !appCertificate) {
+    throw new Error('❌ Variables AGORA_APP_ID ou AGORA_APP_CERTIFICATE non définies');
+   }
+
+    const expirationTimeInSeconds = 3600;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+
+    return RtcTokenBuilder.buildTokenWithUid(
+      appID,
+      appCertificate,
+      canal,
+      uid,
+      RtcRole.PUBLISHER,
+      privilegeExpiredTs,
+    );
+  }
   
     async lancerAppel(dto: CreateAppelDto): Promise<AppelVideo> {
       const user = await this.userRepo.findOne({ where: { id_user: dto.id_user } });
@@ -138,6 +162,32 @@ async annulerAppel(id_appel: string): Promise<{ message: string }> {
   }
   return { message: '✅ Appel annulé avec succès' };
 }
-  
+
+  async mettreAJourDisponibilite(id_expert: number, dto: MajDisponibiliteDto) {
+  const dispo = await this.dispoRepo.findOne({ where: { id_expert } });
+
+  if (!dispo) {
+    throw new NotFoundException('Expert non inscrit dans disponibilite_expert');
+  }
+
+  dispo.est_connecte = dto.est_connecte;
+  dispo.derniere_connexion = new Date();
+
+  if (dto.zone_couverte) {
+    dispo.zone_couverte = dto.zone_couverte;
+  }
+
+  return await this.dispoRepo.save(dispo);
+}
+
+async listerExpertsDisponibles() {
+  return this.dispoRepo.find({
+    where: { est_connecte: true },
+    order: { derniere_connexion: 'DESC' },
+    relations: ['expert'], // pour inclure les infos de expert_sante
+  });
+}
+
+
 }
   

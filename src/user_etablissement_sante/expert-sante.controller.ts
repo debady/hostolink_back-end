@@ -16,7 +16,7 @@ import {
 import { CreateExpertSanteDto } from './dto/create-expert.dto';
 import { JwtExpertGuard } from './guards/jwt-expert.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { MajDisponibiliteDto } from 'src/appel_video/dto/disponibilite-expert.dto';
+// import { MajDisponibiliteDto } from 'src/appel_video/dto/disponibilite-expert.dto';
   
   @Controller('expert-sante')
   export class ExpertSanteController {
@@ -84,18 +84,18 @@ import { MajDisponibiliteDto } from 'src/appel_video/dto/disponibilite-expert.dt
     return this.expertSanteService.updateAvatar(file, req.user.id_expert);
   }
    
-  @Post('disponibilite/:id_expert')
-async mettreAJourDispo(
-  @Param('id_expert') id_expert: number,
-  @Body() dto: MajDisponibiliteDto,
-) {
-  return this.expertSanteService.mettreAJourDisponibilite(id_expert, dto);
-}
+//   @Post('disponibilite/:id_expert')
+// async mettreAJourDispo(
+//   @Param('id_expert') id_expert: number,
+//   @Body() dto: MajDisponibiliteDto,
+// ) {
+//   return this.expertSanteService.mettreAJourDisponibilite(id_expert, dto);
+// }
 
-@Get('disponibles')
-  async listerExpertsConnectes() {
-    return this.expertSanteService.listerExpertsDisponibles();
-  }
+// @Get('disponibles')
+//   async listerExpertsConnectes() {
+//     return this.expertSanteService.listerExpertsDisponibles();
+//   }
 
 
 }

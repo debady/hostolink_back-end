@@ -4,6 +4,7 @@ import { CreateAppelDto } from './dto/create-appel.dto';
 import { AppelVideo } from './entities/appel_video.entity';
 import { TerminerAppelDto } from './dto/terminer-appel.dto';
 import { UpdateAppelStatusDto } from './dto/update-appel-video.dto';
+import { MajDisponibiliteDto } from './dto/disponibilite-expert.dto';
 
 
 @Controller('appel-video')
@@ -47,5 +48,20 @@ async changerStatus(
 async annulerAppel(@Param('id_appel') id_appel: string) {
   return this.appelService.annulerAppel(id_appel.trim());
 }
+
+
+@Post('disponibilite/:id_expert')
+async mettreAJourDispo(
+  @Param('id_expert') id_expert: number,
+  @Body() dto: MajDisponibiliteDto,
+) {
+  return this.appelService.mettreAJourDisponibilite(id_expert, dto);
+}
+
+@Get('disponibles')
+async listerExpertsConnectes() {
+  return this.appelService.listerExpertsDisponibles();
+}
+
 
 }

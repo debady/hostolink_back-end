@@ -11,7 +11,7 @@ dotenv.config();
 
 async function bootstrap() {
   try {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule,{ cors: true });
 
     // ✅ Validation globale des DTOs
     app.useGlobalPipes(
