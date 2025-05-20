@@ -1,37 +1,44 @@
-// import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
-// import { Partage } from 'src/partage/entities/partage.entity';
-// import { User } from 'src/utilisateur/entities/user.entity';
-// import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
+import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
+import { Partage } from 'src/partage/entities/partage.entity';
 
-// @Entity()
-// export class Publication { 
-//   @PrimaryGeneratedColumn()
-//   id_publication: number;
+@Entity('publication')
+export class Publication { 
+  @PrimaryGeneratedColumn()
+  id_publication: number;
 
-//   @Column()
-//   titre_publication: string;
+  @Column({ type: 'varchar', length: 255 })
+  titre_publication: string;
 
-//   @Column()
-//   contenu: string;
+  @Column({ type: 'text' })
+  contenu: string;
 
-//   @Column({ nullable: true })
-//   image: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  image: string;
 
-//   @Column()
-//   date_publication: Date;
+  @CreateDateColumn()
+  date_publication: Date;
 
-//   @Column({ default: 0 })
-//   compteur_like: number;
+  @Column({ type: 'integer', default: 0 })
+  compteur_like: number;
 
-//   @ManyToOne(() => User, { nullable: false }) 
-//   @JoinColumn({ name: 'id_user' })
-//   user: User;
+  // Colonnes pour identifier l'auteur (une seule sera remplie automatiquement)
+  @Column({ type: 'uuid', nullable: true })
+  id_user: string;
 
-//   // Relation avec les commentaires
-//   @OneToMany(() => Commentaire, commentaire => commentaire.publication)
-//   commentaires: Commentaire[];
+  @Column({ type: 'integer', nullable: true })
+  id_user_etablissement_sante: number;
 
-//   // Relation avec les commentaires
-//   @OneToMany(() => Partage, Partage => Partage.publication)
-//   Partages: Partage[];
-// }
+  @Column({ type: 'integer', nullable: true })
+  id_admin_gestionnaire: number;
+
+  @Column({ type: 'integer', nullable: true })
+  id_expert: number;
+
+  // Relations
+  @OneToMany(() => Commentaire, commentaire => commentaire.publication, { cascade: true })
+  commentaires: Commentaire[];
+
+  @OneToMany(() => Partage, partage => partage.publication, { cascade: true })
+  partages: Partage[];
+}

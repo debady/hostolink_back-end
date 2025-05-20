@@ -13,3 +13,16 @@
 //   exports: [CommentaireService]
 // })
 // export class CommentaireModule {}
+
+
+
+// src/commentaire/commentaire.module.ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Commentaire } from './entities/commentaire.entity';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Commentaire])],
+  exports: [TypeOrmModule],
+})
+export class CommentaireModule {}

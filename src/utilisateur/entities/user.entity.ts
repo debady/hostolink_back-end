@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn, ManyToOne, } from 'typeorm';
 import { Image } from '../../image/entities/image.entity';
 import { MessageThematique } from 'src/thematique_discussion/entities/message_thematique.entity';
 import { Otp } from './otp.entity';
 import { Invitation } from 'src/invitations/entities/invitation.entity';
 import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
+
 
 
 @Entity('utilisateur')  
@@ -73,5 +74,8 @@ export class User {
 
   @OneToMany(() => Conversation, conversation => conversation.user)
   conversations: Conversation[];
+
+
+ 
 
 }
