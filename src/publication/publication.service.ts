@@ -60,36 +60,7 @@ export class PublicationService {
 }
 
 
-  // async create(data: any): Promise<Publication> {
-  //   // this.logger.log('🚀 Création publication');
 
-  //   // Sécurité : s'assurer que 'data' est bien défini
-  //   if (!data || typeof data !== 'object') {
-  //     throw new BadRequestException('Données de publication manquantes ou invalides.');
-  //   }
-
-  //   this.validateSingleAuthor(data);
-
-  //   const publicationData: Partial<Publication> = {
-  //     titre_publication: data.titre_publication,
-  //     contenu: data.contenu,
-  //     image: data.image,
-  //     compteur_like: 0,
-  //   };
-
-  //   if (data.id_user) publicationData.id_user = data.id_user;
-  //   if (data.id_user_etablissement_sante)
-  //     publicationData.id_user_etablissement_sante = data.id_user_etablissement_sante;
-  //   if (data.id_admin_gestionnaire)
-  //     publicationData.id_admin_gestionnaire = data.id_admin_gestionnaire;
-  //   if (data.id_expert) publicationData.id_expert = data.id_expert;
-
-  //   const publication = this.publicationRepository.create(publicationData);
-  //   const savedPublication = await this.publicationRepository.save(publication);
-
-  //   this.logger.log(`✅ Publication créée avec ID: ${savedPublication.id_publication}`);
-  //   return savedPublication;
-  // }
 
   private validateSingleAuthor(data: any): void {
     if (!data || typeof data !== 'object') {

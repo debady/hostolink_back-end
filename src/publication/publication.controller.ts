@@ -9,7 +9,7 @@ import { JwtAdminGuard } from 'src/auth/jwt-auth.guard';
 // import { CreatePublicationDto } from './dto/create-publication.dto';
 
 @Controller('publication')
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 export class PublicationController {
   private readonly logger = new Logger(PublicationController.name);
 

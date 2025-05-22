@@ -1,28 +1,37 @@
-// import { Module } from '@nestjs/common';
+// import { Module, Logger } from '@nestjs/common';
 // import { TypeOrmModule } from '@nestjs/typeorm';
 // import { CommentaireController } from './commentaire.controller';
 // import { CommentaireService } from './commentaire.service';
 // import { Commentaire } from './entities/commentaire.entity';
-// import { Publication } from 'src/publication/entities/publication.entity';
-// import { User } from 'src/utilisateur/entities/user.entity';
+// import { Publication } from 'src/publication/entities/publication.entity'; // ✅ AJOUTÉ
 
 // @Module({
-//   imports: [TypeOrmModule.forFeature([Commentaire, User, Publication])],
+//   imports: [TypeOrmModule.forFeature([
+//     Commentaire,
+//     Publication // ✅ AJOUTÉ
+//   ])],
 //   controllers: [CommentaireController],
 //   providers: [CommentaireService],
 //   exports: [CommentaireService]
 // })
-// export class CommentaireModule {}
+// export class CommentaireModule {
+//   private readonly logger = new Logger(CommentaireModule.name);
 
+//   constructor() {
+//     this.logger.log('✅ CommentaireModule initialisé');
+//   }
+// }
 
-
-// src/commentaire/commentaire.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Commentaire } from './entities/commentaire.entity';
+import { CommentaireService } from './commentaire.service';
+import { CommentaireController } from './commentaire.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Commentaire])],
-  exports: [TypeOrmModule],
+  controllers: [CommentaireController],
+  providers: [CommentaireService],
+  exports: [CommentaireService],
 })
 export class CommentaireModule {}

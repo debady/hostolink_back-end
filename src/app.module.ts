@@ -37,6 +37,7 @@ import { MessagesAssistantClientImageModule } from './Discussion_agent_client/me
 import { CommentaireModule } from './commentaire/commentaire.module';
 import { PartageModule } from './partage/partage.module';
 import { PublicationModule } from './publication/publication.module';
+import { SocialCloudinaryModule } from './social_cloudinary/social_cloudinary.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { PublicationModule } from './publication/publication.module';
     CommentaireModule,
     PartageModule,
     PublicationModule,
+    SocialCloudinaryModule
 
   ],
 })
