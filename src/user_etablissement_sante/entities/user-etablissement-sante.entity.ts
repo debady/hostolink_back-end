@@ -10,6 +10,7 @@ import { RaisonSuppressionCompte } from './raison-suppression.entity';
 import { ExpertSante } from './expert_sante.entity';
 import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
 
+
 @Entity('user_etablissement_sante')
 export class UserEtablissementSante {
   @PrimaryGeneratedColumn()

@@ -1,29 +1,35 @@
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Publication } from 'src/publication/entities/publication.entity';
 
-// import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-// import { Publication } from 'src/publication/entities/publication.entity';
-// import { User } from 'src/utilisateur/entities/user.entity';
+@Entity('commentaire')
+export class Commentaire {
+  @PrimaryGeneratedColumn()
+  id_commentaire: number;
 
-// @Entity()
-// export class Commentaire {
-//   @PrimaryGeneratedColumn()
-//   id_commentaire: number;
+  @Column({ type: 'text' })
+  contenu: string;
 
-//   @Column({ type: 'text' })  //j'ai mis le type ici car dans la BD le type de "contenu" est 'text';
-//   contenu: string;
+  @CreateDateColumn()
+  date_commentaire: Date;
 
-//   @CreateDateColumn()
-//   date_commentaire: Date;
+  // Référence à la publication
+  @ManyToOne(() => Publication, publication => publication.commentaires, {
+    nullable: false,
+    onDelete: 'CASCADE' 
+  })
+  @JoinColumn({ name: 'id_publication' })
+  publication: Publication;
 
-//   @ManyToOne(() => Publication, publication => publication.commentaires, {
-//     nullable: false,
-//     onDelete: 'CASCADE' 
-//   })
-//   @JoinColumn({ name: 'id_publication' })
-//   publication: Publication;
+  // Colonnes pour identifier l'auteur du commentaire (une seule sera remplie automatiquement)
+  @Column({ type: 'uuid', nullable: true })
+  id_user: string;
 
-//   @ManyToOne(() => User, user => user.commentaires, {
-//     nullable: false
-//   })
-//   @JoinColumn({ name: 'id_user' })
-//   user: User;
-// }
+  @Column({ type: 'integer', nullable: true })
+  id_user_etablissement_sante: number;
+
+  @Column({ type: 'integer', nullable: true })
+  id_admin_gestionnaire: number;
+
+  @Column({ type: 'integer', nullable: true })
+  id_expert: number;
+}
