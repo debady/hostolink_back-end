@@ -153,7 +153,7 @@ export class UserService {
     return { 
       ...user, 
       mdp: user.mdp,
-      photo_profile: profileImage ? profileImage.url_image : 'https://res.cloudinary.com/dhrrk7vsd/image/upload/v1745581355/hostolink/default_icone_pyiudn.png',
+      photo_profile: profileImage ? profileImage.url_image : '',
       compte,
       qrcodedynamique,
       qrcodedstatique,
