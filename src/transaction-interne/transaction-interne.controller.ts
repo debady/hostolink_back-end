@@ -126,23 +126,23 @@ export class TransactionInterneController {
 
   // endpoints pour recuprer les statistiques des transactions d'un utilisateur
 
-// @Get('stats/utilisateur/:id_user')
-// @UseGuards(JwtAdminGuard)
-// async getUserTransactionStats(@Param('id_user') id_user: string) {
-//   return {
-//     success: true,
-//     message: `Statistiques des transactions de l'utilisateur ${id_user} récupérées`,
-//     data: await this.TransactionInterneService.getUserStats(id_user)
-//   };
-// }
+  // @Get('stats/utilisateur/:id_user')
+  // @UseGuards(JwtAdminGuard)
+  // async getUserTransactionStats(@Param('id_user') id_user: string) {
+  //   return {
+  //     success: true,
+  //     message: `Statistiques des transactions de l'utilisateur ${id_user} récupérées`,
+  //     data: await this.TransactionInterneService.getUserStats(id_user)
+  //   };
+  // }
 
 
 
-@Post('info_qrcode')
-@UseGuards(JwtAuthGuard)
-async getUserInfoFromQrCode(@Body('token') token: string) {
-  return this.TransactionInterneService.getUserInfoFromQrCode(token);
-}
+  @Post('info_qrcode')
+  @UseGuards(JwtAuthGuard)
+  async getUserInfoFromQrCode(@Body('token') token: string) {
+    return this.TransactionInterneService.getUserInfoFromQrCode(token);
+  }
 
 
 

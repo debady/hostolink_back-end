@@ -62,7 +62,7 @@ export class EmailService {
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      //console.log(`✅ Email OTP envoyé à ${email} | ID: ${info.messageId}`);
+      console.log(`✅ Email OTP envoyé à ${email} | ID: ${info.messageId}`);
     } catch (error) {
       console.error('❌ Erreur lors de l’envoi de l’email :', error);
       throw new InternalServerErrorException('Erreur lors de l’envoi de l’email');

@@ -18,6 +18,7 @@ import { CompteService } from 'src/compte/compte.service';
 import { QrCodeService } from 'src/qr-code/qr-code.service';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
 import { EmailService } from './email.service';
+import { SmsService } from './sms.service';
 
 @Injectable()
 export class UserService {
@@ -42,7 +43,9 @@ export class UserService {
     @InjectRepository(Otp)
     private readonly otpRepository: Repository<Otp>,
 
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
+    private readonly smsService: SmsService,
+
 
 
   ) {}
@@ -210,12 +213,14 @@ export class UserService {
         //console.log(`📤 EMAIL envoyé à ${user.email} avec OTP ${otpCode}`);
       }
   
-      // ✅ Affichage dans la console pour les tests si SMS
       if (moyen_envoyer === MoyenEnvoiEnum.SMS) {
-        //console.log(`📤 SMS simulé à ${user.telephone} avec OTP ${otpCode}`);
+        if (!user.telephone) {
+          throw new BadRequestException("Impossible d'envoyer l'OTP : aucun numéro de téléphone renseigné.");
+        }
+
+        await this.smsService.sendOtpSms(user.telephone, otpCode);
+        console.log(`📲 SMS envoyé à ${user.telephone} avec OTP ${otpCode}`);
       }
-  
-      // ✅ Retourne toujours le code OTP côté Flutter (utile en test/dev)
       return { success: true, otp: otpCode };
   
     } catch (error) {
