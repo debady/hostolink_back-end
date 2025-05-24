@@ -34,10 +34,7 @@ import { QuestionsPredefiniesModule } from './Discussion_agent_client/questions_
 import { MessageAssistantClientModule } from './Discussion_agent_client/message_assistant_client/message_assistant_client.module';
 import { ConversationsModule } from './Discussion_agent_client/conversations/conversations.module';
 import { MessagesAssistantClientImageModule } from './Discussion_agent_client/messages_assistant_client_image/messages_assistant_client_image.module';
-import { CommentaireModule } from './commentaire/commentaire.module';
-import { PartageModule } from './partage/partage.module';
-import { PublicationModule } from './publication/publication.module';
-import { SocialCloudinaryModule } from './social_cloudinary/social_cloudinary.module';
+import { AppelVideoModule } from './appel_video/appel_video_module';
 
 @Module({
   imports: [
@@ -53,15 +50,10 @@ import { SocialCloudinaryModule } from './social_cloudinary/social_cloudinary.mo
       host: process.env.DATABASE_HOST || 'localhost',
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'mdp_dev_sohapigroup',
-      database: process.env.DATABASE_NAME || 'hostolink_bd',
-      synchronize: false, // ❗️mettre true UNIQUEMENT en dev
-      logging: false,
-      autoLoadEntities: true,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      password: process.env.DATABASE_PASSWORD || 'postgres',
+      database: process.env.DATABASE_NAME || 'hostolink_bds_reviser_toutes',
     }),
 
-    // ✅ Modules fonctionnels
     AuthModule,
     UserModule,
     ImageModule,
@@ -85,12 +77,7 @@ import { SocialCloudinaryModule } from './social_cloudinary/social_cloudinary.mo
     MessageAssistantClientModule,
     ConversationsModule,
     MessagesAssistantClientImageModule,
-
-    CommentaireModule,
-    PartageModule,
-    PublicationModule,
-    SocialCloudinaryModule
-
+    AppelVideoModule,
   ],
 })
 export class AppModule {}
