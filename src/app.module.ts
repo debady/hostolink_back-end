@@ -68,7 +68,7 @@ import { DocumentsIdentiteModule } from './documents_identite/documents_identite
       ssl: true,
       extra: {
         ssl: {
-          rejectUnauthorized: true,
+          rejectUnauthorized: false,
         },
       },
     }),
