@@ -180,7 +180,7 @@ async getTransactionById(id: number) {
     }
 
     // Calculer les frais (0.5% du montant)
-    const frais = montant_envoyer * 0.005;
+    const frais = montant_envoyer * 0;
     const montantRecu = montant_envoyer - frais;
 
     // Commencer une transaction de base de données
@@ -276,13 +276,6 @@ async getTransactionById(id: number) {
     }
   }
   
-
-
-
-
-
-
-
 // Créer une transaction à partir d'un numéro de téléphone
 async createTransactionFromPhone(userId: string, payWithPhoneDto: PayWithPhoneDto) {
   const { telephone, montant_envoyer, description } = payWithPhoneDto;
@@ -369,7 +362,7 @@ async createTransactionFromPhone(userId: string, payWithPhoneDto: PayWithPhoneDt
   }
 
   // Calculer les frais (0.5% du montant)
-  const frais = montant_envoyer * 0.005;
+  const frais = montant_envoyer * 0;
   const montantRecu = montant_envoyer - frais;
 
   // Commencer une transaction de base de données
@@ -555,7 +548,7 @@ async createTransactionFromEmail(userId: string, payWithEmailDto: PayWithEmailDt
   }
 
   // Calculer les frais (0.5% du montant)
-  const frais = montant_envoyer * 0.005;
+  const frais = montant_envoyer * 0;
   const montantRecu = montant_envoyer - frais;
 
   // Commencer une transaction de base de données

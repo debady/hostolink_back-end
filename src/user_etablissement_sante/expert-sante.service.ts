@@ -7,8 +7,6 @@ import { JwtService } from '@nestjs/jwt'; // 👈 nécessaire pour générer un 
 import { ExpertSante } from './entities/expert_sante.entity';
 import { v2 as cloudinary } from 'cloudinary';
 import { Readable } from 'stream'; 
-// import { DisponibiliteExpert } from 'src/appel_video/entities/disponibilite_expert.entity';
-// import { MajDisponibiliteDto } from 'src/appel_video/dto/disponibilite-expert.dto';
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -24,12 +22,7 @@ export class ExpertSanteService {
     private readonly expertSanteRepository: Repository<ExpertSante>,
 
     private readonly jwtService: JwtService,
-    private readonly dataSource: DataSource,
-
-    // @InjectRepository(DisponibiliteExpert)
-    // private readonly dispoRepo: Repository<DisponibiliteExpert>,
-  
-  ) {}
+    private readonly dataSource: DataSource) {}
 
   private genererIdentifiantAleatoire(): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -38,7 +31,6 @@ export class ExpertSanteService {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
-
   }
 
   async creerExpert(dto: CreateExpertSanteDto, idEtab: number) {
@@ -234,25 +226,6 @@ export class ExpertSanteService {
     return match ? match[1] : null;
   }
   
-  // async mettreAJourDisponibilite(id_expert: number, dto: MajDisponibiliteDto) {
-  //   const dispo = await this.dispoRepo.findOne({ where: { id_expert } });
-
-  //   if (!dispo) {
-  //     throw new NotFoundException('Expert non inscrit dans disponibilite_expert');
-  //   }
-
-  //   dispo.est_connecte = dto.est_connecte;
-  //   dispo.derniere_connexion = new Date();
-
-  //   return await this.dispoRepo.save(dispo);
-  // }
   
-  // async listerExpertsDisponibles() {
-  //   return this.dispoRepo.find({
-  //     where: { est_connecte: true },
-  //     order: { derniere_connexion: 'DESC' },
-  //     relations: ['expert'], // si tu veux inclure l'expert
-  //   });
-  // }
   
 }

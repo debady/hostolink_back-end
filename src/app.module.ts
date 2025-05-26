@@ -6,7 +6,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 // ✅ Modules principaux
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './utilisateur/user.module';
-import { ImageModule } from './image/image.module';
 import { CloudinaryModule } from './upload/cloudinary.module';
 import { AdministrateurModule } from './administrateur/administrateur.module';
 import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
@@ -35,30 +34,44 @@ import { MessageAssistantClientModule } from './Discussion_agent_client/message_
 import { ConversationsModule } from './Discussion_agent_client/conversations/conversations.module';
 import { MessagesAssistantClientImageModule } from './Discussion_agent_client/messages_assistant_client_image/messages_assistant_client_image.module';
 import { AppelVideoModule } from './appel_video/appel_video_module';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
     // ✅ Fichiers .env accessibles partout
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env', }),
 
     // ✅ CRON et tâches planifiées
     ScheduleModule.forRoot(),
 
     // ✅ Connexion PostgreSQL
+    // TypeOrmModule.forRoot({
+    //   type: 'postgres',
+    //   host: process.env.DATABASE_HOST || 'localhost',
+    //   port: Number(process.env.DATABASE_PORT) || 5432,
+    //   username: process.env.DATABASE_USER || 'postgres',
+    //   password: process.env.DATABASE_PASSWORD || 'postgres',
+    //   database: process.env.DATABASE_NAME || 'hostolink',
+    // }),
+
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'postgres',
-      database: process.env.DATABASE_NAME || 'hostolink_bds_reviser_toutes',
-      synchronize: false, // ❗️mettre true UNIQUEMENT en dev
-      logging: false,
-      autoLoadEntities: true,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
+      database: process.env.DATABASE_NAME || 'hostolink_bd',
+      entities: [__dirname + '/**/*.entity{.ts,.js}'], 
+      synchronize: false, 
+      ssl: true,
+      extra: {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      },
     }),
 
-    // ✅ Modules fonctionnels
+
     AuthModule,
     UserModule,
     ImageModule,

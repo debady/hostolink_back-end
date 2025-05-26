@@ -1,123 +1,111 @@
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Commentaire } from './entities/commentaire.entity';
+import { CreateCommentaireDto } from './dto/create-commentaire.dto';
 
-// // import { Injectable } from '@nestjs/common';
-// // import { InjectRepository } from '@nestjs/typeorm';
-// // import { Repository } from 'typeorm';
-// // import { Commentaire } from './entities/commentaire.entity';
-// // import { CreateCommentaireDto } from './dto/create-commentaire.dto';
+@Injectable()
+export class CommentaireService {
+  private readonly logger = new Logger(CommentaireService.name);
 
-// // @Injectable()
-// // export class CommentaireService {
-// //   createCommentaire(id_publication: number, createCommentaireDto: CreateCommentaireDto) {
-// //     throw new Error('Method not implemented.');
-// //   }
-// //   constructor(
-// //     @InjectRepository(Commentaire)
-// //     private readonly commentaireRepository: Repository<Commentaire>,
-// //   ) {}
+  constructor(
+    @InjectRepository(Commentaire)
+    private readonly commentaireRepository: Repository<Commentaire>,
+  ) {}
 
-// //   async create(id_publication: number, createCommentaireDto: CreateCommentaireDto): Promise<Commentaire> {
-// //     const { id_publication, id_user, ...commentaireData } = createCommentaireDto;
+  async create(id_publication: number, createCommentaireDto: CreateCommentaireDto): Promise<Commentaire> {
+    this.logger.log('💬 Création commentaire');
     
-// //     const commentaire = this.commentaireRepository.create({
-// //       ...commentaireData,
-// //       publication: { id_publication },
-// //       user: { id_user }
-// //     });
+    // Validation: s'assurer qu'exactement un ID est fourni
+    this.validateSingleAuthor(createCommentaireDto);
+
+    const commentaireData: Partial<Commentaire> = {
+      contenu: createCommentaireDto.contenu,
+      publication: { id_publication } as any,
+    };
+
+    // Copier automatiquement l'ID fourni
+    if (createCommentaireDto.id_user) {
+      commentaireData.id_user = createCommentaireDto.id_user;
+    }
+    if (createCommentaireDto.id_user_etablissement_sante) {
+      commentaireData.id_user_etablissement_sante = createCommentaireDto.id_user_etablissement_sante;
+    }
+    if (createCommentaireDto.id_admin_gestionnaire) {
+      commentaireData.id_admin_gestionnaire = createCommentaireDto.id_admin_gestionnaire;
+    }
+    if (createCommentaireDto.id_expert) {
+      commentaireData.id_expert = createCommentaireDto.id_expert;
+    }
+
+    const commentaire = this.commentaireRepository.create(commentaireData);
+    const savedCommentaire = await this.commentaireRepository.save(commentaire);
     
-// //     return this.commentaireRepository.save(commentaire);
-// //   }
+    this.logger.log(`✅ Commentaire créé avec ID: ${savedCommentaire.id_commentaire}`);
+    return savedCommentaire;
+  }
 
-// //   // Modifiée pour n'accepter qu'un seul paramètre
-// //   async findByPublicationId(id_publication: number): Promise<Commentaire[]> {
-// //     return this.commentaireRepository.find({
-// //       where: { publication: { id_publication } },
-// //       relations: ['user'],
-// //       order: { date_commentaire: 'DESC' }
-// //     });
-// //   }
+  private validateSingleAuthor(dto: CreateCommentaireDto): void {
+    const authorFields = [
+      dto.id_user,
+      dto.id_user_etablissement_sante,
+      dto.id_admin_gestionnaire,
+      dto.id_expert
+    ].filter(field => field !== undefined && field !== null);
 
-// //   // Nouvelle méthode pour filtrer par publication ET utilisateur
-// //   async findByPublicationIdAndUserId(id_publication: number, id_user: number): Promise<Commentaire[]> {
-// //     return this.commentaireRepository.find({
-// //       where: {
-// //         publication: { id_publication },
-// //         user: { id_user }
-// //       },
-// //       relations: ['user'],
-// //       order: { date_commentaire: 'DESC' }
-// //     });
-// //   }
-// // }
+    if (authorFields.length === 0) {
+      throw new BadRequestException('Au moins un ID d\'auteur doit être fourni (id_user, id_user_etablissement_sante, id_admin_gestionnaire, ou id_expert)');
+    }
 
+    if (authorFields.length > 1) {
+      throw new BadRequestException('Un seul ID d\'auteur doit être fourni');
+    }
+  }
 
-// import { Injectable, NotFoundException } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { Commentaire } from './entities/commentaire.entity';
-// import { CreateCommentaireDto } from './dto/create-commentaire.dto';
-// import { Publication } from 'src/publication/entities/publication.entity';
-// import { User } from 'src/utilisateur/entities/user.entity';
+  async findByPublicationId(id_publication: number): Promise<Commentaire[]> {
+    return this.commentaireRepository.find({
+      where: { publication: { id_publication } },
+      order: { date_commentaire: 'DESC' }
+    });
+  }
 
-// @Injectable()
-// export class CommentaireService {
-//   constructor(
-//     @InjectRepository(Commentaire)
-//     private readonly commentaireRepository: Repository<Commentaire>,
-//     @InjectRepository(Publication)
-//     private readonly publicationRepository: Repository<Publication>,
-//     @InjectRepository(User)
-//     private readonly userRepository: Repository<User>,
-//   ) {}
+  async findByUserAndPublication(id_publication: number, id_user: string): Promise<Commentaire[]> {
+    return this.commentaireRepository.find({
+      where: { 
+        publication: { id_publication },
+        id_user 
+      },
+      order: { date_commentaire: 'DESC' }
+    });
+  }
 
-//   async create(id_publication: number, createCommentaireDto: CreateCommentaireDto): Promise<Commentaire> {
-//     const { id_user, contenu } = createCommentaireDto;
+  async findByEtablissementAndPublication(id_publication: number, id_etablissement: number): Promise<Commentaire[]> {
+    return this.commentaireRepository.find({
+      where: { 
+        publication: { id_publication },
+        id_user_etablissement_sante: id_etablissement 
+      },
+      order: { date_commentaire: 'DESC' }
+    });
+  }
 
-//     // Vérifier si la publication existe
-//     const publication = await this.publicationRepository.findOne({
-//       where: { id_publication },
-//     });
+  async findByAdminAndPublication(id_publication: number, id_admin: number): Promise<Commentaire[]> {
+    return this.commentaireRepository.find({
+      where: { 
+        publication: { id_publication },
+        id_admin_gestionnaire: id_admin 
+      },
+      order: { date_commentaire: 'DESC' }
+    });
+  }
 
-//     if (!publication) {
-//       throw new NotFoundException(`Publication avec id ${id_publication} non trouvée`);
-//     }
-
-//     // Vérifier si l'utilisateur existe
-//     const user = await this.userRepository.findOne({
-//       where: { id_user },
-//     });
-
-//     if (!user) {
-//       throw new NotFoundException(`Utilisateur avec id ${id_user} non trouvé`);
-//     }
-
-//     // Créer et sauvegarder le commentaire
-//     const commentaire = this.commentaireRepository.create({
-//       contenu,
-//       publication,
-//       user,
-//     });
-
-//     return this.commentaireRepository.save(commentaire);
-//   }
-
-//   // ✅ Récupérer tous les commentaires d'une publication spécifique
-//   async findByPublicationId(id_publication: number): Promise<Commentaire[]> {
-//     return this.commentaireRepository.find({
-//       where: { publication: { id_publication } },
-//       relations: ['user'],
-//       order: { date_commentaire: 'DESC' },
-//     });
-//   }
-
-//   // ✅ Récupérer tous les commentaires d'une publication spécifique par un utilisateur donné
-//   async findByPublicationIdAndUserId(id_publication: number, id_user: number): Promise<Commentaire[]> {
-//     return this.commentaireRepository.find({
-//       where: {
-//         publication: { id_publication },
-//         user: { id_user },
-//       },
-//       relations: ['user'],
-//       order: { date_commentaire: 'DESC' },
-//     });
-//   }
-// }
+  async findByExpertAndPublication(id_publication: number, id_expert: number): Promise<Commentaire[]> {
+    return this.commentaireRepository.find({
+      where: { 
+        publication: { id_publication },
+        id_expert 
+      },
+      order: { date_commentaire: 'DESC' }
+    });
+  }
+}

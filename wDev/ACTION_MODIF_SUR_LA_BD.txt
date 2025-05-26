@@ -250,6 +250,12 @@ Contraintes de clÚs ÚtrangÞres :
 
 
 
+
+
+
+
+
+------------------------------------ 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
 ------------- 17 Avril 2025 ajout des champs dans la table administrateurs pour le refferencement --------------*
     ALTER TABLE administrateurs
     ADD COLUMN nom VARCHAR(100),
@@ -321,6 +327,9 @@ CREATE TABLE public.messages_assistant_client_image (
 ALTER TABLE "conversations" ADD COLUMN "auto_created" boolean NOT NULL DEFAULT true;
 
 
+--------------- 29 avril --------------
+ALTER TABLE transaction_interne
+DROP CONSTRAINT transaction_interne_id_qrcode_dynamique_fkey;
 
 
 
@@ -350,8 +359,54 @@ alter table utilisateur add column is_modif_infos boolean default false;
 
 
 
+---------------SOME |  19 Mai 2025 ------------ 
+
+ALTER TABLE publication
+ADD COLUMN id_expert INTEGER,
+ADD CONSTRAINT fk_publication_expert
+FOREIGN KEY (id_expert) REFERENCES expert_sante(id_expert)
+ON DELETE CASCADE;
 
 
+ALTER TABLE partage
+ADD COLUMN id_expert INTEGER,
+ADD CONSTRAINT fk_partage_expert
+FOREIGN KEY (id_expert) REFERENCES expert_sante(id_expert)
+ON DELETE CASCADE;
+
+ALTER TABLE commentaire
+ADD COLUMN id_expert INTEGER,
+ADD CONSTRAINT fk_commentaire_expert
+FOREIGN KEY (id_expert) REFERENCES expert_sante(id_expert)
+ON DELETE CASCADE;
+
+ALTER TABLE partage
+ADD COLUMN id_admin_gestionnaire INTEGER,
+ADD CONSTRAINT fk_partage_admin_gestionnaire
+FOREIGN KEY (id_admin_gestionnaire)
+REFERENCES administrateurs(id_admin_gestionnaire)
+ON DELETE CASCADE;
+
+ALTER TABLE commentaire
+ADD COLUMN id_admin_gestionnaire INTEGER,
+ADD CONSTRAINT fk_commentaire_admin_gestionnaire
+FOREIGN KEY (id_admin_gestionnaire)
+REFERENCES administrateurs(id_admin_gestionnaire)
+ON DELETE CASCADE;
+
+ALTER TABLE commentaire
+ADD COLUMN id_user_etablissement_sante INTEGER,
+ADD CONSTRAINT fk_commentaire_user_etablissement_sante
+FOREIGN KEY (id_user_etablissement_sante)
+REFERENCES user_etablissement_sante(id_user_etablissement_sante)
+ON DELETE CASCADE;
+
+ALTER TABLE publication DROP COLUMN id_publication;
+ALTER TABLE publication ADD COLUMN id_publication SERIAL PRIMARY KEY;
+ALTER TABLE commentaire 
+ALTER COLUMN id_commentaire ADD GENERATED ALWAYS AS IDENTITY;
+ALTER TABLE publication ALTER COLUMN id_admin_gestionnaire DROP NOT NULL;
 
 
+---------------SOME |  20 Mai 2025 ------------ 
 

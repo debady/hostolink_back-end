@@ -1,0 +1,7 @@
+update compte set solde_compte = 0 where id_user_etablissement_sante != 0;
+update transactions_frais set montant_frais = 78412252 where id_frais !=0; 
+connexion bd
+    psql "host=aws-0-eu-west-3.pooler.supabase.com port=5432 dbname=postgres user=postgres.skwupmsitzsxukbmnkwv password=6640ywfeiQqiBMM5 sslmode=require"
+
+
+    dans 

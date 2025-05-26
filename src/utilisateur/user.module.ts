@@ -11,11 +11,15 @@ import { Otp } from './entities/otp.entity';
 import { EmailService } from './email.service';
 import { OtpCleanerService } from './nettoyeur.service';
 import { AuthModule } from 'src/auth/auth.module'; // ✅
+import { SmsModule } from './sms.module';
+import { EmailModule } from 'src/email/dreams-houses-email.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Image, Otp]),
-    forwardRef(() => AuthModule), // ✅ Correction ICI
+    forwardRef(() => AuthModule),
+    SmsModule,
+    EmailModule,
     forwardRef(() => CompteModule),
     forwardRef(() => QrCodeModule),
   ],

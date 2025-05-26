@@ -1,7 +1,10 @@
 import { Annonce } from 'src/annonce/entities/annonce.entity';
+import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
 import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
 import { QuestionsPredefinies } from 'src/Discussion_agent_client/questions_predefinies/entities/question-predefinie.entity';
 import { ListeNumeroEtablissementSante } from 'src/liste_etablissement/entities/liste_numero_vert_etablissement_sante.entity';
+import { Partage } from 'src/partage/entities/partage.entity';
+import { Publication } from 'src/publication/entities/publication.entity';
 import { Thematique } from 'src/thematique_discussion/entities/thematique.entity';
 
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
@@ -73,4 +76,7 @@ export class Administrateur {
 
   @OneToMany(() => Conversation, conversation => conversation.assistant)
   conversations: Conversation[];
+
+
+
 }

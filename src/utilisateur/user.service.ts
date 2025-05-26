@@ -18,6 +18,7 @@ import { CompteService } from 'src/compte/compte.service';
 import { QrCodeService } from 'src/qr-code/qr-code.service';
 import { MoyenEnvoiEnum, Otp } from './entities/otp.entity';
 import { EmailService } from './email.service';
+import { SmsService } from './sms.service';
 
 @Injectable()
 export class UserService {
@@ -42,7 +43,13 @@ export class UserService {
     @InjectRepository(Otp)
     private readonly otpRepository: Repository<Otp>,
 
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
+    private readonly smsService: SmsService,
+
+  @InjectRepository(User)
+  private readonly utilisateurRepo: Repository<User>,
+
+
 
 
   ) {}
@@ -210,12 +217,14 @@ export class UserService {
         //console.log(`📤 EMAIL envoyé à ${user.email} avec OTP ${otpCode}`);
       }
   
-      // ✅ Affichage dans la console pour les tests si SMS
       if (moyen_envoyer === MoyenEnvoiEnum.SMS) {
-        //console.log(`📤 SMS simulé à ${user.telephone} avec OTP ${otpCode}`);
+        if (!user.telephone) {
+          throw new BadRequestException("Impossible d'envoyer l'OTP : aucun numéro de téléphone renseigné.");
+        }
+
+        await this.smsService.sendOtpSms(user.telephone, otpCode);
+        console.log(`📲 SMS envoyé à ${user.telephone} avec OTP ${otpCode}`);
       }
-  
-      // ✅ Retourne toujours le code OTP côté Flutter (utile en test/dev)
       return { success: true, otp: otpCode };
   
     } catch (error) {
@@ -270,36 +279,7 @@ export class UserService {
         if (!user.compte_verifier) {
         user.compte_verifier = true;
         await this.userRepository.save(user);
-        //console.log(`✅ Le compte ${identifier} est maintenant vérifié.`);
-
-
-
-        // ✅ On sécurise avant d'utiliser id_parrain
-  //  if (!user.id_parrain) {
-  //   console.warn("❌ Aucun parrain associé à cet utilisateur.");
-  //   return { success: true, message: "Compte vérifié, pas de parrain." };
-  // }
-
-  // try {
-  //   const compteParrain = await this.compteService.getUserCompte(user.id_parrain);
-
-  //   if (!compteParrain) {
-  //     console.warn("❌ Compte parrain introuvable.");
-  //     return { success: true, message: "Compte vérifié, mais parrain introuvable." };
-  //   }
-
-  //   const montantBonus = 500;
-  //   const nouveauSolde = compteParrain.solde_bonus + montantBonus;
-
-  //   await this.compteService.updateCompteBonus(compteParrain.id_compte, nouveauSolde);
-
-  //   //console.log(`✅ Bonus de ${montantBonus} F crédité au parrain : ${user.id_parrain}`);
-  // } catch (error) {
-  //   console.error("❌ Erreur rewardParrainAfterOtp:", error);
-  //   return { success: true, message: "Compte vérifié, erreur lors du bonus." };
-  // }
-
-         
+        //console.log(`✅ Le compte ${identifier} est maintenant vérifié.`);  
       }
 
     
@@ -549,6 +529,22 @@ async getAllTelephones() {
   return users
     .filter(user => user.telephone)
     .map(user => user.telephone);
+}
+
+
+  // notifications
+
+async updateFcmToken(id_user: string, fcm_token: string) {
+  const user = await this.utilisateurRepo.findOne({ where: { id_user } });
+  if (!user) throw new NotFoundException('Utilisateur non trouvé');
+
+  user.fcm_token = fcm_token;
+  await this.utilisateurRepo.save(user);
+
+  return {
+    success: true,
+    message: 'FCM token mis à jour',
+  };
 }
 
   

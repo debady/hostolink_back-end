@@ -12,7 +12,7 @@ export class TransactionFraisController {
   // Récupérer toutes les transactions de frais (protégé, admin uniquement)
   @Get()
   @UseGuards(JwtAdminGuard) // Ajoutez RolesGuard si nécessaire
-  async getAllTransactionFrais(@Query('page') page = 1, @Query('limit') limit = 10) {
+  async getAllTransactionFrais(@Query('page') page = 1, @Query('limit') limit = 100) {
     return {
       success: true,
       message: 'Transactions de frais récupérées',
@@ -26,7 +26,7 @@ export class TransactionFraisController {
   async getUserTransactionFrais(
     @Param('id_user') id_user: string,
     @Query('page') page = 1, 
-    @Query('limit') limit = 10
+    @Query('limit') limit = 100
   ) {
     return {
       success: true,

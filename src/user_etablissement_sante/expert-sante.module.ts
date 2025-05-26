@@ -6,11 +6,10 @@ import { ExpertSante } from './entities/expert_sante.entity';
 import { ExpertSanteController } from './expert-sante.controller';
 import { ExpertSanteService } from './expert-sante.service';
 import { JwtExpertStrategy } from './strategies/jwt-expert.strategy';
-import { DisponibiliteExpert } from 'src/appel_video/entities/disponibilite_expert.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ExpertSante,DisponibiliteExpert ]),
+    TypeOrmModule.forFeature([ExpertSante]),
     ConfigModule, // assure la lecture du .env
 
     JwtModule.registerAsync({

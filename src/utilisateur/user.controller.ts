@@ -254,4 +254,13 @@ async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifi
 
 
 }
+
+  //notifications
+  @UseGuards(JwtAuthGuard)
+  @Post('update-fcm-token')
+  async updateFcmToken(@Req() req, @Body('fcm_token') fcm_token: string) {
+    const userId = req.user.id_user;
+return this.userService.updateFcmToken(userId, fcm_token);
+  }
+
 }
