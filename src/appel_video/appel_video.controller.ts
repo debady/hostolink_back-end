@@ -63,5 +63,9 @@ async listerExpertsConnectes() {
   return this.appelService.listerExpertsDisponibles();
 }
 
+@Get('en-attente/:id_expert')
+async getAppelsEnAttente(@Param('id_expert') id_expert: number) {
+  return this.appelService.appelsEnAttentePourExpert(id_expert);
+}
 
 }

@@ -188,6 +188,19 @@ async listerExpertsDisponibles() {
   });
 }
 
+async appelsEnAttentePourExpert(id_expert: number) {
+  const appels = await this.appelRepo.find({
+    where: {
+      expert: { id_expert },
+      status_appel: 'en_attente',
+    },
+    relations: ['utilisateur'], // pour avoir les infos du patient
+    order: { date_debut: 'DESC' },
+  });
+
+  return appels;
+}
+
 
 }
   
