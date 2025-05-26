@@ -4,6 +4,7 @@ import { MessageThematique } from 'src/thematique_discussion/entities/message_th
 import { Otp } from './otp.entity';
 import { Invitation } from 'src/invitations/entities/invitation.entity';
 import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
+import { DocumentsIdentiteEntity } from 'src/documents_identite/entities/documents_identite.entity';
 
 
 @Entity('utilisateur')  
@@ -69,9 +70,11 @@ export class User {
   @OneToMany(() => Invitation, invitation => invitation.user)
   invitations: Invitation[];
 
-
-
   @OneToMany(() => Conversation, conversation => conversation.user)
   conversations: Conversation[];
+
+  @OneToOne(() => DocumentsIdentiteEntity, document => document.user, { eager: true })
+  document_identite: DocumentsIdentiteEntity;
+
 
 }
