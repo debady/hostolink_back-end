@@ -71,6 +71,15 @@ export class ThematiqueDiscussionService {
     return savedMessage;
   }
 
+
+  async getAllThematiques(): Promise<Thematique[]> {
+  return this.thematiqueRepo.find({
+    relations: ['administrateur'], // ✅ ceci est crucial
+    order: { date_ajout: 'DESC' },
+  });
+}
+
+
   // ✅ Créer une thématique de discussion
   async createThematique(dto: CreateThematiqueDto): Promise<Thematique> {
     const admin = await this.adminRepo.findOneBy({

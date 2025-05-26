@@ -19,10 +19,10 @@ export class CreateThematiqueDto {
   image?: string;
 
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @IsInt()
-  @IsOptional()
+  @IsNotEmpty()
   nbre_expert?: number;
 }

@@ -21,6 +21,12 @@ export class ThematiqueDiscussionController {
     return this.thematiqueService.createThematique(dto);
   }
 
+  @Get()
+  async getAllThematiques() {
+  return this.thematiqueService.getAllThematiques();
+  }
+
+
   @Post('/messages')
   async createMessage(@Body() dto: CreateMessageDto) {
     return this.thematiqueService.createMessage(dto);
