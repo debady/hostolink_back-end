@@ -418,6 +418,7 @@ FOREIGN KEY (id_user_etablissement_sante)
 REFERENCES user_etablissement_sante(id_user_etablissement_sante)
 ON DELETE CASCADE;
 
+---------------SOME |  20 Mai 2025 ------------ 
 ALTER TABLE publication DROP COLUMN id_publication;
 ALTER TABLE publication ADD COLUMN id_publication SERIAL PRIMARY KEY;
 ALTER TABLE commentaire 
@@ -425,5 +426,14 @@ ALTER COLUMN id_commentaire ADD GENERATED ALWAYS AS IDENTITY;
 ALTER TABLE publication ALTER COLUMN id_admin_gestionnaire DROP NOT NULL;
 
 
----------------SOME |  20 Mai 2025 ------------ 
 
+--------------- lundi  26 mai 2026 -------------
+ alter table documents_identite alter url_photo_profile drop not null;
+ ALTER TABLE utilisateur
+ADD COLUMN donnees_completes boolean DEFAULT false;
+
+
+// deja definris dans mais facile d'accès dans ici dans a revoir plus tard 
+
+ALTER TABLE utilisateur
+ADD COLUMN monnaie_locale varchar(50) DEFAULT 'XOF';

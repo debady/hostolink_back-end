@@ -35,6 +35,7 @@ import { ConversationsModule } from './Discussion_agent_client/conversations/con
 import { MessagesAssistantClientImageModule } from './Discussion_agent_client/messages_assistant_client_image/messages_assistant_client_image.module';
 import { AppelVideoModule } from './appel_video/appel_video_module';
 import { ImageModule } from './image/image.module';
+import { DocumentsIdentiteModule } from './documents_identite/documents_identite.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ImageModule } from './image/image.module';
       database: process.env.DATABASE_NAME || 'hostolink_bds_reviser_toutes',
       entities: [__dirname + '/**/*.entity{.ts,.js}'], 
       synchronize: false, 
+      autoLoadEntities: false,
       ssl: true,
       extra: {
         ssl: {
@@ -96,6 +98,7 @@ import { ImageModule } from './image/image.module';
     ConversationsModule,
     MessagesAssistantClientImageModule,
     AppelVideoModule,
+    DocumentsIdentiteModule
   ],
 })
 export class AppModule {}

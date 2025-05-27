@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { User } from 'src/utilisateur/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity({ name: 'documents_identite' }) // ✅ IMPORTANT
 export class DocumentsIdentiteEntity {
@@ -25,4 +26,11 @@ export class DocumentsIdentiteEntity {
 
   @CreateDateColumn({ name: 'date_envoi' })
   date_envoi: Date;
+
+
+  @ManyToOne(() => User, user => user.document_identite, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'id_user' })
+  user: User;
+
+
 }
