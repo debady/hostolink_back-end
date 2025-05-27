@@ -125,7 +125,7 @@ CREATE TABLE disponibilite_expert (
     CONSTRAINT fk_dispo_expert FOREIGN KEY (id_expert) REFERENCES expert_sante(id_expert) ON DELETE CASCADE
 );
 
-******* dans la table disponibilite_expert*********
+******* dans la table expert_sante*********
 
  ALTER TABLE appel_video
 ADD CONSTRAINT fk_appel_expert
