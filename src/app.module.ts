@@ -46,32 +46,35 @@ import { DocumentsIdentiteModule } from './documents_identite/documents_identite
     ScheduleModule.forRoot(),
 
     // ✅ Connexion PostgreSQL
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   host: process.env.DATABASE_HOST || 'localhost',
-    //   port: Number(process.env.DATABASE_PORT) || 5432,
-    //   username: process.env.DATABASE_USER || 'postgres',
-    //   password: process.env.DATABASE_PASSWORD || 'postgres',
-    //   database: process.env.DATABASE_NAME || 'hostolink',
-    // }),
-
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
+      password: process.env.DATABASE_PASSWORD || 'postgres',
       database: process.env.DATABASE_NAME || 'hostolink_bds_reviser_toutes',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'], 
-      synchronize: false, 
-      autoLoadEntities: false,
-      ssl: true,
-      extra: {
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      },
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: false,
+      autoLoadEntities: true,
     }),
+
+    // TypeOrmModule.forRoot({
+    //   type: 'postgres',
+    //   host: process.env.DATABASE_HOST || 'localhost',
+    //   port: Number(process.env.DATABASE_PORT) || 5432,
+    //   username: process.env.DATABASE_USER || 'postgres',
+    //   password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
+    //   database: process.env.DATABASE_NAME || 'hostolink_bds_reviser_toutes',
+    //   entities: [__dirname + '/**/*.entity{.ts,.js}'], 
+    //   synchronize: false, 
+    //   autoLoadEntities: false,
+    //   ssl: true,
+    //   extra: {
+    //     ssl: {
+    //       rejectUnauthorized: false,
+    //     },
+    //   },
+    // }),
 
 
     AuthModule,

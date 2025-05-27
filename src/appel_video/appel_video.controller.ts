@@ -5,6 +5,7 @@ import { AppelVideo } from './entities/appel_video.entity';
 import { TerminerAppelDto } from './dto/terminer-appel.dto';
 import { UpdateAppelStatusDto } from './dto/update-appel-video.dto';
 import { MajDisponibiliteDto } from './dto/disponibilite-expert.dto';
+import { RefusAppelDto } from './dto/refuse-appel_video.dto';
 
 
 @Controller('appel-video')
@@ -66,6 +67,40 @@ async listerExpertsConnectes() {
 @Get('en-attente/:id_expert')
 async getAppelsEnAttente(@Param('id_expert') id_expert: number) {
   return this.appelService.appelsEnAttentePourExpert(id_expert);
+}
+
+@Post('accepter/:id_appel')
+async accepterAppel(@Param('id_appel') id_appel: string) {
+  return this.appelService.accepterAppel(id_appel.trim());
+}
+
+
+@Post('terminer-par-expert/:id_appel')
+async terminerParExpert(
+  @Param('id_appel') id_appel: string,
+  @Body() dto: TerminerAppelDto,
+) {
+  return this.appelService.terminerAppelParExpert(id_appel.trim(), dto);
+}
+
+
+@Get('historique-expert/:id_expert')
+async getHistoriqueExpert(@Param('id_expert') id_expert: number) {
+  return this.appelService.historiqueAppelsExpert(id_expert);
+}
+
+@Patch('refuser/:id_appel')
+async refuserAppel(
+  @Param('id_appel') id_appel: string,
+  @Body() dto: RefusAppelDto,
+) {
+  return this.appelService.refuserAppel(id_appel.trim(), dto);
+}
+
+
+@Get('en-cours/:id_expert')
+async verifierAppelEnCours(@Param('id_expert') id_expert: number) {
+  return this.appelService.verifierAppelEnCoursPourExpert(id_expert);
 }
 
 }

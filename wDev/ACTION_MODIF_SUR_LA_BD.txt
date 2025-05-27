@@ -428,8 +428,22 @@ ALTER TABLE publication ALTER COLUMN id_admin_gestionnaire DROP NOT NULL;
 
 
 --------------- lundi  26 mai 2026 -------------
- alter table documents_identite alter url_photo_profile drop not null;
- ALTER TABLE utilisateur
+
+
+CREATE TABLE IF NOT EXISTS documents_identite (
+  id_document SERIAL PRIMARY KEY,
+  id_user UUID NOT NULL,
+  type_document VARCHAR(50) NOT NULL,
+  url_recto TEXT NOT NULL,
+  url_verso TEXT,
+  statut_validation VARCHAR(20) DEFAULT 'en_attente',
+  date_envoi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  url_photo_profile TEXT,
+  CONSTRAINT fk_user FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE
+);
+
+alter table documents_identite alter url_photo_profile drop not null;
+ALTER TABLE utilisateur
 ADD COLUMN donnees_completes boolean DEFAULT false;
 
 
