@@ -65,12 +65,12 @@ import { DocumentsIdentiteModule } from './documents_identite/documents_identite
       entities: [__dirname + '/**/*.entity{.ts,.js}'], 
       synchronize: false, 
       autoLoadEntities: false,
-      ssl: true,
-      extra: {
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      },
+      ssl: false,
+      // extra: {
+      //   ssl: {
+      //     rejectUnauthorized: false,
+      //   },
+      // },
     }),
 
 

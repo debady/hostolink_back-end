@@ -151,7 +151,7 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
             moyen: moyenEnvoyerFormatted,
             otp, // ✅ affiché dans la réponse
           };
-        }
+        }else{
     
         // 🟣 Email → envoyer normalement (tu peux garder l’envoi réel si tu veux)
         return {
@@ -160,6 +160,7 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
           moyen: moyenEnvoyerFormatted,
           otp
         };
+        }
       } catch (error) {
         console.error("❌ Erreur generate-otp:", error);
         throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");
