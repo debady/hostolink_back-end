@@ -1,8 +1,8 @@
 import { IsOptional, IsString } from 'class-validator';
 
-export class TerminerAppelDto {
+export class RefusAppelDto {
   @IsOptional()
   @IsString()
-  compte_rendu: string | null;
+  motif?: string;
 }
 
