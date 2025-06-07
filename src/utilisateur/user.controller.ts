@@ -38,13 +38,56 @@ export class UserController {
 
   // ✅ Définition du mot de passe après inscription
 // ✅ Définition du mot de passe + génération immédiate d'un OTP
+// @Post('define-password')
+// async definePassword(@Body() registerUserDto: RegisterUserDto) {
+//   const identifier = registerUserDto.identifier?.trim();
+//   const password = registerUserDto.password?.trim();
+
+//   if (!identifier || !password) {
+//     throw new BadRequestException('Identifiant et mot de passe sont obligatoires');
+//   }
+
+//   try {
+//     const success = await this.userService.setUserPassword(identifier, password);
+
+//     if (!success) {
+//       throw new InternalServerErrorException("Échec de la mise à jour du mot de passe.");
+//     }
+
+//     // ✅ Déterminer si c'est un email ou un téléphone
+//     const moyen: MoyenEnvoiEnum = identifier.includes('@') ? MoyenEnvoiEnum.EMAIL : MoyenEnvoiEnum.SMS;
+    
+
+//     // ✅ Générer automatiquement un OTP
+//     const { otp } = await this.userService.generateOtp(identifier, moyen);
+
+//     // ✅ Retourner la réponse
+//     return {
+//       success: true,
+//       message: `Mot de passe défini. Un OTP a été envoyé via ${moyen}.${otp}`,
+//       // otp: moyen === MoyenEnvoiEnum.SMS ? otp : undefined, // on affiche le code uniquement si SMS
+//     };
+
+//   } catch (error) {
+//     console.error("❌ Erreur define-password:", error);
+//     throw new InternalServerErrorException(error.message || "Erreur lors de la mise à jour du mot de passe");
+//   }
+// }
+
 @Post('define-password')
 async definePassword(@Body() registerUserDto: RegisterUserDto) {
-  const identifier = registerUserDto.identifier?.trim();
+  let identifier = registerUserDto.identifier?.trim();
   const password = registerUserDto.password?.trim();
 
   if (!identifier || !password) {
     throw new BadRequestException('Identifiant et mot de passe sont obligatoires');
+  }
+
+  // ✅ Formater le numéro pour Twilio (format international)
+  if (!identifier.includes('@') && !identifier.startsWith('+')) {
+    // Pour la Côte d'Ivoire, ajouter +225
+    identifier = '+225' + identifier.replace(/^0/, ''); // Retire le 0 initial
+    console.log(`📱 Numéro formaté: ${identifier}`);
   }
 
   try {
@@ -54,17 +97,16 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
       throw new InternalServerErrorException("Échec de la mise à jour du mot de passe.");
     }
 
-    // ✅ Déterminer si c'est un email ou un téléphone
     const moyen: MoyenEnvoiEnum = identifier.includes('@') ? MoyenEnvoiEnum.EMAIL : MoyenEnvoiEnum.SMS;
 
-    // ✅ Générer automatiquement un OTP
+    console.log(`🔍 Envoi OTP via ${moyen} à ${identifier}`); // Debug
+
     const { otp } = await this.userService.generateOtp(identifier, moyen);
 
-    // ✅ Retourner la réponse
     return {
       success: true,
-      message: `Mot de passe défini. Un OTP a été envoyé via ${moyen}.${otp}`,
-      // otp: moyen === MoyenEnvoiEnum.SMS ? otp : undefined, // on affiche le code uniquement si SMS
+      message: `Mot de passe défini. Un OTP a été envoyé via ${moyen}.`,
+      debug: moyen === MoyenEnvoiEnum.SMS ? otp : undefined, // Pour tester
     };
 
   } catch (error) {

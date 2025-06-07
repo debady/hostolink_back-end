@@ -36,6 +36,7 @@ import { MessagesAssistantClientImageModule } from './Discussion_agent_client/me
 import { AppelVideoModule } from './appel_video/appel_video_module';
 import { ImageModule } from './image/image.module';
 import { DocumentsIdentiteModule } from './documents_identite/documents_identite.module';
+import { SmsModule } from './utilisateur/sms.module';
 
 @Module({
   imports: [
@@ -98,7 +99,8 @@ import { DocumentsIdentiteModule } from './documents_identite/documents_identite
     ConversationsModule,
     MessagesAssistantClientImageModule,
     AppelVideoModule,
-    DocumentsIdentiteModule
+    DocumentsIdentiteModule,
+    SmsModule
   ],
 })
 export class AppModule {}

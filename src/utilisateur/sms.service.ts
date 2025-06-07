@@ -17,26 +17,35 @@ export class SmsService {
   }
 
   async sendOtpSms(phoneNumber: string, otpCode: string): Promise<void> {
-    const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+  const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+  
+  console.log(`🔍 Tentative SMS vers: ${phoneNumber}`);
+  console.log(`🔍 Depuis le numéro: ${fromNumber}`);
+  
+  try {
+    const message = await this.client.messages.create({
+      body: `Akwaba, Voici le code de vérification: ${otpCode}. Valable 5 min.`,
+      from: fromNumber,
+      to: phoneNumber,
+    });
 
-    if (!fromNumber) {
-      throw new InternalServerErrorException('❌ Numéro Twilio manquant dans .env');
-    }
-
-    try {
-      await this.client.messages.create({
-        body: `Akwaba, Voici le code de vérification que vous avez demandé
-        
-      ${otpCode}. 
-        
-      Merci de ne pas le partager. Ce code est valable 5 Min après reception.`,
-        from: fromNumber,
-        to: phoneNumber,
-      });
-      console.log(`✅ SMS envoyé à ${phoneNumber}`);
-    } catch (error) {
-      console.error('❌ Erreur Twilio:', error);
-      throw new InternalServerErrorException("Échec d'envoi du SMS");
-    }
+    setTimeout(async () => {
+  const finalMessage = await this.client.messages(message.sid).fetch();
+  console.log(`📊 Statut final: ${finalMessage.status}`);
+  if (finalMessage.errorCode) {
+    console.error(`❌ Erreur Twilio: ${finalMessage.errorCode} - ${finalMessage.errorMessage}`);
   }
+}, 5000);
+
+    
+
+    
+    
+    console.log(`✅ SMS envoyé! SID: ${message.sid}, Status: ${message.status}`);
+  } catch (error) {
+    console.error('❌ Détail erreur Twilio:', error.message);
+    console.error('❌ Code erreur:', error.code);
+    throw new InternalServerErrorException(`Twilio Error: ${error.message}`);
+  }
+}
 }
