@@ -11,8 +11,8 @@ export class EmailService {
       port: 587,
       secure: false,
       auth: {
-        user: 'startup@explora-studio.com',
-        pass: 'Deb@dy4470#Deb@dy4470#', 
+        user: 'business@dreams-houses.com',
+        pass: 'Deb@dy4470##Deb@dy4470##Deb@dy4470##Deb@dy4470##', 
       },
     });
   }
@@ -20,7 +20,7 @@ export class EmailService {
   async sendOtpEmail(email: string, otp: string): Promise<void> {
     try {
       const mailOptions = {
-        from: `"Explora Studio" <startup@explora-studio.com>`,
+        from: `"Explora Studio" <business@dreams-houses.com>`,
         to: email,
         subject: '🔐 Code de vérification - Hostolink',
         html: `
@@ -62,7 +62,7 @@ export class EmailService {
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      //console.log(`✅ Email OTP envoyé à ${email} | ID: ${info.messageId}`);
+      console.log(`✅ Email OTP envoyé à ${email} | ID: ${info.messageId}`);
     } catch (error) {
       console.error('❌ Erreur lors de l’envoi de l’email :', error);
       throw new InternalServerErrorException('Erreur lors de l’envoi de l’email');
