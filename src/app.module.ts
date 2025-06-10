@@ -38,6 +38,7 @@ import { CommentaireModule } from './commentaire/commentaire.module';
 import { PartageModule } from './partage/partage.module';
 import { PublicationModule } from './publication/publication.module';
 import { SocialCloudinaryModule } from './social_cloudinary/social_cloudinary.module';
+import { DocumentsIdentiteModule } from './documents_identite/documents_identite.module';
 
 @Module({
   imports: [
@@ -85,6 +86,8 @@ import { SocialCloudinaryModule } from './social_cloudinary/social_cloudinary.mo
     MessageAssistantClientModule,
     ConversationsModule,
     MessagesAssistantClientImageModule,
+
+    DocumentsIdentiteModule,
 
     CommentaireModule,
     PartageModule,

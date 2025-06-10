@@ -220,3 +220,8 @@ FIREBASE_CREDENTIAL_PATH=src\config1\hostolink-sante-firebase-adminsdk-fbsvc-10c
 # QR_DYNAMIC_SECRET=your_dynamic_qr_secret_key
 
 ; NODE_ENV=development
+
+
+
+
+docker exec -it sohapi psql -U postgres -d hostolink_bd

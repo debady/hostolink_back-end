@@ -1,15 +1,12 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Logger, UseGuards, ValidationPipe, UsePipes, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { PublicationService } from './publication.service';
-// import { CreatePublicationDto } from './dto/create-publication.dto';
 import { Publication } from './entities/publication.entity';
-// import { AnyAuthGuard } from 'src/auth/any-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
-import { AuthGuard } from '@nestjs/passport/dist/auth.guard';
-import { JwtAdminGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAdminGuard, JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 // import { CreatePublicationDto } from './dto/create-publication.dto';
 
 @Controller('publication')
-// @UseGuards(AuthGuard)
+@UseGuards(JwtAuthGuard)
 export class PublicationController {
   private readonly logger = new Logger(PublicationController.name);
 
@@ -17,7 +14,7 @@ export class PublicationController {
 
 
    @Post('create')
-  //  @UseGuards(AuthGuard)
+   @UseGuards(JwtAuthGuard)
       @UseInterceptors(FileInterceptor('image'))
       async createPublication(
       @UploadedFile() image: Express.Multer.File,
@@ -28,11 +25,13 @@ export class PublicationController {
 
 
   @Get('recupations')
+  @UseGuards(JwtAuthGuard)
   async findAll(): Promise<Publication[]> {
     return this.publicationService.findAll();
   }
 
   @Get(':id')
+     @UseGuards(JwtAuthGuard)
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Publication> {
     return this.publicationService.findOne(id);
   }
@@ -61,15 +60,31 @@ export class PublicationController {
     return this.publicationService.findByExpert(id_expert);
   }
 
+
+  // liké une publication
   @Post(':id/like')
+     @UseGuards(JwtAuthGuard)
   async likePost(@Param('id', ParseIntPipe) id: number): Promise<Publication> {
     return this.publicationService.likePost(id);
   }
 
+
+  // disliké une publication
   @Post(':id/dislike')
+     @UseGuards(JwtAuthGuard)
   async dislikePost(@Param('id', ParseIntPipe) id: number): Promise<Publication> {
     return this.publicationService.dislikePost(id);
   }
+
+
+  // Récupérer les likes d'une publication par l'id de la publication
+  @Get(':id/likes/count')
+@UseGuards(JwtAuthGuard)
+async getLikesCount(@Param('id', ParseIntPipe) id: number): Promise<{ compteur_like: number }> {
+  return this.publicationService.getLikesCount(id);
+}
+
+
 }
 
 

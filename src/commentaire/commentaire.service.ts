@@ -108,4 +108,16 @@ export class CommentaireService {
       order: { date_commentaire: 'DESC' }
     });
   }
+
+// recuperer le nombre de commentaire par publication
+  async getCommentsCount(id_publication: number): Promise<{ commentaires_count: number }> {
+  const count = await this.commentaireRepository.count({
+    where: { publication: { id_publication } }
+  });
+
+  return { commentaires_count: count };
+}
+
+
+
 }

@@ -378,4 +378,15 @@ ALTER TABLE publication DROP COLUMN id_publication;
 ALTER TABLE publication ADD COLUMN id_publication SERIAL PRIMARY KEY;
 
 
+---------------SOME |  27 Mai 2025 ------------ 
+DELETE FROM commentaire;
+ALTER TABLE commentaire
+ALTER COLUMN id_user TYPE uuid USING id_user::uuid;
 
+ALTER TABLE partage DROP CONSTRAINT IF EXISTS fk_partage_user;
+ALTER TABLE partage
+ALTER COLUMN id_user TYPE uuid USING '00000000-0000-0000-0000-000000000000'::uuid;
+ALTER TABLE partage
+ALTER COLUMN id_partage ADD GENERATED ALWAYS AS IDENTITY;
+
+alter table publication alter column titre_publication drop not null;

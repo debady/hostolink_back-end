@@ -72,6 +72,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
       return this.expertSanteService.deleteExpertByEtablissement(id, req.user.id_user_etablissement_sante);
     }
 
+    // Dans votre controller expert-sante
+// @Patch('update-profile')
+// @UseGuards(JwtExpertGuard)
+// async updateProfile(@Body() dto: UpdateExpertProfileDto, @Req() req) {
+//   return this.expertSanteService.updateProfile(req.user.id_expert, dto);
+// }
+
 
   @Patch('avatar')
   @UseGuards(JwtExpertGuard)
