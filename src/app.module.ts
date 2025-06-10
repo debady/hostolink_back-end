@@ -89,6 +89,7 @@ import { DocumentsIdentiteModule } from './documents_identite/documents_identite
 
     DocumentsIdentiteModule,
 
+    
     CommentaireModule,
     PartageModule,
     PublicationModule,

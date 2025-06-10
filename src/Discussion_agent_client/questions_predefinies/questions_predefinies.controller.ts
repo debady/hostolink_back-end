@@ -36,19 +36,19 @@ export class QuestionController {
     return this.questionService.findOne(+id);
   }
 
-  @Post()
+  @Post('create')
   @UseGuards(JwtAgentAuthGuard)
   async create(@Body() createQuestionDto: CreateQuestionDto) {
     return this.questionService.create(createQuestionDto);
   }
 
-  @Patch(':id')
+  @Patch(':id/modifier-question')
   @UseGuards(JwtAgentAuthGuard)
   async update(@Param('id') id: string, @Body() updateQuestionDto: UpdateQuestionDto) {
     return this.questionService.update(+id, updateQuestionDto);
   }
 
-  @Delete(':id')
+  @Delete(':id/supprimer')
   @UseGuards(JwtAgentAuthGuard)
   async remove(@Param('id') id: string) {
     await this.questionService.remove(+id);
