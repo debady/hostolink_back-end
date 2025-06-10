@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { Publication } from 'src/publication/entities/publication.entity';
+import { Publication } from 'src/1-Module_reseaux_sociale/publication/entities/publication.entity';
 
 @Entity('partage')
 export class Partage {

@@ -41,7 +41,7 @@ cloudinary.config({
 });
 
 @Injectable()
-export class SocialCloudinaryService {
+export class SocialCloudinaryServicess {
   async uploadImage(file: Express.Multer.File): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!file) return reject(new Error('Aucun fichier reçu.'));

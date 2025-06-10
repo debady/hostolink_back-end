@@ -25,7 +25,7 @@ import { TransactionFraisModule } from './transaction-frais/transaction-frais.mo
 import { TransactionInterneModule } from './transaction-interne/transaction-interne.module';
 
 // ✅ Chat thématique
-import { ThematiqueDiscussionModule } from './thematique_discussion/thematique_discussion.module';
+import { ThematiqueDiscussionModule } from './1-Module_reseaux_sociale/thematique_discussion/thematique_discussion.module';
 
 // ✅ Agent assistant (chat IA)
 import { AgentAssistantModule } from './agent-assistant/agent-assistant.module';
@@ -37,6 +37,10 @@ import { AppelVideoModule } from './appel_video/appel_video_module';
 import { ImageModule } from './image/image.module';
 import { DocumentsIdentiteModule } from './documents_identite/documents_identite.module';
 import { SmsModule } from './utilisateur/sms.module';
+import { SocialCloudinaryModule } from './social_cloudinary/social_cloudinary.module';
+import { PublicationModule } from './1-Module_reseaux_sociale/publication/publication.module';
+import { PartageModule } from './1-Module_reseaux_sociale/partage/partage.module';
+import { CommentaireModule } from './1-Module_reseaux_sociale/commentaire/commentaire.module';
 
 @Module({
   imports: [
@@ -103,7 +107,11 @@ import { SmsModule } from './utilisateur/sms.module';
     MessagesAssistantClientImageModule,
     AppelVideoModule,
     DocumentsIdentiteModule,
-    SmsModule
+    SmsModule,
+    SocialCloudinaryModule,
+    PublicationModule,
+    PartageModule,
+    CommentaireModule
   ],
 })
 export class AppModule {}

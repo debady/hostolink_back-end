@@ -1,11 +1,11 @@
 import { Annonce } from 'src/annonce/entities/annonce.entity';
-import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
+import { Commentaire } from 'src/1-Module_reseaux_sociale/commentaire/entities/commentaire.entity';
 import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
 import { QuestionsPredefinies } from 'src/Discussion_agent_client/questions_predefinies/entities/question-predefinie.entity';
 import { ListeNumeroEtablissementSante } from 'src/liste_etablissement/entities/liste_numero_vert_etablissement_sante.entity';
-import { Partage } from 'src/partage/entities/partage.entity';
-import { Publication } from 'src/publication/entities/publication.entity';
-import { Thematique } from 'src/thematique_discussion/entities/thematique.entity';
+import { Partage } from 'src/1-Module_reseaux_sociale/partage/entities/partage.entity';
+import { Publication } from 'src/1-Module_reseaux_sociale/publication/entities/publication.entity';
+import { Thematique } from 'src/1-Module_reseaux_sociale/thematique_discussion/entities/thematique.entity';
 
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
 

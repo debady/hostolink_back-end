@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
-import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
-import { Partage } from 'src/partage/entities/partage.entity';
+import { Commentaire } from 'src/1-Module_reseaux_sociale/commentaire/entities/commentaire.entity';
+import { Partage } from 'src/1-Module_reseaux_sociale/partage/entities/partage.entity';
 
 @Entity('publication')
 export class Publication { 

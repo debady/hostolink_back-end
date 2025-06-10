@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Publication } from './entities/publication.entity';
-import { SocialCloudinaryService } from 'src/social_cloudinary/social_cloudinary.service';
+import { SocialCloudinaryServicess } from 'src/social_cloudinary/social_cloudinary.service';
 
 
 
@@ -19,7 +19,7 @@ export class PublicationService {
   constructor(
     @InjectRepository(Publication)
     private readonly publicationRepository: Repository<Publication>,
-    private readonly SocialCloudinaryService: SocialCloudinaryService,
+    private readonly SocialCloudinaryService: SocialCloudinaryServicess,
   ) {}
 
 
