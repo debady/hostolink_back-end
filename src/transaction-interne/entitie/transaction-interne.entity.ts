@@ -5,7 +5,8 @@ export enum TransactionStatus {
   EN_ATTENTE = 'en attente',
   REUSSIE = 'réussie',
   ECHOUEE = 'échouée',
-  ANNULEE = 'annulée'
+  ANNULEE = 'annulée',
+  REMBOURSEE = 'remboursée'
 }
 
 export enum TransactionType {

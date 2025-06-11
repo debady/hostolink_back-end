@@ -7,6 +7,7 @@ import { PayWithQrDto } from './payer-avec/payer-avec-qr.dto';
 import { PayWithPhoneDto } from './payer-avec/payer-avec-telephone.dto';
 import { RollbackTransactionDto } from './rollback-dto/rollback-transaction.dto';
 import { PayWithEmailDto } from './payer-avec/payer-avec-email.dto';
+import { CreateTransactionDto } from './dto/transaction-interne.dto';
 
 @Controller('transaction')
 export class TransactionInterneController {
@@ -33,6 +34,7 @@ export class TransactionInterneController {
   
 
 
+  
   
   @Get(':id')
   @UseGuards(JwtAdminGuard)
@@ -144,6 +146,10 @@ export class TransactionInterneController {
     return this.TransactionInterneService.getUserInfoFromQrCode(token);
   }
 
-
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() createTransactionDto: CreateTransactionDto) {
+    return this.TransactionInterneService.createTransaction(createTransactionDto);
+  }
 
 }

@@ -39,6 +39,7 @@ export class TransactionInterneService {
     private readonly dataSource: DataSource,
     private readonly moduleRef: ModuleRef
   ) {}
+  
 
 
   // Récupérer toutes les transactions d'un utilisateur avec les noms des destinataires
@@ -1145,7 +1146,15 @@ async getUserInfoFromQrCode(token: string) {
   };
 }
 
+ async createTransaction(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
+    const transaction = this.transactionRepository.create({
+      ...createTransactionDto,
+      statut: TransactionStatus.EN_ATTENTE,
+      date_transaction: new Date(),
+    });
 
-
+    return this.transactionRepository.save(transaction);
+  }
+ 
 
 }

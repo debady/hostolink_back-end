@@ -57,7 +57,7 @@ import { CommentaireModule } from './1-Module_reseaux_sociale/commentaire/commen
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'postgres',
-      database: process.env.DATABASE_NAME || 'hostolink_bd',
+      database: process.env.DATABASE_NAME || 'hostolink_bds_reviser_toutes',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false,
       autoLoadEntities: true,
