@@ -36,43 +36,6 @@ export class UserController {
     }
   }
 
-  // ✅ Définition du mot de passe après inscription
-// ✅ Définition du mot de passe + génération immédiate d'un OTP
-// @Post('define-password')
-// async definePassword(@Body() registerUserDto: RegisterUserDto) {
-//   const identifier = registerUserDto.identifier?.trim();
-//   const password = registerUserDto.password?.trim();
-
-//   if (!identifier || !password) {
-//     throw new BadRequestException('Identifiant et mot de passe sont obligatoires');
-//   }
-
-//   try {
-//     const success = await this.userService.setUserPassword(identifier, password);
-
-//     if (!success) {
-//       throw new InternalServerErrorException("Échec de la mise à jour du mot de passe.");
-//     }
-
-//     // ✅ Déterminer si c'est un email ou un téléphone
-//     const moyen: MoyenEnvoiEnum = identifier.includes('@') ? MoyenEnvoiEnum.EMAIL : MoyenEnvoiEnum.SMS;
-    
-
-//     // ✅ Générer automatiquement un OTP
-//     const { otp } = await this.userService.generateOtp(identifier, moyen);
-
-//     // ✅ Retourner la réponse
-//     return {
-//       success: true,
-//       message: `Mot de passe défini. Un OTP a été envoyé via ${moyen}.${otp}`,
-//       // otp: moyen === MoyenEnvoiEnum.SMS ? otp : undefined, // on affiche le code uniquement si SMS
-//     };
-
-//   } catch (error) {
-//     console.error("❌ Erreur define-password:", error);
-//     throw new InternalServerErrorException(error.message || "Erreur lors de la mise à jour du mot de passe");
-//   }
-// }
 
 @Post('define-password')
 async definePassword(@Body() registerUserDto: RegisterUserDto) {
@@ -115,6 +78,42 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
   }
 }
 
+    @Post('generate')
+    async generateOtp(@Body() body: { identifier: string; moyen_envoyer: MoyenEnvoiEnum }) {
+      if (!body.identifier?.trim()) {
+        throw new BadRequestException("L'identifiant est requis");
+      }
+    
+      try {
+        const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
+        console.log(`📩 Génération OTP pour ${body.identifier} via ${moyenEnvoyerFormatted}`);
+    
+        const { otp } = await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
+    
+        // 🔵 Si c'est un téléphone ➔ afficher simplement le code
+        if (moyenEnvoyerFormatted === MoyenEnvoiEnum.SMS || moyenEnvoyerFormatted === MoyenEnvoiEnum.TELEPHONE) {
+          return {
+            success: true,
+            message: "OTP généré avec succès (affiché uniquement en mode SMS)",
+            moyen: moyenEnvoyerFormatted,
+            otp, // ✅ affiché dans la réponse
+          };
+        }else{
+    
+        // 🟣 Email → envoyer normalement (tu peux garder l’envoi réel si tu veux)
+        return {
+          success: true,
+          message: "OTP envoyé par email avec succès",
+          moyen: moyenEnvoyerFormatted,
+          otp
+        };
+        }
+      } catch (error) {
+        console.error("❌ Erreur generate-otp:", error);
+        throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");
+      }
+    }
+
 
   // ✅ Vérification du PIN de connexion
   @Post('verify-pin')
@@ -148,7 +147,7 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
       const identifier = body.identifier.trim();
       const otpCode = body.otpCode.trim();
   
-      //console.log(`📩 Vérification OTP pour ${identifier}`);
+      console.log(`📩 Vérification OTP pour ${identifier}`);
   
       const result = await this.userService.verifyOtp(identifier, otpCode);
   
@@ -162,54 +161,14 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
       return {
         success: true,
         message: result.message,
-        token, // ✅ maintenant le front Flutter pourra rediriger
+        token, 
       };
     } catch (error) {
       console.error("❌ Erreur verify-otp:", error);
       return { success: false, message: "Échec de la vérification de l'OTP" };
     }
   }
-  
-  
 
-
-    @Post('generate')
-    async generateOtp(@Body() body: { identifier: string; moyen_envoyer: MoyenEnvoiEnum }) {
-      if (!body.identifier?.trim()) {
-        throw new BadRequestException("L'identifiant est requis");
-      }
-    
-      try {
-        const moyenEnvoyerFormatted = body.moyen_envoyer.toLowerCase() as MoyenEnvoiEnum;
-        //console.log(`📩 Génération OTP pour ${body.identifier} via ${moyenEnvoyerFormatted}`);
-    
-        const { otp } = await this.userService.generateOtp(body.identifier.trim(), moyenEnvoyerFormatted);
-    
-        // 🔵 Si c'est un téléphone ➔ afficher simplement le code
-        if (moyenEnvoyerFormatted === MoyenEnvoiEnum.SMS || moyenEnvoyerFormatted === MoyenEnvoiEnum.TELEPHONE) {
-          return {
-            success: true,
-            message: "OTP généré avec succès (affiché uniquement en mode SMS)",
-            moyen: moyenEnvoyerFormatted,
-            otp, // ✅ affiché dans la réponse
-          };
-        }else{
-    
-        // 🟣 Email → envoyer normalement (tu peux garder l’envoi réel si tu veux)
-        return {
-          success: true,
-          message: "OTP envoyé par email avec succès",
-          moyen: moyenEnvoyerFormatted,
-          otp
-        };
-        }
-      } catch (error) {
-        console.error("❌ Erreur generate-otp:", error);
-        throw new InternalServerErrorException(error.message || "Erreur lors de la génération de l'OTP");
-      }
-    }
-    
-    
 
   // ✅ Récupérer les infos de l'utilisateur connecté
   @Get('user/me')
@@ -231,9 +190,9 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
     @Body() updateProfileDto: UpdateProfileDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    const id_user = req.user.id_user; // 🔥 récupéré du token, pas du body
-    //console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
-    //console.log('🔵 id_user extrait du token:', id_user);
+    const id_user = req.user.id_user; 
+    console.log('🟢 Image reçue:', file ? file.originalname : 'Aucune image reçue');
+    console.log('🔵 id_user extrait du token:', id_user);
   
     return await this.userService.updateUserProfile(id_user, updateProfileDto, file);
   }
@@ -303,7 +262,7 @@ async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifi
   @Post('update-fcm-token')
   async updateFcmToken(@Req() req, @Body('fcm_token') fcm_token: string) {
     const userId = req.user.id_user;
-return this.userService.updateFcmToken(userId, fcm_token);
+    return this.userService.updateFcmToken(userId, fcm_token);
   }
 
 }
