@@ -144,6 +144,20 @@ FOREIGN KEY (id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE;
 
 
 
+****************11juin2025*********
+CREATE TABLE transactions_user_es (
+  id SERIAL PRIMARY KEY,
+  id_user UUID NOT NULL,                             
+  id_etablissement INTEGER NOT NULL,                 
+  qr_code_valeur TEXT NOT NULL,                    
+  statut VARCHAR(50) NOT NULL DEFAULT 'en_attente',   
+  montant NUMERIC(15, 2) NOT NULL,                   
+  date_creation TIMESTAMP DEFAULT now(),             
+  date_mise_a_jour TIMESTAMP DEFAULT now()           
+);
+
+
+
 
 
 

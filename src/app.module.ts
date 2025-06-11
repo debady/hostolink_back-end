@@ -41,6 +41,7 @@ import { SocialCloudinaryModule } from './social_cloudinary/social_cloudinary.mo
 import { PublicationModule } from './1-Module_reseaux_sociale/publication/publication.module';
 import { PartageModule } from './1-Module_reseaux_sociale/partage/partage.module';
 import { CommentaireModule } from './1-Module_reseaux_sociale/commentaire/commentaire.module';
+import { TransactionModule } from './transaction_user_es/transaction.module';
 
 @Module({
   imports: [
@@ -123,7 +124,8 @@ import { CommentaireModule } from './1-Module_reseaux_sociale/commentaire/commen
     SocialCloudinaryModule,
     PublicationModule,
     PartageModule,
-    CommentaireModule
+    CommentaireModule,
+    TransactionModule
   ],
 })
 export class AppModule {}
