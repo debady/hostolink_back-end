@@ -6,8 +6,13 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { JwtEtablissementAuthGuard } from 'src/auth/jwt-etablissement.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
+import { Request } from 'express';
 
+export interface AuthenticatedRequest extends Request {
+  user_etablissement?: number; // Remplacez 'any' par le type réel de votre utilisateur si possible
+}
 
 @Controller('user-etablissement-sante')
 export class UserEtablissementSanteController {
@@ -103,6 +108,34 @@ export class UserEtablissementSanteController {
     return this.userEtablissementSanteService.uploadOrUpdateAvatar(id, file);
   }
 
+  // ✅ Récupérer tous les emails
+  @Get('all-etablissement-emails')
+  @UseGuards(JwtAuthGuard)
+  async getAllEmailsForEs(@Req() req: AuthenticatedRequest) {
+    return await this.userEtablissementSanteService.getAllEmailsForEs();
+  }
 
+  // ✅ Récupérer tous les téléphones
+  @Get('all-etablissement-telephones')
+  @UseGuards(JwtAuthGuard)
+  async getAllTelephonesForEs(@Req() req: AuthenticatedRequest) {
+    return await this.userEtablissementSanteService.getAllTelephonesForEs();
+  }
 
+  // ✅ Vérifier si un email ou numéro existe
+  @Post('check-etablissement-exist')
+  @UseGuards(JwtAuthGuard)
+  async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifier: string }) {
+    if (!body.identifier?.trim()) {
+      throw new BadRequestException("Identifiant requis.");
+    }
+
+    const user_etablissement_sante = await this.userEtablissementSanteService.findEtablissementByIdentifier(body.identifier.trim());
+    if (user_etablissement_sante) {
+      return { success: true, message: "Identifiant trouvé", data: user_etablissement_sante };
+    } else {
+      return { success: false, message: "Identifiant non trouvé" };
+    }
+
+  }
 }

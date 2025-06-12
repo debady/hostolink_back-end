@@ -33,15 +33,12 @@ import { QuestionsPredefiniesModule } from './Discussion_agent_client/questions_
 import { MessageAssistantClientModule } from './Discussion_agent_client/message_assistant_client/message_assistant_client.module';
 import { ConversationsModule } from './Discussion_agent_client/conversations/conversations.module';
 import { MessagesAssistantClientImageModule } from './Discussion_agent_client/messages_assistant_client_image/messages_assistant_client_image.module';
-import { AppelVideoModule } from './appel_video/appel_video_module';
 import { ImageModule } from './image/image.module';
-import { DocumentsIdentiteModule } from './documents_identite/documents_identite.module';
-import { SmsModule } from './utilisateur/sms.module';
-import { SocialCloudinaryModule } from './social_cloudinary/social_cloudinary.module';
-import { PublicationModule } from './1-Module_reseaux_sociale/publication/publication.module';
-import { PartageModule } from './1-Module_reseaux_sociale/partage/partage.module';
 import { CommentaireModule } from './1-Module_reseaux_sociale/commentaire/commentaire.module';
+import { PublicationModule } from './1-Module_reseaux_sociale/publication/publication.module';
 import { TransactionModule } from './transaction_user_es/transaction.module';
+import { DocumentsIdentiteModule } from './documents_identite/documents_identite.module';
+import { PartageModule } from './1-Module_reseaux_sociale/partage/partage.module';
 
 @Module({
   imports: [
@@ -63,36 +60,6 @@ import { TransactionModule } from './transaction_user_es/transaction.module';
       synchronize: false,
       autoLoadEntities: true,
     }),
-
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   host: process.env.DATABASE_HOST || 'localhost',
-    //   port: Number(process.env.DATABASE_PORT) || 5432,
-    //   username: process.env.DATABASE_USER || 'postgres',
-    //   password: process.env.DATABASE_PASSWORD || 'postgres',
-    //   database: process.env.DATABASE_NAME || 'hostolink_bd',
-    //   entities: [__dirname + '/**/*.entity{.ts,.js}'],
-    //   synchronize: false,
-    //   autoLoadEntities: true,
-    // }),
-
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   host: process.env.DATABASE_HOST || 'localhost',
-    //   port: Number(process.env.DATABASE_PORT) || 5432,
-    //   username: process.env.DATABASE_USER || 'postgres',
-    //   password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
-    //   database: process.env.DATABASE_NAME || 'hostolink_bd',
-    //   entities: [__dirname + '/**/*.entity{.ts,.js}'], 
-    //   synchronize: false, 
-    //   autoLoadEntities: false,
-    //   ssl: true,
-    //   extra: {
-    //     ssl: {
-    //       rejectUnauthorized: false,
-    //     },
-    //   },
-    // }),
 
     // TypeOrmModule.forRoot({
     //   type: 'postgres',
@@ -136,10 +103,12 @@ import { TransactionModule } from './transaction_user_es/transaction.module';
     MessageAssistantClientModule,
     ConversationsModule,
     MessagesAssistantClientImageModule,
-    AppelVideoModule,
+
     DocumentsIdentiteModule,
-    SmsModule,
-    SocialCloudinaryModule,
+
+    
+    CommentaireModule,
+    PartageModule,
     PublicationModule,
     PartageModule,
     CommentaireModule,

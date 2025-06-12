@@ -150,4 +150,17 @@ export class PublicationService {
     }
     return this.publicationRepository.save(publication);
   }
+
+  async getLikesCount(id: number): Promise<{ compteur_like: number }> {
+  const publication = await this.publicationRepository.findOne({
+    where: { id_publication: id },
+    select: ['compteur_like']
+  });
+
+  if (!publication) {
+    throw new NotFoundException(`Publication avec l'ID ${id} non trouvée`);
+  }
+
+  return { compteur_like: publication.compteur_like };
+}
 }

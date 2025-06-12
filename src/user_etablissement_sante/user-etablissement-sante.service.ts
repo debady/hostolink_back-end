@@ -449,6 +449,37 @@ async getProfile(id: number) {
     return dernier.length ? dernier[0].id_user_etablissement_sante : null;
   }
   
+
+  // ✅ Trouve un etablissement de santé par email ou téléphone
+  async findEtablissementByIdentifier(identifier: string): Promise<UserEtablissementSante | null> {
+    return await this.userRepo.findOne({
+      where: [{ email: identifier }, { telephone: identifier }],
+    });
+  }
   
   
+    // ✅ Récupérer tous les emails des établissements de santé 
+    async getAllEmailsForEs() {
+      const user_etablissement_sante = await this.userRepo.find({
+        select: ['email'],
+        // where: { actif: true, compte_verifier: true },
+      });
+
+    return user_etablissement_sante
+      .filter(user_etablissement => user_etablissement.email)
+      .map(user_etablissement => user_etablissement.email);
+  }
+
+  // ✅ Récupérer tous les téléphones des établissements de santé 
+  async getAllTelephonesForEs() {
+    const user_etablissement_sante = await this.userRepo.find({
+      select: ['telephone'],
+      // where: { actif: true, compte_verifier: true },
+    });
+    return user_etablissement_sante
+      .filter(user_etablissement => user_etablissement.telephone)
+      .map(user_etablissement => user_etablissement.telephone);
+  }
+
+
 }

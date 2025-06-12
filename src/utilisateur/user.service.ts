@@ -332,7 +332,7 @@ export class UserService {
     };
   }
 
-// ✅ Trouve un utilisateur par email ou téléphone A ECRIS SON ENDPOINT 
+// ✅ Trouve un utilisateur par email ou téléphone A ECRIS SON ENDPOINT      
 async findUserByIdentifier(identifier: string): Promise<User | null> {
   return await this.userRepository.findOne({
     where: [{ email: identifier }, { telephone: identifier }],

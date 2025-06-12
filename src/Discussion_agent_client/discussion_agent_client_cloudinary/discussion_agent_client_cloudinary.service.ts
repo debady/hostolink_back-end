@@ -10,13 +10,13 @@ cloudinary.config({
 });
 
 @Injectable()
-export class SocialCloudinaryServicess {
+export class DiscussionAgentCloudinaryService {
   async uploadImage(file: Express.Multer.File): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!file) return reject(new Error('Aucun fichier reçu.'));
 
       const stream = cloudinary.uploader.upload_stream(
-        { folder: 'reseau-social/images-des-publications' },
+        { folder: 'Discussion-agent-client/message_en_image' },
         (error, result: UploadApiResponse) => {
           if (error) {
             console.error('❌ Erreur Cloudinary:', error);
