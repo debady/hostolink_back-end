@@ -3,13 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, MoreThan } from 'typeorm';
 import * as crypto from 'crypto';
 import { QrCodePaiementDynamique } from './entities/qr_code_paiement_dynamique.entity';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { Transaction } from './entities/transaction.entity';
 
 @Injectable()
 export class QrDynamiqueService implements OnModuleInit {
+ 
   constructor(
     private readonly dataSource: DataSource,
     @InjectRepository(QrCodePaiementDynamique)
     private readonly qrRepo: Repository<QrCodePaiementDynamique>,
+
+    @InjectRepository(Transaction)
+    private readonly transactionRepo: Repository<Transaction>,
   ) {}
 
   onModuleInit() {
@@ -131,4 +137,13 @@ export class QrDynamiqueService implements OnModuleInit {
   private generateToken(): string {
     return crypto.randomBytes(16).toString('hex');
   }
+
+  //  async createTransaction(dto: CreateTransactionDto): Promise<Transaction> {
+  //   const transaction = this.transactionRepo.create({
+  //     ...dto,
+  //     statut: 'en_attente',
+  //   });
+  //   return this.transactionRepo.save(transaction);
+  // }
+
 }

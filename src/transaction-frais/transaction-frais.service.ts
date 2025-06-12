@@ -224,19 +224,6 @@ async getStats() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   // Obtenir des statistiques pour un utilisateur spécifique
   async getUserStats(id_user: string) {
     // Statistiques par type de transaction pour cet utilisateur

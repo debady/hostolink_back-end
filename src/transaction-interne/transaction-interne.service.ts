@@ -39,7 +39,11 @@ export class TransactionInterneService {
     private readonly dataSource: DataSource,
     private readonly moduleRef: ModuleRef
   ) {}
-
+  
+ private calculerFrais(montant: number): number {
+    const tauxFrais = 0.02; // 2%
+    return Math.round(montant * tauxFrais);
+  }
 
   // Récupérer toutes les transactions d'un utilisateur avec les noms des destinataires
 async getMyTransactions(userId: string) {
@@ -1145,7 +1149,50 @@ async getUserInfoFromQrCode(token: string) {
   };
 }
 
+ async createTransaction(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
+    if (
+      !createTransactionDto.id_utilisateur_recepteur &&
+      !createTransactionDto.id_etablissement_recepteur
+    ) {
+      throw new BadRequestException(
+        'Au moins un destinataire (utilisateur ou établissement) doit être renseigné.',
+      );
+    }
 
+    const frais_preleve = this.calculerFrais(createTransactionDto.montant_envoyer);
+    const montant_recu = createTransactionDto.montant_envoyer - frais_preleve;
 
+    const transactionData = {
+      id_compte_expediteur: createTransactionDto.id_compte_expediteur,
+      id_utilisateur_envoyeur: createTransactionDto.id_utilisateur_envoyeur ?? undefined,
+      id_utilisateur_recepteur: createTransactionDto.id_utilisateur_recepteur ?? undefined,
+      id_etablissement_recepteur: createTransactionDto.id_etablissement_recepteur ?? undefined,
+      id_etablissement_envoyeur: createTransactionDto.id_etablissement_envoyeur ?? undefined,
+      montant_envoyer: createTransactionDto.montant_envoyer,
+      montant_recu: montant_recu,
+      frais_preleve: frais_preleve,
+      statut: createTransactionDto.statut ?? TransactionStatus.EN_ATTENTE,
+      devise_transaction: createTransactionDto.devise_transaction ?? 'XOF',
+      motif_annulation: createTransactionDto.motif_annulation ?? '',
+      type_transaction: createTransactionDto.type_transaction ?? TransactionType.TRANSFERT,
+      date_transaction: new Date(),
+      id_qrcode_dynamique: createTransactionDto.id_qrcode_dynamique ?? undefined,
+      id_qrcode_statique: createTransactionDto.id_qrcode_statique ?? undefined,
+      id_compte_recepteur: createTransactionDto.id_compte_recepteur,
+    };
+
+    const transaction = this.transactionRepository.create(transactionData);
+    return this.transactionRepository.save(transaction);
+  }
+
+ async updateTransactionStatus(id: number, statut: TransactionStatus): Promise<Transaction> {
+    const transaction = await this.transactionRepository.findOne({ where: { id_transaction: id } });
+    if (!transaction) {
+      throw new NotFoundException(`Transaction avec id ${id} non trouvée`);
+    }
+
+    transaction.statut = statut;
+    return this.transactionRepository.save(transaction);
+  }
 
 }

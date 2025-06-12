@@ -1,5 +1,5 @@
 // transaction.controller.ts
-import { Controller, Get, Post, Body, Param, Req, UseGuards, NotFoundException, BadRequestException, Inject, forwardRef, ParseIntPipe, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req, UseGuards, NotFoundException, BadRequestException, Inject, forwardRef, ParseIntPipe, InternalServerErrorException, Patch } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { JwtAdminGuard, JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { TransactionInterneService } from './transaction-interne.service';
@@ -7,6 +7,8 @@ import { PayWithQrDto } from './payer-avec/payer-avec-qr.dto';
 import { PayWithPhoneDto } from './payer-avec/payer-avec-telephone.dto';
 import { RollbackTransactionDto } from './rollback-dto/rollback-transaction.dto';
 import { PayWithEmailDto } from './payer-avec/payer-avec-email.dto';
+import { CreateTransactionDto } from './dto/transaction-interne.dto';
+import { UpdateTransactionStatusDto } from './dto/update-transaction-status.dto';
 
 @Controller('transaction')
 export class TransactionInterneController {
@@ -30,10 +32,7 @@ export class TransactionInterneController {
       data: await this.TransactionInterneService.getStats()
     };
   }
-  
 
-
-  
   @Get(':id')
   @UseGuards(JwtAdminGuard)
   async getTransactionById(@Param('id') id: string, @Req() req) {
@@ -143,7 +142,20 @@ export class TransactionInterneController {
   async getUserInfoFromQrCode(@Body('token') token: string) {
     return this.TransactionInterneService.getUserInfoFromQrCode(token);
   }
+  // enregistrer une transaction interne
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() createTransactionDto: CreateTransactionDto) {
+    return this.TransactionInterneService.createTransaction(createTransactionDto);
+  }
+ //mettre a jour une transaction interne
 
-
-
+ @Patch(':id/statut')
+  @UseGuards(JwtAuthGuard)
+  async updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateStatusDto: UpdateTransactionStatusDto,
+  ) {
+    return this.TransactionInterneService.updateTransactionStatus(id, updateStatusDto.statut);
+  }
 }

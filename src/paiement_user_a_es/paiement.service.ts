@@ -109,7 +109,7 @@ export class PaiementService {
       throw new NotFoundException('Compte établissement introuvable');
     }
   
-    const frais = Math.floor(montant * 0.02);
+    const frais = Math.floor(montant * 0);
     const montantFinal = montant - frais;
   
     await this.dataSource.transaction(async (manager) => {
@@ -226,7 +226,7 @@ export class PaiementService {
             throw new NotFoundException("Compte de l'établissement introuvable");
           }
         
-          const frais = Math.floor(montant * 0.02);
+          const frais = Math.floor(montant * 0);
           const montantFinal = montant - frais;
         
           // 4. 🔐 Transaction
@@ -293,17 +293,6 @@ export class PaiementService {
         [etab.id_user_etablissement_sante],
       );
       
-
-      
-    
-      // return {
-      //   message: '✅ Paiement effectué avec succès',
-      //   identifiant_etablissement: identifiant,
-      //   montant_envoyé: montant,
-      //   montant_recu: montantFinal,
-      //   frais_appliqués: frais,
-      //   solde_restant: soldeActuel?.solde_compte || null,
-      // };
 
           return {
             message: '✅ Paiement effectué avec succès',
