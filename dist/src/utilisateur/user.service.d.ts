@@ -59,4 +59,22 @@ export declare class UserService {
         success: boolean;
         message: string;
     }>;
+    createFullUser(data: {
+        email?: string;
+        telephone?: string;
+        mdp: string;
+        nom?: string;
+        prenom?: string;
+        pays?: string;
+        position?: {
+            longitude: number;
+            latitude: number;
+        };
+        fcm_token?: string;
+        code_invitation_utilise?: string;
+    }): Promise<{
+        success: boolean;
+        id_user?: string;
+        message: string;
+    }>;
 }

@@ -547,5 +547,71 @@ async updateFcmToken(id_user: string, fcm_token: string) {
   };
 }
 
+
+// INSCRIPTION DIRECTEMENT DE L4UTILISATEUR
+
+
+ async createFullUser(data: {
+  email?: string;
+  telephone?: string;
+  mdp: string;
+  nom?: string;
+  prenom?: string;
+  pays?: string;
+  position?: { longitude: number; latitude: number }; // Correction ici
+  fcm_token?: string;
+  code_invitation_utilise?: string;
+}): Promise<{ success: boolean; id_user?: string; message: string }> {
+  try {
+    // Vérifier email ou téléphone déjà utilisé
+    const existing = await this.userRepository.findOne({
+      where: [
+        { email: data.email ?? '' },
+        { telephone: data.telephone ?? '' }
+      ]
+    });
+    if (existing) {
+      return { success: false, message: "Email ou téléphone déjà utilisé." };
+    }
+
+    // Hash du mot de passe
+    const hashedPassword = await bcrypt.hash(data.mdp, 10);
+
+    // Création de l'utilisateur
+    const user = this.userRepository.create({
+      email: data.email,
+      telephone: data.telephone,
+      mdp: hashedPassword,
+      nom: data.nom,
+      prenom: data.prenom,
+      pays: data.pays,
+      position: data.position
+        ? {
+            type: 'Point',
+            coordinates: [
+              parseFloat(data.position.longitude.toString()),
+              parseFloat(data.position.latitude.toString())
+            ]
+          }
+        : undefined,
+      fcm_token: data.fcm_token,
+      code_invitation_utilise: data.code_invitation_utilise,
+      date_inscription: new Date(),
+      compte_verifier: false,
+      actif: true,
+    });
+
+    const saved = await this.userRepository.save(user);
+
+    // Création du compte associé, QR code, etc. si besoin
+    await this.compteService.createUserCompte(saved.id_user);
+    await this.qrCodeService.createStaticQrForNewUser(saved.id_user);
+
+    return { success: true, id_user: saved.id_user, message: "Utilisateur créé avec succès." };
+  } catch (error) {
+    throw new InternalServerErrorException("Erreur lors de la création du compte: " + error.message);
+  }
+}
+
   
 }

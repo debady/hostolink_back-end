@@ -17,7 +17,7 @@ export declare class User {
     raison_banni?: string;
     compte_verifier: boolean;
     otps?: Otp[];
-    position?: string;
+    position?: any;
     images?: Image[];
     actif: boolean;
     messagesEnvoyes: MessageThematique[];

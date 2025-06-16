@@ -172,6 +172,21 @@ let UserController = class UserController {
         const userId = req.user.id_user;
         return this.userService.updateFcmToken(userId, fcm_token);
     }
+    async createFullUser(body) {
+        let parsedPosition = undefined;
+        if (body.position) {
+            try {
+                parsedPosition = typeof body.position === 'string' ? JSON.parse(body.position) : undefined;
+            }
+            catch (e) {
+                throw new common_1.BadRequestException('Position doit être un objet JSON valide avec longitude et latitude.');
+            }
+        }
+        return this.userService.createFullUser({
+            ...body,
+            position: parsedPosition,
+        });
+    }
 };
 exports.UserController = UserController;
 __decorate([
@@ -262,6 +277,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updateFcmToken", null);
+__decorate([
+    (0, common_1.Post)('creer-compte-complet'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createFullUser", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('api'),
     __metadata("design:paramtypes", [user_service_1.UserService,

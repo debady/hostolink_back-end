@@ -81,5 +81,20 @@ export declare class UserController {
         success: boolean;
         message: string;
     }>;
+    createFullUser(body: {
+        email?: string;
+        telephone?: string;
+        mdp: string;
+        nom?: string;
+        prenom?: string;
+        pays?: string;
+        position?: string;
+        fcm_token?: string;
+        code_invitation_utilise?: string;
+    }): Promise<{
+        success: boolean;
+        id_user?: string;
+        message: string;
+    }>;
 }
 export {};

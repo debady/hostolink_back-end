@@ -384,6 +384,49 @@ let UserService = class UserService {
             message: 'FCM token mis à jour',
         };
     }
+    async createFullUser(data) {
+        try {
+            const existing = await this.userRepository.findOne({
+                where: [
+                    { email: data.email ?? '' },
+                    { telephone: data.telephone ?? '' }
+                ]
+            });
+            if (existing) {
+                return { success: false, message: "Email ou téléphone déjà utilisé." };
+            }
+            const hashedPassword = await bcrypt.hash(data.mdp, 10);
+            const user = this.userRepository.create({
+                email: data.email,
+                telephone: data.telephone,
+                mdp: hashedPassword,
+                nom: data.nom,
+                prenom: data.prenom,
+                pays: data.pays,
+                position: data.position
+                    ? {
+                        type: 'Point',
+                        coordinates: [
+                            parseFloat(data.position.longitude.toString()),
+                            parseFloat(data.position.latitude.toString())
+                        ]
+                    }
+                    : undefined,
+                fcm_token: data.fcm_token,
+                code_invitation_utilise: data.code_invitation_utilise,
+                date_inscription: new Date(),
+                compte_verifier: false,
+                actif: true,
+            });
+            const saved = await this.userRepository.save(user);
+            await this.compteService.createUserCompte(saved.id_user);
+            await this.qrCodeService.createStaticQrForNewUser(saved.id_user);
+            return { success: true, id_user: saved.id_user, message: "Utilisateur créé avec succès." };
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException("Erreur lors de la création du compte: " + error.message);
+        }
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([

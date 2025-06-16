@@ -49,7 +49,7 @@ export class User {
   otps?: Otp[];
 
   @Column('geometry', { spatialFeatureType: 'Point', srid: 4326, nullable: true })
-  position?: string;
+  position?: any;
 
   @OneToMany(() => Image, (image) => image.user, { cascade: true })
   images?: Image[];
