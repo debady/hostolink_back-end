@@ -1,3 +1,5 @@
+
+
 // dto/pay-with-qr.dto.ts
 import { IsNotEmpty, IsNumber, IsString, IsOptional } from 'class-validator';
 

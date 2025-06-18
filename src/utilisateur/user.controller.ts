@@ -196,14 +196,14 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
   }
   
 
-// ✅ Récupérer tous les emails
+// ✅ Récupérer tous les emails dans la bd
 @Get('all-emails')
 @UseGuards(JwtAuthGuard)
 async getAllEmails(@Req() req: AuthenticatedRequest) {
   return await this.userService.getAllEmails();
 }
 
-// ✅ Récupérer tous les téléphones
+// ✅ Récupérer tous les téléphones dans la bd
 @Get('all-telephones')
 @UseGuards(JwtAuthGuard)
 async getAllTelephones(@Req() req: AuthenticatedRequest) {
@@ -223,34 +223,10 @@ async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifi
     return { success: true, message: "Identifiant trouvé", data: user };
   } else {
     return { success: false, message: "Identifiant non trouvé" };
+
   }
 
-  // ✅ Création d'un utilisateur avec code d'invitation (si fourni)
-// @Post('check-user')
-//   async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
-//     return this.userService.registerUser(
-//       body.identifier.trim(),
-//       body.code_invitation_utilise?.trim() // ← C’EST ICI QUE ÇA PEUT ÊTRE VIDE
-//     );
-// }
-
-// @Post('verify-otp-bonus')
-//   async verifyOtpAndReward(@Body() body: { identifier: string; otpCode: string }) {
-//   if (!body.identifier?.trim() || !body.otpCode?.trim()) {
-//     throw new BadRequestException("Identifiant et code OTP requis");
-// }
-
-//   try {
-//     const result = await this.userService.verifyOtpAndRewardParrain(
-//       body.identifier.trim(),
-//       body.otpCode.trim()
-//     );
-//     return result;
-//   } catch (error) {
-//     console.error("❌ Erreur verify-otp-bonus:", error);
-//     throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
-//   }
-// }
+  
 
 
 }
