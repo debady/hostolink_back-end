@@ -50,7 +50,7 @@ let AuthController = class AuthController {
         }
         catch (error) {
             console.error(`❌ Erreur lors de la connexion pour ${body.identifier}:`, error);
-            throw new common_1.InternalServerErrorException('Erreur lors de la connexion');
+            throw new common_1.InternalServerErrorException('Erreur lors de la connexion Veuillez Confirmez votre compte ou réessayer plus tard');
         }
     }
     async loginEtablissement(dto) {

@@ -77,4 +77,10 @@ export declare class UserService {
         id_user?: string;
         message: string;
     }>;
+    getLastOtpByIdentifier(identifier: string): Promise<{
+        otp?: string;
+        expires_at?: Date;
+        success: boolean;
+        message: string;
+    }>;
 }

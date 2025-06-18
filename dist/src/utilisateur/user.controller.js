@@ -182,10 +182,28 @@ let UserController = class UserController {
                 throw new common_1.BadRequestException('Position doit être un objet JSON valide avec longitude et latitude.');
             }
         }
-        return this.userService.createFullUser({
+        if (!body.email || !body.email.trim()) {
+            throw new common_1.BadRequestException('L\'email est requis pour créer un compte.');
+        }
+        const identifier = body.email.trim();
+        const user = await this.userService.createFullUser({
             ...body,
+            email: identifier,
             position: parsedPosition,
         });
+        const { otp } = await this.userService.generateOtp(identifier, otp_entity_1.MoyenEnvoiEnum.EMAIL);
+        return {
+            success: true,
+            message: `Compte créé avec succès. Un OTP a été envoyé à votre adresse email.`,
+            id_user: user?.id_user,
+            otp,
+        };
+    }
+    async getOtp(body) {
+        if (!body.identifier?.trim()) {
+            throw new common_1.BadRequestException("Identifiant requis.");
+        }
+        return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
     }
 };
 exports.UserController = UserController;
@@ -284,6 +302,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "createFullUser", null);
+__decorate([
+    (0, common_1.Post)('get-otp'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getOtp", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('api'),
     __metadata("design:paramtypes", [user_service_1.UserService,

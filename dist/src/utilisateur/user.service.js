@@ -178,8 +178,7 @@ let UserService = class UserService {
                 if (!user.telephone) {
                     throw new common_1.BadRequestException("Impossible d'envoyer l'OTP : aucun numéro de téléphone renseigné.");
                 }
-                await this.smsService.sendOtpSms(user.telephone, otpCode);
-                console.log(`📲 SMS envoyé à ${user.telephone} avec OTP ${otpCode}`);
+                console.log(`une erreur s'es produit lors 📲 SMS à envoyé ${user.telephone} avec OTP ${otpCode}`);
             }
             return { success: true, otp: otpCode };
         }
@@ -426,6 +425,26 @@ let UserService = class UserService {
         catch (error) {
             throw new common_1.InternalServerErrorException("Erreur lors de la création du compte: " + error.message);
         }
+    }
+    async getLastOtpByIdentifier(identifier) {
+        const user = await this.userRepository.findOne({
+            where: [{ email: identifier }, { telephone: identifier }],
+        });
+        if (!user) {
+            return { success: false, message: "Utilisateur non trouvé" };
+        }
+        const otp = await this.otpRepository.findOne({
+            where: { user: { id_user: user.id_user }, is_valid: true },
+        });
+        if (!otp) {
+            return { success: false, message: "Aucun OTP valide trouvé pour cet utilisateur" };
+        }
+        return {
+            success: true,
+            otp: otp.otp_code,
+            expires_at: otp.expires_at,
+            message: "OTP récupéré avec succès"
+        };
     }
 };
 exports.UserService = UserService;

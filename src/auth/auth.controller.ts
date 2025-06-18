@@ -48,7 +48,7 @@ export class AuthController {
     }
      catch (error) {
       console.error(`❌ Erreur lors de la connexion pour ${body.identifier}:`, error);
-      throw new InternalServerErrorException('Erreur lors de la connexion');
+      throw new InternalServerErrorException('Erreur lors de la connexion Veuillez Confirmez votre compte ou réessayer plus tard');
     }
   }
 

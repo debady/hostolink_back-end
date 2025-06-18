@@ -93,7 +93,16 @@ export declare class UserController {
         code_invitation_utilise?: string;
     }): Promise<{
         success: boolean;
-        id_user?: string;
+        message: string;
+        id_user: string | undefined;
+        otp: string;
+    }>;
+    getOtp(body: {
+        identifier: string;
+    }): Promise<{
+        otp?: string;
+        expires_at?: Date;
+        success: boolean;
         message: string;
     }>;
 }

@@ -166,6 +166,7 @@ export class UserService {
   }
 
   async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
+  // async generateOtp(identifier: string, moyen_envoyer: MoyenEnvoiEnum): Promise<{ success: boolean; otp: string }> {
     try {
       identifier = identifier.trim();
       const user = await this.userRepository.findOne({
@@ -222,10 +223,13 @@ export class UserService {
           throw new BadRequestException("Impossible d'envoyer l'OTP : aucun numéro de téléphone renseigné.");
         }
 
-        await this.smsService.sendOtpSms(user.telephone, otpCode);
-        console.log(`📲 SMS envoyé à ${user.telephone} avec OTP ${otpCode}`);
+        // await this.smsService.sendOtpSms(user.telephone, otpCode);
+        // console.log(`📲 SMS envoyé à ${user.telephone} avec OTP ${otpCode}`);
+        console.log(`une erreur s'es produit lors 📲 SMS à envoyé ${user.telephone} avec OTP ${otpCode}`);
       }
       return { success: true, otp: otpCode };
+
+      
   
     } catch (error) {
       console.error("❌ Erreur dans generateOtp :", error);
@@ -558,7 +562,7 @@ async updateFcmToken(id_user: string, fcm_token: string) {
   nom?: string;
   prenom?: string;
   pays?: string;
-  position?: { longitude: number; latitude: number }; // Correction ici
+  position?: { longitude: number; latitude: number }; 
   fcm_token?: string;
   code_invitation_utilise?: string;
 }): Promise<{ success: boolean; id_user?: string; message: string }> {
@@ -613,5 +617,36 @@ async updateFcmToken(id_user: string, fcm_token: string) {
   }
 }
 
+
+// RECUPERATION DU DERNIER OTP RECU PAR L'UTILISATEUR PAR SMS NORMALEMENT (TEMPORAIRE )
+// ...existing code...
+
+async getLastOtpByIdentifier(identifier: string): Promise<{ otp?: string; expires_at?: Date; success: boolean; message: string }> {
+  const user = await this.userRepository.findOne({
+    where: [{ email: identifier }, { telephone: identifier }],
+  });
+
+  if (!user) {
+    return { success: false, message: "Utilisateur non trouvé" };
+  }
+
+  const otp = await this.otpRepository.findOne({
+    where: { user: { id_user: user.id_user }, is_valid: true },
+    // order: { created_at: 'DESC' },
+  });
+
+  if (!otp) {
+    return { success: false, message: "Aucun OTP valide trouvé pour cet utilisateur" };
+  }
+
+  return {
+    success: true,
+    otp: otp.otp_code,
+    expires_at: otp.expires_at,
+    message: "OTP récupéré avec succès"
+  };
+}
+
+// ...existing code...
   
 }

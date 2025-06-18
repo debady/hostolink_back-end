@@ -266,44 +266,107 @@ async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifi
   }
 
   // inscription direct de l'utilisateur 
-    @Post('creer-compte-complet')
-    async createFullUser(@Body() body: {
-        // 
+    // @Post('creer-compte-complet')
+    // async createFullUser(@Body() body: {
+    //     // 
 
-      email?: string;
-      telephone?: string;
-      mdp: string;
-      nom?: string;
-      prenom?: string;
-      pays?: string;
-      position?: string;
-      fcm_token?: string;
-      code_invitation_utilise?: string;
-    }) {
-      let parsedPosition: { longitude: number; latitude: number } | undefined = undefined;
-      if (body.position) {
-        try {
-          // Suppose position is a JSON string like '{"longitude":5.3,"latitude":7.1}'
-          parsedPosition = typeof body.position === 'string' ? JSON.parse(body.position) : undefined;
-        } catch (e) {
-          throw new BadRequestException('Position doit être un objet JSON valide avec longitude et latitude.');
-        }
-      }
+    //   email?: string;
+    //   telephone?: string;
+    //   mdp: string;
+    //   nom?: string;
+    //   prenom?: string;
+    //   pays?: string;
+    //   position?: string;
+    //   fcm_token?: string;
+    //   code_invitation_utilise?: string;
+    // }) {
+    //   let parsedPosition: { longitude: number; latitude: number } | undefined = undefined;
+    //   if (body.position) {
+    //     try {
+    //       // Suppose position is a JSON string like '{"longitude":5.3,"latitude":7.1}'
+    //       parsedPosition = typeof body.position === 'string' ? JSON.parse(body.position) : undefined;
+    //     } catch (e) {
+    //       throw new BadRequestException('Position doit être un objet JSON valide avec longitude et latitude.');
+    //     }
+    //   }
 
-        // Déterminer l'identifiant et le moyen d'envoi
-        // const identifier = body.email ? body.email.trim() : body.telephone?.trim();
-        // if (!identifier) {
-        //   throw new BadRequestException('Email ou téléphone requis pour générer un OTP.');
-        // }
-        // const moyen: MoyenEnvoiEnum = body.email ? MoyenEnvoiEnum.EMAIL : MoyenEnvoiEnum.SMS;
-        // console.log(`🔍 Envoi OTP via ${moyen} à ${identifier}`); // Debug
-        // const { otp } = await this.userService.generateOtp(identifier, moyen);
+    //     // Déterminer l'identifiant et le moyen d'envoi
+    //     // const identifier = body.email ? body.email.trim() : body.telephone?.trim();
+    //     // if (!identifier) {
+    //     //   throw new BadRequestException('Email ou téléphone requis pour générer un OTP.');
+    //     // }
+    //     // const moyen: MoyenEnvoiEnum = body.email ? MoyenEnvoiEnum.EMAIL : MoyenEnvoiEnum.SMS;
+    //     // console.log(`🔍 Envoi OTP via ${moyen} à ${identifier}`); // Debug
+    //     // const { otp } = await this.userService.generateOtp(identifier, moyen);
       
-      return this.userService.createFullUser({
-        ...body,
-        position: parsedPosition,
-        // otp
-      });
+    //   return this.userService.createFullUser({
+    //     ...body,
+    //     position: parsedPosition,
+    //     // otp
+    //   });
+    // }
+
+    // ...existing code...
+
+@Post('creer-compte-complet')
+async createFullUser(@Body() body: {
+  email?: string;
+  telephone?: string;
+  mdp: string;
+  nom?: string;
+  prenom?: string;
+  pays?: string;
+  position?: string;
+  fcm_token?: string;
+  code_invitation_utilise?: string;
+}) {
+  let parsedPosition: { longitude: number; latitude: number } | undefined = undefined;
+  if (body.position) {
+    try {
+      parsedPosition = typeof body.position === 'string' ? JSON.parse(body.position) : undefined;
+    } catch (e) {
+      throw new BadRequestException('Position doit être un objet JSON valide avec longitude et latitude.');
     }
+  }
+
+  // Vérifier que l'email est fourni
+  if (!body.email || !body.email.trim()) {
+    throw new BadRequestException('L\'email est requis pour créer un compte.');
+  }
+
+  const identifier = body.email.trim();
+
+  // Création de l'utilisateur
+  const user = await this.userService.createFullUser({
+    ...body,
+    email: identifier,
+    position: parsedPosition,
+  });
+
+  // Générer et envoyer l'OTP uniquement par email
+  const { otp } = await this.userService.generateOtp(identifier, MoyenEnvoiEnum.EMAIL);
+
+  return {
+    success: true,
+    message: `Compte créé avec succès. Un OTP a été envoyé à votre adresse email.`,
+    id_user: user?.id_user,
+    otp, // Pour debug/test, à retirer en production
+  };
+}
+
+
+// ENDPOINT DE RECUP DU DERNIER OTP DE L'UTILISATEUR PAR SMS
+
+// ...existing code...
+
+@Post('get-otp')
+async getOtp(@Body() body: { identifier: string }) {
+  if (!body.identifier?.trim()) {
+    throw new BadRequestException("Identifiant requis.");
+  }
+  return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
+}
+
+// ...existing code...
 
 }
