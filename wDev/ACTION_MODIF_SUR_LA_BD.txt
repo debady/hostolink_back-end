@@ -390,3 +390,30 @@ ALTER TABLE partage
 ALTER COLUMN id_partage ADD GENERATED ALWAYS AS IDENTITY;
 
 alter table publication alter column titre_publication drop not null;
+
+
+
+
+---------------SOME |  19 JUIN 2025 ------------ 
+ALTER TABLE admin_rechargements
+ADD COLUMN type_operation VARCHAR(20);
+
+alter table admin_rechargements alter column cible_id drop not null;
+
+ALTER TABLE admin_rechargements
+ADD COLUMN statut VARCHAR(20);
+
+ALTER TABLE admin_rechargements
+ADD COLUMN erreur_operations VARCHAR(20);
+
+alter table admin_rechargements add column erreur_operations text;
+
+ALTER TABLE motif_echec
+ADD COLUMN motif_echec VARCHAR(255);
+
+
+ALTER TABLE transaction_interne
+ALTER COLUMN id_compte_expediteur DROP NOT NULL,
+ALTER COLUMN id_compte_recepteur DROP NOT NULL,
+ALTER COLUMN montant_envoyer DROP NOT NULL,
+ALTER COLUMN montant_recu DROP NOT NULL;

@@ -304,49 +304,59 @@ return {
   }
   
    
-  
 
-  async crediterUtilisateur(id_user: string, montant: number, idAdmin: number) {
+
+
+  // PARTIE DES AGENTS HOSTOPAY POUR LES RECHARGEMENTS ET RETRAITS DES UTILISATEURS
+
+ // Créditer un utilisateur
+async crediterUtilisateur(id_user: string, montant: number, idAdmin: number) {
+  let compte: any = null;
+  let admin: any = null;
+  let ancienSolde = null;
+  let nouveauSolde = null;
+
+  try {
     if (!id_user || !montant || montant <= 0) {
       throw new BadRequestException('ID utilisateur et montant requis');
     }
-  
-    const [compte] = await this.dataSource.query(
+
+    [compte] = await this.dataSource.query(
       `SELECT * FROM compte WHERE id_user = $1 AND statut = 'actif' LIMIT 1`,
       [id_user],
     );
     if (!compte) throw new NotFoundException('Compte utilisateur introuvable');
-  
-    const [admin] = await this.dataSource.query(
+
+    [admin] = await this.dataSource.query(
       `SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`,
       [idAdmin]
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
-  
+
     const MAX_AUTORISE = 100000000;
-    
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
-    
+
     const nouveauCumul = cumulActuel + montant;
     const nouveauSoldeAdmin = soldeActuel - montant;
-    
+
     if (nouveauCumul > MAX_AUTORISE) {
       throw new BadRequestException("❌ Plafond de 50 000 000 FCFA atteint.");
     }
-  
+
     if (nouveauSoldeAdmin < 0) {
       throw new BadRequestException("❌ Solde de rechargement insuffisant.");
     }
-  
-    const nouveauSoldeUser = compte.solde_compte + montant;
-  
+
+    ancienSolde = compte.solde_compte;
+    nouveauSolde = compte.solde_compte + montant;
+
     await this.dataSource.transaction(async manager => {
       await manager.query(
         `UPDATE compte SET solde_compte = $1 WHERE id_compte = $2`,
-        [nouveauSoldeUser, compte.id_compte],
+        [nouveauSolde, compte.id_compte],
       );
-  
+
       await manager.query(
         `UPDATE administrateurs
          SET cumule_des_transactions = $1,
@@ -355,81 +365,106 @@ return {
          WHERE id_admin_gestionnaire = $3`,
         [nouveauCumul, nouveauSoldeAdmin, idAdmin],
       );
-  
+
       await manager.query(`
         INSERT INTO admin_rechargements 
-        (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
-        VALUES ($1, 'user', $2, $3, $4, $5, $6)
+        (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations)
+        VALUES ($1, 'user', $2, $3, $4, $5, $6, $7, $8)
       `, [
         idAdmin,
         id_user,
         id_user,
         montant,
-        compte.solde_compte,
-        nouveauSoldeUser
+        ancienSolde,
+        nouveauSolde,
+        'reussie',
+        null
       ]);
     });
 
-    //console.log("⛏ cumul AVANT :", admin.cumule_des_transactions);
-    //console.log("💰 montant :", montant);
-    //console.log("🧮 cumul APRÈS :", nouveauCumul);
-
-  
     return {
       message: '✅ Solde crédité avec succès',
       utilisateur: id_user,
       montant_crédité: montant,
     };
+  } catch (error) {
+    // Enregistrement de l’opération échouée dans admin_rechargements
+    try {
+      await this.dataSource.query(
+        `INSERT INTO admin_rechargements
+          (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations)
+         VALUES ($1, 'user', $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          idAdmin,
+          id_user ?? null,
+          id_user ?? null,
+          montant ?? null,
+          compte?.solde_compte ?? null,
+          compte?.solde_compte ?? null,
+          'echouee',
+          error.message,
+        ]
+      );
+    } catch (logError) {
+      console.error('Erreur lors de la traçabilité de l\'échec admin:', logError);
+    }
+    throw error;
   }
-  
-  
-  async crediterEtablissement(idEtab: number, montant: number, idAdmin: number) {
+}
+
+
+
+
+
+
+// Créditer un établissement
+async crediterEtablissement(idEtab: number, montant: number, idAdmin: number) {
+  let compte: any = null;
+  let admin: any = null;
+  let ancienSolde = null;
+  let nouveauSolde = null;
+
+  try {
     if (!idEtab || !montant || montant <= 0) {
       throw new BadRequestException('ID établissement et montant requis');
     }
-  
-    const [compte] = await this.dataSource.query(
-      `SELECT * FROM compte 
-       WHERE id_user_etablissement_sante = $1 
-       AND statut = 'actif' LIMIT 1`,
+
+    [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user_etablissement_sante = $1 AND statut = 'actif' LIMIT 1`,
       [idEtab],
     );
-    if (!compte) {
-      throw new NotFoundException("Compte établissement introuvable");
-    }
-  
-    const [admin] = await this.dataSource.query(
+    if (!compte) throw new NotFoundException("Compte établissement introuvable");
+
+    [admin] = await this.dataSource.query(
       `SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`,
       [idAdmin]
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
-  
+
     const MAX_AUTORISE = 100000000;
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
-    
+
     const nouveauCumul = cumulActuel + montant;
-    const nouveauSoldeAdmin = soldeActuel + montant;
-    
+    const nouveauSoldeAdmin = soldeActuel - montant;
+
     if (nouveauCumul > MAX_AUTORISE) {
       throw new BadRequestException("❌ Plafond de 50 000 000 FCFA atteint.");
     }
-  
+
     if (nouveauSoldeAdmin < 0) {
       throw new BadRequestException("❌ Solde de rechargement insuffisant.");
     }
-  
-    const ancienSolde = compte.solde_compte;
-    const nouveauSolde = ancienSolde + montant;
-  
+
+    ancienSolde = compte.solde_compte;
+    nouveauSolde = compte.solde_compte + montant;
+
     await this.dataSource.transaction(async manager => {
       await manager.query(
-        `UPDATE compte 
-         SET solde_compte = $1 
-         WHERE id_user_etablissement_sante = $2`,
+        `UPDATE compte SET solde_compte = $1 WHERE id_user_etablissement_sante = $2`,
         [nouveauSolde, idEtab],
       );
-  
+
       await manager.query(
         `UPDATE administrateurs
          SET cumule_des_transactions = $1,
@@ -438,33 +473,265 @@ return {
          WHERE id_admin_gestionnaire = $3`,
         [nouveauCumul, nouveauSoldeAdmin, idAdmin],
       );
-  
+
       await manager.query(`
         INSERT INTO admin_rechargements 
-        (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
-        VALUES ($1, 'etablissement', $2, $3, $4, $5, $6)
+        (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations)
+        VALUES ($1, 'etablissement', $2, $3, $4, $5, $6, $7, $8)
       `, [
         idAdmin,
-        idEtab,
+        idEtab.toString(),
         idEtab.toString(),
         montant,
         ancienSolde,
-        nouveauSolde
+        nouveauSolde,
+        'reussie',
+        null
       ]);
     });
 
-    //console.log("⛏ cumul AVANT :", admin.cumule_des_transactions);
-    //console.log("💰 montant :", montant);
-    //console.log("🧮 cumul APRÈS :", nouveauCumul);
-
-      
     return {
       message: `✅ Crédit de ${montant} XOF effectué avec succès.`,
       nouveauSolde,
       montant_crédité: montant,
     };
+  } catch (error) {
+    try {
+      await this.dataSource.query(
+        `INSERT INTO admin_rechargements
+          (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations)
+         VALUES ($1, 'etablissement', $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          idAdmin,
+          idEtab?.toString() ?? null,
+          idEtab?.toString() ?? null,
+          montant ?? null,
+          compte?.solde_compte ?? null,
+          compte?.solde_compte ?? null,
+          'echouee',
+          error.message,
+        ]
+      );
+    } catch (logError) {
+      console.error('Erreur lors de la traçabilité de l\'échec admin:', logError);
+    }
+    throw error;
   }
-  
+}
+
+
+
+
+
+// Retirer à un utilisateur
+// Retirer à un utilisateur
+async retirerUtilisateur(id_user: string, montant: number, idAdmin: number) {
+  let compte: any = null;
+  let admin: any = null;
+  let ancienSolde = null;
+  let nouveauSolde = 0;
+
+  try {
+    if (!id_user || !montant || montant <= 0) {
+      throw new BadRequestException('ID utilisateur et montant requis');
+    }
+
+    [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user = $1 AND statut = 'actif' LIMIT 1`,
+      [id_user],
+    );
+    if (!compte) throw new NotFoundException('Compte utilisateur introuvable');
+    if (compte.solde_compte < montant) {
+      throw new BadRequestException("❌ Solde utilisateur insuffisant pour ce retrait.");
+    }
+
+    [admin] = await this.dataSource.query(
+      `SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`,
+      [idAdmin]
+    );
+    if (!admin) throw new NotFoundException("Administrateur non trouvé");
+
+    const MAX_AUTORISE = 100000000;
+    const cumulActuel = parseInt(admin.cumule_des_transactions);
+    const soldeActuel = parseInt(admin.solde_de_rechargement);
+
+    const nouveauCumul = cumulActuel + montant;
+    const nouveauSoldeAdmin = soldeActuel + montant;
+
+    if (nouveauCumul > MAX_AUTORISE) {
+      throw new BadRequestException("❌ Plafond de 50 000 000 FCFA atteint.");
+    }
+
+    ancienSolde = compte.solde_compte;
+    nouveauSolde = compte.solde_compte - montant;
+
+    await this.dataSource.transaction(async manager => {
+      await manager.query(
+        `UPDATE compte SET solde_compte = $1 WHERE id_compte = $2`,
+        [nouveauSolde, compte.id_compte],
+      );
+      await manager.query(
+        `UPDATE administrateurs
+         SET cumule_des_transactions = $1,
+             solde_de_rechargement = $2,
+             date_modification = NOW()
+         WHERE id_admin_gestionnaire = $3`,
+        [nouveauCumul, nouveauSoldeAdmin, idAdmin],
+      );
+      const montantNegatif = -Math.abs(montant);
+      await manager.query(`
+        INSERT INTO admin_rechargements 
+        (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations, type_operation)
+        VALUES ($1, 'user', $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [
+        idAdmin,
+        id_user,
+        id_user,
+        montantNegatif,
+        ancienSolde,
+        nouveauSolde,
+        'reussie',
+        'retrait',
+        null
+
+      ]);
+    });
+
+    return {
+      message: '✅ Retrait effectué avec succès depuis le compte utilisateur',
+      utilisateur: id_user,
+      montant_retiré: montant,
+    };
+  } catch (error) {
+    try {
+      await this.dataSource.query(
+        `INSERT INTO admin_rechargements
+          (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations, type_operation)
+         VALUES ($1, 'user', $2, $3, $4, $5, $6, $7, $8, $9)`, 
+        [
+          idAdmin,
+          id_user ?? null,
+          id_user ?? null,
+          montant ? -Math.abs(montant) : null,
+          compte?.solde_compte ?? null,
+          compte?.solde_compte ?? null,
+          'echouee',
+          error.message,
+          'retrait',
+        ]
+      );
+    } catch (logError) {
+      console.error('Erreur lors de la traçabilité de l\'échec admin:', logError);
+    }
+    throw error;
+  }
+}
+
+
+
+
+
+// Retirer à un établissement
+async retirerEtablissement(idEtab: number, montant: number, idAdmin: number) {
+  let compte: any = null;
+  let admin: any = null;
+  let ancienSolde = null;
+  let nouveauSolde = 0;
+
+  try {
+    if (!idEtab || !montant || montant <= 0) {
+      throw new BadRequestException('ID établissement et montant requis');
+    }
+
+    [compte] = await this.dataSource.query(
+      `SELECT * FROM compte WHERE id_user_etablissement_sante = $1 AND statut = 'actif' LIMIT 1`,
+      [idEtab],
+    );
+    if (!compte) throw new NotFoundException("Compte établissement introuvable");
+    if (compte.solde_compte < montant) {
+      throw new BadRequestException("❌ Solde insuffisant sur le compte de l’établissement.");
+    }
+
+    [admin] = await this.dataSource.query(
+      `SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`,
+      [idAdmin]
+    );
+    if (!admin) throw new NotFoundException("Administrateur non trouvé");
+
+    const MAX_AUTORISE = 100000000;
+    const cumulActuel = parseInt(admin.cumule_des_transactions);
+    const soldeActuel = parseInt(admin.solde_de_rechargement);
+
+    const nouveauCumul = cumulActuel + montant;
+    const nouveauSoldeAdmin = soldeActuel + montant;
+
+    if (nouveauCumul > MAX_AUTORISE) {
+      throw new BadRequestException("❌ Plafond de 50 000 000 FCFA atteint.");
+    }
+
+    ancienSolde = compte.solde_compte;
+    nouveauSolde = compte.solde_compte - montant;
+
+    await this.dataSource.transaction(async manager => {
+      await manager.query(
+        `UPDATE compte SET solde_compte = $1 WHERE id_user_etablissement_sante = $2`,
+        [nouveauSolde, idEtab],
+      );
+      await manager.query(
+        `UPDATE administrateurs
+         SET cumule_des_transactions = $1,
+             solde_de_rechargement = $2,
+             date_modification = NOW()
+         WHERE id_admin_gestionnaire = $3`,
+        [nouveauCumul, nouveauSoldeAdmin, idAdmin],
+      );
+      const montantNegatif = -Math.abs(montant);
+      await manager.query(`
+        INSERT INTO admin_rechargements 
+        (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations, type_operation)
+        VALUES ($1, 'etablissement', $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [
+        idAdmin,
+        idEtab.toString(),
+        idEtab.toString(),
+        montantNegatif,
+        ancienSolde,
+        nouveauSolde,
+        'reussie',
+        'retrait',
+        null
+      ]);
+    });
+
+    return {
+      message: `✅ Retrait de ${montant} XOF effectué avec succès depuis l’établissement.`,
+      nouveauSolde,
+      montant_retiré: montant,
+    };
+  } catch (error) {
+    try {
+      await this.dataSource.query(
+        `INSERT INTO admin_rechargements
+          (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations, type_operation)
+         VALUES ($1, 'etablissement', $2, $3, $4, $5, $6, $7, $8, $9)`, 
+        [
+          idAdmin,
+          idEtab?.toString() ?? null,
+          idEtab?.toString() ?? null,
+          montant ? -Math.abs(montant) : null,
+          compte?.solde_compte ?? null,
+          compte?.solde_compte ?? null,
+          'echouee',
+          error.message,
+          'retrait',
+        ]
+      );
+    } catch (logError) {
+      console.error('Erreur lors de la traçabilité de l\'échec admin:', logError);
+    }
+    throw error;
+  }
+}
   
 
   async findAllEtablissements(): Promise<{ total: number; etablissements: any[] }> {
@@ -515,49 +782,61 @@ return {
     };
   }
 
+
+
+
+
+
   async rechargerUser(identifiant: string, montant: number, idAdmin: number) {
-    const [user] = await this.dataSource.query(
+  let user: any = null;
+  let compte: any = null;
+  let admin: any = null;
+  let ancienSolde: number | null = null;
+  let nouveauSoldeUser: number | null = null;
+
+  try {
+    [user] = await this.dataSource.query(
       `SELECT * FROM utilisateur WHERE email = $1 OR telephone = $1 LIMIT 1`,
       [identifiant],
     );
     if (!user) throw new NotFoundException("Utilisateur introuvable");
-  
-    const [compte] = await this.dataSource.query(
+
+    [compte] = await this.dataSource.query(
       `SELECT * FROM compte WHERE id_user = $1 LIMIT 1`,
       [user.id_user],
     );
     if (!compte) throw new NotFoundException("Compte utilisateur introuvable");
-  
-    const [admin] = await this.dataSource.query(
+
+    [admin] = await this.dataSource.query(
       `SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`,
       [idAdmin]
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
-  
+
     const MAX_AUTORISE = 100000000;
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
-    
+
     const nouveauCumul = cumulActuel + montant;
     const nouveauSoldeAdmin = soldeActuel - montant;
-    
+
     if (nouveauCumul > MAX_AUTORISE) {
       throw new BadRequestException("❌ Plafond de 50 000 000 FCFA atteint.");
     }
-  
+
     if (nouveauSoldeAdmin < 0) {
       throw new BadRequestException("❌ Solde de rechargement insuffisant.");
     }
-  
-    const nouveauSoldeUser = compte.solde_compte + montant;
-  
-    // ✅ Exécute tout dans une SEULE transaction
+
+    ancienSolde = compte.solde_compte;
+    nouveauSoldeUser = compte.solde_compte + montant;
+
     await this.dataSource.transaction(async manager => {
       await manager.query(
         `UPDATE compte SET solde_compte = $1 WHERE id_user = $2`,
         [nouveauSoldeUser, user.id_user]
       );
-  
+
       await manager.query(
         `UPDATE administrateurs
          SET cumule_des_transactions = $1,
@@ -566,64 +845,95 @@ return {
          WHERE id_admin_gestionnaire = $3`,
         [nouveauCumul, nouveauSoldeAdmin, idAdmin]
       );
-  
+
       await manager.query(
-        `INSERT INTO admin_rechargements (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
-         VALUES ($1, 'user', $2, $3, $4, $5, $6)`,
-        [idAdmin, user.id_user, identifiant, montant, compte.solde_compte, nouveauSoldeUser]
+        `INSERT INTO admin_rechargements (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations, type_operation)
+         VALUES ($1, 'user', $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [idAdmin, user.id_user, identifiant, montant, ancienSolde, nouveauSoldeUser, 'reussie', null, 'dépot',]
       );
     });
-  
+
     return {
       message: '✅ Rechargement utilisateur effectué avec succès',
       nouveauSolde: nouveauSoldeUser,
       montant_crédité: montant
     };
+  } catch (error) {
+    // Enregistrement de l’opération échouée dans admin_rechargements
+    try {
+      await this.dataSource.query(
+        `INSERT INTO admin_rechargements
+          (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations, type_operation)
+         VALUES ($1, 'user', $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [
+          idAdmin,
+          user?.id_user ?? null,
+          identifiant ?? null,
+          montant ?? null,
+          compte?.solde_compte ?? null,
+          compte?.solde_compte ?? null,
+          'echouee',
+          error.message,
+          'dépot',
+        ]
+      );
+    } catch (logError) {
+      console.error('Erreur lors de la traçabilité de l\'échec rechargerUser:', logError);
+    }
+    throw error;
   }
-  
-  
-  async rechargerEtablissement(identifiant: string, montant: number, idAdmin: number) {
-    const [etab] = await this.dataSource.query(
+}
+
+async rechargerEtablissement(identifiant: string, montant: number, idAdmin: number) {
+  let etab: any = null;
+  let compte: any = null;
+  let admin: any = null;
+  let ancienSolde: number | null = null;
+  let nouveauSoldeEtab: number | null = null;
+
+  try {
+    [etab] = await this.dataSource.query(
       `SELECT * FROM user_etablissement_sante WHERE email = $1 OR telephone = $1 LIMIT 1`,
       [identifiant],
     );
     if (!etab) throw new NotFoundException("Établissement introuvable");
-  
-    const [compte] = await this.dataSource.query(
+
+    [compte] = await this.dataSource.query(
       `SELECT * FROM compte WHERE id_user_etablissement_sante = $1 LIMIT 1`,
       [etab.id_user_etablissement_sante],
     );
     if (!compte) throw new NotFoundException("Compte établissement introuvable");
-  
-    const [admin] = await this.dataSource.query(
+
+    [admin] = await this.dataSource.query(
       `SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`,
       [idAdmin]
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
-  
+
     const MAX_AUTORISE = 100000000;
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
-    
+
     const nouveauCumul = cumulActuel + montant;
     const nouveauSoldeAdmin = soldeActuel - montant;
-    
+
     if (nouveauCumul > MAX_AUTORISE) {
       throw new BadRequestException("❌ Plafond de 50 000 000 FCFA atteint.");
     }
-  
+
     if (nouveauSoldeAdmin < 0) {
       throw new BadRequestException("❌ Solde de rechargement insuffisant.");
     }
-  
-    const nouveauSoldeEtab = compte.solde_compte + montant;
-  
+
+    ancienSolde = compte.solde_compte;
+    nouveauSoldeEtab = compte.solde_compte + montant;
+
     await this.dataSource.transaction(async manager => {
       await manager.query(
         `UPDATE compte SET solde_compte = $1 WHERE id_user_etablissement_sante = $2`,
         [nouveauSoldeEtab, etab.id_user_etablissement_sante]
       );
-  
+
       await manager.query(
         `UPDATE administrateurs
          SET cumule_des_transactions = $1,
@@ -632,29 +942,60 @@ return {
          WHERE id_admin_gestionnaire = $3`,
         [nouveauCumul, nouveauSoldeAdmin, idAdmin]
       );
-  
+
       await manager.query(
-        `INSERT INTO admin_rechargements (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
-         VALUES ($1, 'etablissement', $2, $3, $4, $5, $6)`,
+        `INSERT INTO admin_rechargements (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations, type_operation)
+         VALUES ($1, 'etablissement', $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           idAdmin,
           etab.id_user_etablissement_sante,
           identifiant,
           montant,
-          compte.solde_compte,
+          ancienSolde,
           nouveauSoldeEtab,
+          'reussie',
+          'dépot',
+          null
         ]
       );
     });
-  
+
     return {
       message: '✅ Rechargement établissement effectué avec succès',
       nouveauSolde: nouveauSoldeEtab,
       montant_crédité: montant
     };
+  } catch (error) {
+    try {
+      await this.dataSource.query(
+        `INSERT INTO admin_rechargements
+          (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde, statut, erreur_operations, type_operation)
+         VALUES ($1, 'etablissement', $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [
+          idAdmin,
+          etab?.id_user_etablissement_sante ?? null,
+          identifiant ?? null,
+          montant ?? null,
+          compte?.solde_compte ?? null,
+          compte?.solde_compte ?? null,
+          'echouee',
+          error.message,
+          'dépot',
+        ]
+      );
+    } catch (logError) {
+      console.error('Erreur lors de la traçabilité de l\'échec rechargerEtablissement:', logError);
+    }
+    throw error;
   }
-  
-  
+}
+
+
+
+
+
+
+
   // 🔹 Tous les rechargements
   async getAllRechargements() {
     return await this.dataSource.query(`SELECT * FROM admin_rechargements ORDER BY date DESC`);
@@ -765,178 +1106,6 @@ async verifierEtMettreAJourAdminTransaction(idAdmin: number, montant: number) {
   await this.adminRepository.save(admin);
 }
 
-// ------------ RETRAIT DES USERS | E.S
-
-async retirerUtilisateur(id_user: string, montant: number, idAdmin: number) {
-  if (!id_user || !montant || montant <= 0) {
-    throw new BadRequestException('ID utilisateur et montant requis');
-  }
-
-  // Récupérer le compte utilisateur actif
-  const [compte] = await this.dataSource.query(
-    `SELECT * FROM compte WHERE id_user = $1 AND statut = 'actif' LIMIT 1`,
-    [id_user],
-  );
-  if (!compte) throw new NotFoundException('Compte utilisateur introuvable');
-
-  // Vérifier que l'utilisateur a assez d'argent pour le retrait
-  if (compte.solde_compte < montant) {
-    throw new BadRequestException("❌ Solde utilisateur insuffisant pour ce retrait.");
-  }
-
-  // Récupérer l'administrateur
-  const [admin] = await this.dataSource.query(
-    `SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`,
-    [idAdmin]
-  );
-  if (!admin) throw new NotFoundException("Administrateur non trouvé");
-
-  const MAX_AUTORISE = 100000000;
-  const cumulActuel = parseInt(admin.cumule_des_transactions);
-  const soldeActuel = parseInt(admin.solde_de_rechargement);
-  
-  const nouveauCumul = cumulActuel + montant;
-  const nouveauSoldeAdmin = soldeActuel + montant;
-  
-  // Vérification du plafond de transaction
-  if (nouveauCumul > MAX_AUTORISE) {
-    throw new BadRequestException("❌ Plafond de 50 000 000 FCFA atteint.");
-  }
-
-  const nouveauSoldeUser = compte.solde_compte - montant;
-
-  // ✅ Mise à jour transactionnelle
-  await this.dataSource.transaction(async manager => {
-    // Débiter le compte utilisateur
-    await manager.query(
-      `UPDATE compte SET solde_compte = $1 WHERE id_compte = $2`,
-      [nouveauSoldeUser, compte.id_compte],
-    );
-
-    // Créditer l'admin et mettre à jour son cumul
-    await manager.query(
-      `UPDATE administrateurs
-       SET cumule_des_transactions = $1,
-           solde_de_rechargement = $2,
-           date_modification = NOW()
-       WHERE id_admin_gestionnaire = $3`,
-      [nouveauCumul, nouveauSoldeAdmin, idAdmin],
-    );
-
-    // Enregistrer l’opération dans les rechargements (type retrait utilisateur)
-    const montantNegatif = -Math.abs(montant);
-
-    await manager.query(`
-      INSERT INTO admin_rechargements 
-      (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
-      VALUES ($1, 'user', $2, $3, $4, $5, $6)
-    `, [
-      idAdmin,
-      id_user,
-      id_user,
-      montantNegatif,
-      compte.solde_compte,
-      nouveauSoldeUser
-    ]);
-
-  });
-
-  return {
-    message: '✅ Retrait effectué avec succès depuis le compte utilisateur',
-    utilisateur: id_user,
-    montant_retiré: montant,
-  };
-}
-
-//  --- RETRIT E.S
-
-async retirerEtablissement(idEtab: number, montant: number, idAdmin: number) {
-  if (!idEtab || !montant || montant <= 0) {
-    throw new BadRequestException('ID établissement et montant requis');
-  }
-
-  // Récupérer le compte de l'établissement
-  const [compte] = await this.dataSource.query(
-    `SELECT * FROM compte 
-     WHERE id_user_etablissement_sante = $1 
-     AND statut = 'actif' LIMIT 1`,
-    [idEtab],
-  );
-  if (!compte) {
-    throw new NotFoundException("Compte établissement introuvable");
-  }
-
-  // Vérifier que l'établissement a assez d'argent pour le retrait
-  if (compte.solde_compte < montant) {
-    throw new BadRequestException("❌ Solde insuffisant sur le compte de l’établissement.");
-  }
-
-  // Récupérer l'administrateur
-  const [admin] = await this.dataSource.query(
-    `SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`,
-    [idAdmin]
-  );
-  if (!admin) throw new NotFoundException("Administrateur non trouvé");
-
-  const MAX_AUTORISE = 100000000;
-  const cumulActuel = parseInt(admin.cumule_des_transactions);
-  const soldeActuel = parseInt(admin.solde_de_rechargement);
-  
-  const nouveauCumul = cumulActuel + montant;
-  const nouveauSoldeAdmin = soldeActuel + montant;
-  
-  // Vérification du plafond de transaction
-  if (nouveauCumul > MAX_AUTORISE) {
-    throw new BadRequestException("❌ Plafond de 50 000 000 FCFA atteint.");
-  }
-
-  const ancienSolde = compte.solde_compte;
-  const nouveauSolde = ancienSolde - montant;
-
-  // ✅ Mise à jour transactionnelle
-  await this.dataSource.transaction(async manager => {
-    // Débiter l’établissement
-    await manager.query(
-      `UPDATE compte 
-       SET solde_compte = $1 
-       WHERE id_user_etablissement_sante = $2`,
-      [nouveauSolde, idEtab],
-    );
-
-    // Créditer l’admin
-    await manager.query(
-      `UPDATE administrateurs
-       SET cumule_des_transactions = $1,
-           solde_de_rechargement = $2,
-           date_modification = NOW()
-       WHERE id_admin_gestionnaire = $3`,
-      [nouveauCumul, nouveauSoldeAdmin, idAdmin],
-    );
-
-    // Historique de la transaction (montant négatif)
-    const montantNegatif = -Math.abs(montant);
-
-    await manager.query(`
-      INSERT INTO admin_rechargements 
-      (id_admin, cible_type, cible_id, identifiant, montant, ancien_solde, nouveau_solde)
-      VALUES ($1, 'etablissement', $2, $3, $4, $5, $6)
-    `, [
-      idAdmin,
-      idEtab,
-      idEtab.toString(),
-      montantNegatif,
-      ancienSolde,
-      nouveauSolde
-    ]);
-
-  });
-
-  return {
-    message: `✅ Retrait de ${montant} XOF effectué avec succès depuis l’établissement.`,
-    nouveauSolde,
-    montant_retiré: montant,
-  };
-}
 
   
 }

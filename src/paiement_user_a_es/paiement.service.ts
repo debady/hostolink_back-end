@@ -63,6 +63,9 @@ export class PaiementService {
   
 
 
+
+
+
   async payerParQr(
   shortId: string,
   idCompteEtablissement: number,
@@ -74,16 +77,17 @@ export class PaiementService {
   let idQrcode: number | null = null;
 
   try {
+    // console.log('Début try');
+
     if (!shortId || !idCompteEtablissement || !montant || !idUser) {
       throw new BadRequestException('Données manquantes pour effectuer le paiement');
     }
 
-    // 🔍 Récupérer l'id_qrcode depuis le shortId
+    // Récupérer l'id_qrcode depuis le shortId
     const [qr] = await this.dataSource.query(
       `SELECT id_qrcode FROM qr_code_paiement_dynamique WHERE short_id = $1 LIMIT 1`,
       [shortId],
     );
-
     if (!qr) {
       throw new NotFoundException(`QR Code avec short_id "${shortId}" introuvable.`);
     }
@@ -93,7 +97,6 @@ export class PaiementService {
       `SELECT * FROM compte WHERE id_user = $1 AND statut = 'actif' LIMIT 1`,
       [idUser],
     );
-
     if (!compteUtilisateur) {
       throw new UnauthorizedException('Compte utilisateur introuvable');
     }
@@ -106,7 +109,6 @@ export class PaiementService {
       `SELECT * FROM compte WHERE id_compte = $1 LIMIT 1`,
       [idCompteEtablissement],
     );
-
     if (!compteEtablissement) {
       throw new NotFoundException('Compte établissement introuvable');
     }
@@ -119,12 +121,10 @@ export class PaiementService {
         `UPDATE compte SET solde_compte = solde_compte - $1 WHERE id_compte = $2`,
         [montant, compteUtilisateur.id_compte],
       );
-
       await manager.query(
         `UPDATE compte SET solde_compte = solde_compte + $1 WHERE id_compte = $2`,
         [montantFinal, compteEtablissement.id_compte],
       );
-
       const insertTransaction = await manager.query(
         `INSERT INTO transaction_interne 
          (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_qrcode_dynamique, id_etablissement_recepteur)
@@ -140,16 +140,13 @@ export class PaiementService {
           compteEtablissement.id_user_etablissement_sante,
         ],
       );
-
       const idTransaction = insertTransaction[0].id_transaction;
-
       await manager.query(
         `INSERT INTO transactions_frais 
          (id_transaction, montant_frais, type_transaction, mode_paiement)
          VALUES ($1, $2, 'interne', 'wallet')`,
         [idTransaction, frais],
       );
-
       await manager.query(
         `UPDATE qr_code_paiement_dynamique SET statut = 'expiré' WHERE id_qrcode = $1`,
         [idQrcode],
@@ -160,7 +157,6 @@ export class PaiementService {
       `SELECT solde_compte FROM compte WHERE id_compte = $1`,
       [compteUtilisateur.id_compte],
     );
-
     const [etablissement] = await this.dataSource.query(
       `SELECT nom FROM user_etablissement_sante WHERE id_user_etablissement_sante = $1 LIMIT 1`,
       [compteEtablissement.id_user_etablissement_sante],
@@ -175,34 +171,31 @@ export class PaiementService {
       etablissement_de_santé: etablissement?.nom ?? null,
     };
   } catch (error) {
-    // Enregistrement de la transaction échouée si possible
+    // console.log('Début catch');
+    // Enregistrement systématique de la transaction échouée, même si tout est null
     try {
-      if (compteUtilisateur && compteEtablissement && idQrcode) {
-        await this.dataSource.query(
-          `INSERT INTO transaction_interne
-            (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_qrcode_dynamique, id_etablissement_recepteur, motif_echec)
-           VALUES ($1, $2, $3, $4, $5, 'XOF', 'echouee', 'paiement_qrcode', $6, $7, 'la transaction à échouée')`,
-          [
-            compteUtilisateur.id_compte,
-            compteEtablissement.id_compte,
-            montant,
-            0,
-            0,
-            idQrcode,
-            compteEtablissement.id_user_etablissement_sante,
-            error.message,
-          ]
-        );
-      }
+      await this.dataSource.query(
+        `INSERT INTO transaction_interne
+          (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_qrcode_dynamique, id_etablissement_recepteur, motif_echec)
+         VALUES ($1, $2, $3, $4, $5, $6, 'echouee', 'paiement_qrcode', $7, $8, $9)`,
+        [
+          compteUtilisateur?.id_compte ?? null,
+          compteEtablissement?.id_compte ?? null,
+          montant ?? null,
+          0,
+          0,
+          'XOF',
+          idQrcode ?? null,
+          compteEtablissement?.id_user_etablissement_sante ?? null,
+          error.message,
+        ]
+      );
     } catch (saveError) {
-      // Optionnel : log l’erreur d’enregistrement
       console.error('Erreur lors de l\'enregistrement de la transaction échouée:', saveError);
     }
     throw error;
   }
 }
-
-
 
 
 
@@ -330,26 +323,28 @@ async payerParIdentifiant(identifiant: string, montant: number, idUser: string) 
       photo: photo?.url_image ?? null,
     };
   } catch (error) {
-    // Enregistrement de la transaction échouée si possible
+    console.log('debut catch');
+     // Enregistrement systématique de la transaction échouée, même si tout est null
     try {
-      if (compteUtilisateur && compteEtablissement && etabId) {
-        await this.dataSource.query(
-          `INSERT INTO transaction_interne
-            (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_etablissement_recepteur, motif_echec)
-           VALUES ($1, $2, $3, $4, $5, 'XOF', 'echouée', 'paiement_contact', $6, 'la transaction à échouée')`,
-          [
-            compteUtilisateur.id_compte,
-            compteEtablissement.id_compte,
-            montant,
-            0,
-            0,
-            etabId,
-            error.message,
-          ]
-        );
-      }
+     await this.dataSource.query(
+        `INSERT INTO transaction_interne
+          (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_etablissement_recepteur, motif_echec)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+       [
+        compteUtilisateur?.id_compte ?? null,
+        compteEtablissement?.id_compte ?? null,
+        montant ?? null,
+        0,
+        0,
+        'XOF',
+        'echouee',
+        'transaction par identifiant',
+        compteEtablissement?.id_user_etablissement_sante ?? null,
+        error.message,
+        ]
+      );
+      console.log('Transaction échouée enregistrée');
     } catch (saveError) {
-      // Optionnel : log l’erreur d’enregistrement
       console.error('Erreur lors de l\'enregistrement de la transaction échouée:', saveError);
     }
     throw error;
