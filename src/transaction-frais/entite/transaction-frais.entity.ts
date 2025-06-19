@@ -1,4 +1,4 @@
-// transaction-frais.entity.ts
+
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum TransactionFraisType {
@@ -42,3 +42,6 @@ export class TransactionFrais {
   })
   date_creation: Date;
 }
+
+
+

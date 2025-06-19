@@ -10,7 +10,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Transaction = exports.TransactionType = exports.TransactionStatus = void 0;
-const compte_entity_1 = require("../../compte/entitie/compte.entity");
 const typeorm_1 = require("typeorm");
 var TransactionStatus;
 (function (TransactionStatus) {
@@ -105,16 +104,6 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Transaction.prototype, "id_compte_recepteur", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => compte_entity_1.Compte),
-    (0, typeorm_1.JoinColumn)({ name: 'id_compte_expediteur' }),
-    __metadata("design:type", compte_entity_1.Compte)
-], Transaction.prototype, "compteExpediteur", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => compte_entity_1.Compte),
-    (0, typeorm_1.JoinColumn)({ name: 'id_compte_recepteur' }),
-    __metadata("design:type", compte_entity_1.Compte)
-], Transaction.prototype, "compteRecepteur", void 0);
 exports.Transaction = Transaction = __decorate([
     (0, typeorm_1.Entity)('transaction_interne')
 ], Transaction);

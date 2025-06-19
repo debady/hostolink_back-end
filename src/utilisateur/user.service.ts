@@ -645,6 +645,5 @@ async getLastOtpByIdentifier(identifier: string): Promise<{ otp?: string; expire
   };
 }
 
-// ...existing code...
   
 }

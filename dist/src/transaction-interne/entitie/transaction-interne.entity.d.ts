@@ -1,4 +1,3 @@
-import { Compte } from 'src/compte/entitie/compte.entity';
 export declare enum TransactionStatus {
     EN_ATTENTE = "en attente",
     REUSSIE = "r\u00E9ussie",
@@ -30,6 +29,4 @@ export declare class Transaction {
     id_qrcode_dynamique: number;
     id_qrcode_statique: number;
     id_compte_recepteur: number;
-    compteExpediteur: Compte;
-    compteRecepteur: Compte;
 }

@@ -1,6 +1,6 @@
-// transaction.entity.ts
-import { Compte } from 'src/compte/entitie/compte.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+
+
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 
 export enum TransactionStatus {
   EN_ATTENTE = 'en attente',
@@ -81,13 +81,5 @@ export class Transaction {
 
   @Column()
   id_compte_recepteur: number;
-
-  @ManyToOne(() => Compte) // Relation avec l'entité Compte
-  @JoinColumn({ name: 'id_compte_expediteur' }) // Clé étrangère
-  compteExpediteur: Compte;
-
-  @ManyToOne(() => Compte) // Relation avec l'entité Compte
-  @JoinColumn({ name: 'id_compte_recepteur' }) // Clé étrangère
-  compteRecepteur: Compte;
-
 }
+

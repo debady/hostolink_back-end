@@ -21,8 +21,6 @@ const payer_avec_qr_dto_1 = require("./payer-avec/payer-avec-qr.dto");
 const payer_avec_telephone_dto_1 = require("./payer-avec/payer-avec-telephone.dto");
 const rollback_transaction_dto_1 = require("./rollback-dto/rollback-transaction.dto");
 const payer_avec_email_dto_1 = require("./payer-avec/payer-avec-email.dto");
-const transaction_interne_dto_1 = require("./dto/transaction-interne.dto");
-const update_transaction_status_dto_1 = require("./dto/update-transaction-status.dto");
 let TransactionInterneController = class TransactionInterneController {
     constructor(TransactionInterneService, moduleRef) {
         this.TransactionInterneService = TransactionInterneService;
@@ -86,12 +84,6 @@ let TransactionInterneController = class TransactionInterneController {
     }
     async getUserInfoFromQrCode(token) {
         return this.TransactionInterneService.getUserInfoFromQrCode(token);
-    }
-    async create(createTransactionDto) {
-        return this.TransactionInterneService.createTransaction(createTransactionDto);
-    }
-    async updateStatus(id, updateStatusDto) {
-        return this.TransactionInterneService.updateTransactionStatus(id, updateStatusDto.statut);
     }
 };
 exports.TransactionInterneController = TransactionInterneController;
@@ -173,23 +165,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], TransactionInterneController.prototype, "getUserInfoFromQrCode", null);
-__decorate([
-    (0, common_1.Post)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [transaction_interne_dto_1.CreateTransactionDto]),
-    __metadata("design:returntype", Promise)
-], TransactionInterneController.prototype, "create", null);
-__decorate([
-    (0, common_1.Patch)(':id/statut'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, update_transaction_status_dto_1.UpdateTransactionStatusDto]),
-    __metadata("design:returntype", Promise)
-], TransactionInterneController.prototype, "updateStatus", null);
 exports.TransactionInterneController = TransactionInterneController = __decorate([
     (0, common_1.Controller)('transaction'),
     __metadata("design:paramtypes", [transaction_interne_service_1.TransactionInterneService,

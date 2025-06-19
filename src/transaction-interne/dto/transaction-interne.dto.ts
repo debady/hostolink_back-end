@@ -15,14 +15,6 @@ export class CreateTransactionDto {
   @IsUUID()
   id_utilisateur_recepteur?: string;
 
-  @IsOptional()
-  @IsNumber()
-  id_etablissement_recepteur?: number;
-
-  @IsOptional()
-  @IsNumber()
-  id_etablissement_envoyeur?: number;
-
   @IsNotEmpty()
   @IsNumber()
   montant_envoyer: number;
@@ -35,14 +27,10 @@ export class CreateTransactionDto {
   @IsNumber()
   frais_preleve?: number;
 
-
-
   @IsOptional()
   @IsString()
   motif_annulation?: string;
 
-  
-  
   @IsOptional()
   @IsEnum(TransactionStatus)
   statut?: TransactionStatus;
@@ -66,4 +54,8 @@ export class CreateTransactionDto {
   @IsNotEmpty()
   @IsNumber()
   id_compte_recepteur: number;
+
+  @IsNotEmpty()
+  @IsString()
+  motif_echec?: string;
 }

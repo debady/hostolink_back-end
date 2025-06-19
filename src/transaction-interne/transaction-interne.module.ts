@@ -21,7 +21,7 @@ import { TransactionFrais } from 'src/transaction-frais/entite/transaction-frais
     forwardRef(() => UserModule)
   ],
   controllers: [TransactionInterneController],
-  providers: [TransactionInterneService],
+  providers: [TransactionInterneService], 
   exports: [TransactionInterneService]
 })
 export class TransactionInterneModule {}

@@ -31,16 +31,6 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTransactionDto.prototype, "id_utilisateur_recepteur", void 0);
 __decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], CreateTransactionDto.prototype, "id_etablissement_recepteur", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], CreateTransactionDto.prototype, "id_etablissement_envoyeur", void 0);
-__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
@@ -90,4 +80,9 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateTransactionDto.prototype, "id_compte_recepteur", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTransactionDto.prototype, "motif_echec", void 0);
 //# sourceMappingURL=transaction-interne.dto.js.map

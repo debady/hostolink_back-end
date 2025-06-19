@@ -198,19 +198,19 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
   }
   
 
-  // ✅ Récupérer tous les emails
-    @Get('all-emails')
-    @UseGuards(JwtAuthGuard)
-    async getAllEmails(@Req() req: AuthenticatedRequest) {
-      return await this.userService.getAllEmails();
-    }
+// ✅ Récupérer tous les emails dans la bd
+@Get('all-emails')
+@UseGuards(JwtAuthGuard)
+async getAllEmails(@Req() req: AuthenticatedRequest) {
+  return await this.userService.getAllEmails();
+}
 
-    // ✅ Récupérer tous les téléphones
-    @Get('all-telephones')
-    @UseGuards(JwtAuthGuard)
-    async getAllTelephones(@Req() req: AuthenticatedRequest) {
-      return await this.userService.getAllTelephones();
-    }
+// ✅ Récupérer tous les téléphones dans la bd
+@Get('all-telephones')
+@UseGuards(JwtAuthGuard)
+async getAllTelephones(@Req() req: AuthenticatedRequest) {
+  return await this.userService.getAllTelephones();
+}
 
     // ✅ Vérifier si un email ou numéro existe
     @Post('check-identifier')
@@ -225,7 +225,8 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
         return { success: true, message: "Identifiant trouvé", data: user };
       } else {
         return { success: false, message: "Identifiant non trouvé" };
-      }
+    
+  }
     }
 
     //notifications
@@ -337,6 +338,10 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
 
     // ...existing code...
 
+  
+
+
+}
   // ✅ Création d'un utilisateur avec code d'invitation (si fourni)
 // @Post('check-user')
 //   async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
@@ -363,4 +368,4 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
 //     throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
 //   }
 // }
-}
+// }

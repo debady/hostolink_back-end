@@ -1,3 +1,4 @@
+
 // transaction.controller.ts
 import { Controller, Get, Post, Body, Param, Req, UseGuards, NotFoundException, BadRequestException, Inject, forwardRef, ParseIntPipe, InternalServerErrorException, Patch } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
@@ -137,25 +138,13 @@ export class TransactionInterneController {
 
 
 
-  @Post('info_qrcode')
-  @UseGuards(JwtAuthGuard)
-  async getUserInfoFromQrCode(@Body('token') token: string) {
-    return this.TransactionInterneService.getUserInfoFromQrCode(token);
-  }
-  // enregistrer une transaction interne
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  async create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.TransactionInterneService.createTransaction(createTransactionDto);
-  }
- //mettre a jour une transaction interne
-
- @Patch(':id/statut')
-  @UseGuards(JwtAuthGuard)
-  async updateStatus(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateStatusDto: UpdateTransactionStatusDto,
-  ) {
-    return this.TransactionInterneService.updateTransactionStatus(id, updateStatusDto.statut);
-  }
+@Post('info_qrcode')
+@UseGuards(JwtAuthGuard)
+async getUserInfoFromQrCode(@Body('token') token: string) {
+  return this.TransactionInterneService.getUserInfoFromQrCode(token);
 }
+
+
+
+}
+

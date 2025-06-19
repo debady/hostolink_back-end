@@ -3,7 +3,6 @@ import { ModuleRef } from '@nestjs/core';
 import { Transaction, TransactionStatus } from './entitie/transaction-interne.entity';
 import { TransactionFrais } from 'src/transaction-frais/entite/transaction-frais.entity';
 import { PayWithQrDto } from './payer-avec/payer-avec-qr.dto';
-import { CreateTransactionDto } from './dto/transaction-interne.dto';
 import { RollbackTransactionDto } from './rollback-dto/rollback-transaction.dto';
 import { PayWithPhoneDto } from './payer-avec/payer-avec-telephone.dto';
 import { PayWithEmailDto } from './payer-avec/payer-avec-email.dto';
@@ -16,6 +15,7 @@ export declare class TransactionInterneService {
     private calculerFrais;
     getMyTransactions(userId: string): Promise<any[]>;
     getTransactionById(id: number): Promise<any>;
+    private validateCriticalFields;
     createTransactionFromQrCode(userId: string, payWithQrDto: PayWithQrDto): Promise<{
         success: boolean;
         message: string;
@@ -68,7 +68,6 @@ export declare class TransactionInterneService {
     private executeTransaction;
     private getQrCodeInfoFromToken;
     private getCompteByUserId;
-    private getCompteByEtablissementId;
     private getCompteById;
     getStats(): Promise<{
         montant_total_des_transactions: any;
@@ -98,6 +97,4 @@ export declare class TransactionInterneService {
             photo_profile: string | null;
         };
     }>;
-    createTransaction(createTransactionDto: CreateTransactionDto): Promise<Transaction>;
-    updateTransactionStatus(id: number, statut: TransactionStatus): Promise<Transaction>;
 }

@@ -66,6 +66,16 @@ let TransactionInterneService = class TransactionInterneService {
         }
         return transaction;
     }
+    validateCriticalFields(transactionData) {
+        if ((transactionData.statut === transaction_interne_entity_1.TransactionStatus.REUSSIE ||
+            transactionData.statut === transaction_interne_entity_1.TransactionStatus.EN_ATTENTE) &&
+            (!transactionData.id_compte_expediteur ||
+                !transactionData.id_compte_recepteur ||
+                transactionData.montant_envoyer == null ||
+                transactionData.montant_recu == null)) {
+            throw new common_1.BadRequestException("Impossible d'enregistrer une transaction réussie ou en attente avec des champs critiques manquants.");
+        }
+    }
     async createTransactionFromQrCode(userId, payWithQrDto) {
         const { token, montant_envoyer } = payWithQrDto;
         const qrCodeInfo = await this.getQrCodeInfoFromToken(token);
@@ -131,8 +141,6 @@ let TransactionInterneService = class TransactionInterneService {
                 id_compte_expediteur: compteExpéditeur.id_compte,
                 id_utilisateur_envoyeur: userId,
                 id_utilisateur_recepteur,
-                id_etablissement_recepteur,
-                id_etablissement_envoyeur,
                 montant_envoyer: montant_envoyer,
                 montant_recu: montantRecu,
                 frais_preleve: frais,
@@ -147,6 +155,7 @@ let TransactionInterneService = class TransactionInterneService {
             else if (isQrcodeDynamic) {
                 transactionData.id_qrcode_dynamique = idQrcode;
             }
+            this.validateCriticalFields(transactionData);
             const newTransaction = this.transactionRepository.create(transactionData);
             const savedTransaction = await queryRunner.manager.save(newTransaction);
             const transactionFraisData = {
@@ -173,6 +182,34 @@ let TransactionInterneService = class TransactionInterneService {
             };
         }
         catch (error) {
+            if (queryRunner.isTransactionActive) {
+                await queryRunner.rollbackTransaction();
+            }
+            try {
+                const failedTransactionData = {
+                    id_compte_expediteur: compteExpéditeur?.id_compte,
+                    id_utilisateur_envoyeur: userId,
+                    id_utilisateur_recepteur,
+                    montant_envoyer: montant_envoyer,
+                    montant_recu: 0,
+                    frais_preleve: frais,
+                    statut: transaction_interne_entity_1.TransactionStatus.ECHOUEE,
+                    devise_transaction: compteExpéditeur?.devise,
+                    type_transaction: typeTransaction,
+                    id_compte_recepteur: compteRecepteur?.id_compte,
+                    motif_echec: 'Transaction échouée: ' + (error?.message || 'Erreur inconnue')
+                };
+                if (isStatic) {
+                    failedTransactionData.id_qrcode_statique = idQrcode;
+                }
+                else if (isQrcodeDynamic) {
+                    failedTransactionData.id_qrcode_dynamique = idQrcode;
+                }
+                await queryRunner.manager.save(this.transactionRepository.create(failedTransactionData));
+            }
+            catch (saveError) {
+                console.error('Erreur lors de l\'enregistrement de la transaction échouée:', saveError);
+            }
             await queryRunner.rollbackTransaction();
             if (error instanceof common_1.NotFoundException || error instanceof common_1.BadRequestException) {
                 throw error;
@@ -186,7 +223,6 @@ let TransactionInterneService = class TransactionInterneService {
     async createTransactionFromPhone(userId, payWithPhoneDto) {
         const { telephone, montant_envoyer, description } = payWithPhoneDto;
         let destinationUser = null;
-        let etablissementSante = null;
         try {
             destinationUser = await this.dataSource.manager.findOne('utilisateur', {
                 where: {
@@ -210,8 +246,6 @@ let TransactionInterneService = class TransactionInterneService {
         }
         let compteRecepteur;
         let id_utilisateur_recepteur;
-        let id_etablissement_recepteur;
-        let id_etablissement_envoyeur;
         let typeTransaction = transaction_interne_entity_1.TransactionType.TRANSFERT;
         if (destinationUser) {
             compteRecepteur = await this.getCompteByUserId(destinationUser.id_user);
@@ -233,8 +267,6 @@ let TransactionInterneService = class TransactionInterneService {
                 id_compte_expediteur: compteExpéditeur.id_compte,
                 id_utilisateur_envoyeur: userId,
                 id_utilisateur_recepteur,
-                id_etablissement_recepteur,
-                id_etablissement_envoyeur,
                 montant_envoyer: montant_envoyer,
                 montant_recu: montantRecu,
                 frais_preleve: frais,
@@ -243,6 +275,7 @@ let TransactionInterneService = class TransactionInterneService {
                 type_transaction: typeTransaction,
                 id_compte_recepteur: compteRecepteur.id_compte,
             };
+            this.validateCriticalFields(transactionData);
             const newTransaction = this.transactionRepository.create(transactionData);
             const savedTransaction = await queryRunner.manager.save(newTransaction);
             const transactionFraisData = {
@@ -273,20 +306,37 @@ let TransactionInterneService = class TransactionInterneService {
             };
         }
         catch (error) {
-            await queryRunner.rollbackTransaction();
+            if (queryRunner.isTransactionActive) {
+                await queryRunner.rollbackTransaction();
+            }
+            try {
+                const failedTransactionData = {
+                    id_compte_expediteur: compteExpéditeur?.id_compte,
+                    id_utilisateur_envoyeur: userId,
+                    id_utilisateur_recepteur,
+                    montant_envoyer: montant_envoyer,
+                    montant_recu: 0,
+                    frais_preleve: frais,
+                    statut: transaction_interne_entity_1.TransactionStatus.ECHOUEE,
+                    devise_transaction: compteExpéditeur?.devise,
+                    type_transaction: typeTransaction,
+                    id_compte_recepteur: compteRecepteur?.id_compte,
+                    motif_echec: (`Transaction échouée:  + (error?.message || 'Erreur inconnue')`)
+                };
+                await this.transactionRepository.save(failedTransactionData);
+            }
+            catch (saveError) {
+                console.error('Erreur lors de l\'enregistrement de la transaction échouée:', saveError);
+            }
             if (error instanceof common_1.NotFoundException || error instanceof common_1.BadRequestException) {
                 throw error;
             }
             throw new common_1.InternalServerErrorException(`Erreur lors de la transaction: ${error.message}`);
         }
-        finally {
-            await queryRunner.release();
-        }
     }
     async createTransactionFromEmail(userId, payWithEmailDto) {
         const { email, montant_envoyer, description } = payWithEmailDto;
         let destinationUser = null;
-        let etablissementSante = null;
         try {
             destinationUser = await this.dataSource.manager.findOne('utilisateur', {
                 where: {
@@ -333,8 +383,6 @@ let TransactionInterneService = class TransactionInterneService {
                 id_compte_expediteur: compteExpéditeur.id_compte,
                 id_utilisateur_envoyeur: userId,
                 id_utilisateur_recepteur,
-                id_etablissement_recepteur,
-                id_etablissement_envoyeur,
                 montant_envoyer: montant_envoyer,
                 montant_recu: montantRecu,
                 frais_preleve: frais,
@@ -343,6 +391,7 @@ let TransactionInterneService = class TransactionInterneService {
                 type_transaction: typeTransaction,
                 id_compte_recepteur: compteRecepteur.id_compte,
             };
+            this.validateCriticalFields(transactionData);
             const newTransaction = this.transactionRepository.create(transactionData);
             const savedTransaction = await queryRunner.manager.save(newTransaction);
             const transactionFraisData = {
@@ -373,14 +422,32 @@ let TransactionInterneService = class TransactionInterneService {
             };
         }
         catch (error) {
-            await queryRunner.rollbackTransaction();
+            if (queryRunner.isTransactionActive) {
+                await queryRunner.rollbackTransaction();
+            }
+            try {
+                const failedTransactionData = {
+                    id_compte_expediteur: compteExpéditeur?.id_compte,
+                    id_utilisateur_envoyeur: userId,
+                    id_utilisateur_recepteur,
+                    montant_envoyer: montant_envoyer,
+                    montant_recu: 0,
+                    frais_preleve: frais,
+                    statut: transaction_interne_entity_1.TransactionStatus.ECHOUEE,
+                    devise_transaction: compteExpéditeur?.devise,
+                    type_transaction: typeTransaction,
+                    id_compte_recepteur: compteRecepteur?.id_compte,
+                    motif_echec: (`Transaction échouée:  + (error?.message || 'Erreur inconnue')`)
+                };
+                await this.transactionRepository.save(failedTransactionData);
+            }
+            catch (saveError) {
+                console.error('Erreur lors de l\'enregistrement de la transaction échouée:', saveError);
+            }
             if (error instanceof common_1.NotFoundException || error instanceof common_1.BadRequestException) {
                 throw error;
             }
             throw new common_1.InternalServerErrorException(`Erreur lors de la transaction: ${error.message}`);
-        }
-        finally {
-            await queryRunner.release();
         }
     }
     async cancelTransaction(id, userId) {
@@ -423,19 +490,19 @@ let TransactionInterneService = class TransactionInterneService {
             }
             const montantADebiter = originalTransaction.montant_recu;
             const montantACrediter = originalTransaction.montant_recu;
+            const motifEchec = (`Transaction échouée:  + (error?.message || 'Erreur inconnue')`);
             const remboursementData = {
                 id_compte_expediteur: originalTransaction.id_compte_recepteur,
                 id_utilisateur_envoyeur: originalTransaction.id_utilisateur_recepteur,
                 id_utilisateur_recepteur: originalTransaction.id_utilisateur_envoyeur,
-                id_etablissement_recepteur: originalTransaction.id_etablissement_envoyeur,
-                id_etablissement_envoyeur: originalTransaction.id_etablissement_recepteur,
                 montant_envoyer: montantADebiter,
                 montant_recu: montantACrediter,
                 frais_preleve: 0,
                 statut: transaction_interne_entity_1.TransactionStatus.EN_ATTENTE,
                 devise_transaction: originalTransaction.devise_transaction,
                 type_transaction: transaction_interne_entity_1.TransactionType.REMBOURSEMENT,
-                id_compte_recepteur: originalTransaction.id_compte_expediteur
+                id_compte_recepteur: originalTransaction.id_compte_expediteur,
+                motif_echec: motifEchec
             };
             const newRollbackTransaction = this.transactionRepository.create(remboursementData);
             const savedRollbackTransaction = await queryRunner.manager.save(newRollbackTransaction);
@@ -525,18 +592,6 @@ let TransactionInterneService = class TransactionInterneService {
         }
         catch (error) {
             console.error(`Erreur lors de la récupération du compte pour l'utilisateur ${userId}:`, error);
-            return null;
-        }
-    }
-    async getCompteByEtablissementId(etablissementId) {
-        try {
-            const compte = await this.dataSource.manager.findOne('compte', {
-                where: { id_user_etablissement_sante: etablissementId }
-            });
-            return compte;
-        }
-        catch (error) {
-            console.error(`Erreur lors de la récupération du compte pour l'établissement ${etablissementId}:`, error);
             return null;
         }
     }
@@ -684,42 +739,6 @@ let TransactionInterneService = class TransactionInterneService {
                 photo_profile: photoProfile,
             }
         };
-    }
-    async createTransaction(createTransactionDto) {
-        if (!createTransactionDto.id_utilisateur_recepteur &&
-            !createTransactionDto.id_etablissement_recepteur) {
-            throw new common_1.BadRequestException('Au moins un destinataire (utilisateur ou établissement) doit être renseigné.');
-        }
-        const frais_preleve = this.calculerFrais(createTransactionDto.montant_envoyer);
-        const montant_recu = createTransactionDto.montant_envoyer - frais_preleve;
-        const transactionData = {
-            id_compte_expediteur: createTransactionDto.id_compte_expediteur,
-            id_utilisateur_envoyeur: createTransactionDto.id_utilisateur_envoyeur ?? undefined,
-            id_utilisateur_recepteur: createTransactionDto.id_utilisateur_recepteur ?? undefined,
-            id_etablissement_recepteur: createTransactionDto.id_etablissement_recepteur ?? undefined,
-            id_etablissement_envoyeur: createTransactionDto.id_etablissement_envoyeur ?? undefined,
-            montant_envoyer: createTransactionDto.montant_envoyer,
-            montant_recu: montant_recu,
-            frais_preleve: frais_preleve,
-            statut: createTransactionDto.statut ?? transaction_interne_entity_1.TransactionStatus.EN_ATTENTE,
-            devise_transaction: createTransactionDto.devise_transaction ?? 'XOF',
-            motif_annulation: createTransactionDto.motif_annulation ?? '',
-            type_transaction: createTransactionDto.type_transaction ?? transaction_interne_entity_1.TransactionType.TRANSFERT,
-            date_transaction: new Date(),
-            id_qrcode_dynamique: createTransactionDto.id_qrcode_dynamique ?? undefined,
-            id_qrcode_statique: createTransactionDto.id_qrcode_statique ?? undefined,
-            id_compte_recepteur: createTransactionDto.id_compte_recepteur,
-        };
-        const transaction = this.transactionRepository.create(transactionData);
-        return this.transactionRepository.save(transaction);
-    }
-    async updateTransactionStatus(id, statut) {
-        const transaction = await this.transactionRepository.findOne({ where: { id_transaction: id } });
-        if (!transaction) {
-            throw new common_1.NotFoundException(`Transaction avec id ${id} non trouvée`);
-        }
-        transaction.statut = statut;
-        return this.transactionRepository.save(transaction);
     }
 };
 exports.TransactionInterneService = TransactionInterneService;

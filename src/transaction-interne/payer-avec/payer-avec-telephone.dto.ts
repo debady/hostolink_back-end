@@ -1,3 +1,4 @@
+
 // dto/pay-with-phone.dto.ts
 import { IsString, IsNumber, IsOptional, Min, Matches } from 'class-validator';
 
@@ -14,4 +15,8 @@ export class PayWithPhoneDto {
   @IsOptional()
   description?: string;
 }
+
+// 
+
+
 

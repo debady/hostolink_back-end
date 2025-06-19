@@ -4,8 +4,6 @@ import { PayWithQrDto } from './payer-avec/payer-avec-qr.dto';
 import { PayWithPhoneDto } from './payer-avec/payer-avec-telephone.dto';
 import { RollbackTransactionDto } from './rollback-dto/rollback-transaction.dto';
 import { PayWithEmailDto } from './payer-avec/payer-avec-email.dto';
-import { CreateTransactionDto } from './dto/transaction-interne.dto';
-import { UpdateTransactionStatusDto } from './dto/update-transaction-status.dto';
 export declare class TransactionInterneController {
     private readonly TransactionInterneService;
     private readonly moduleRef;
@@ -93,6 +91,4 @@ export declare class TransactionInterneController {
             photo_profile: string | null;
         };
     }>;
-    create(createTransactionDto: CreateTransactionDto): Promise<import("./entitie/transaction-interne.entity").Transaction>;
-    updateStatus(id: number, updateStatusDto: UpdateTransactionStatusDto): Promise<import("./entitie/transaction-interne.entity").Transaction>;
 }
