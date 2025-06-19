@@ -553,8 +553,6 @@ async updateFcmToken(id_user: string, fcm_token: string) {
 
 
 // INSCRIPTION DIRECTEMENT DE L4UTILISATEUR
-
-
  async createFullUser(data: {
   email?: string;
   telephone?: string;

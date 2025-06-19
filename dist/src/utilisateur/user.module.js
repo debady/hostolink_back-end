@@ -22,13 +22,14 @@ const nettoyeur_service_1 = require("./nettoyeur.service");
 const auth_module_1 = require("../auth/auth.module");
 const sms_module_1 = require("./sms.module");
 const dreams_houses_email_module_1 = require("../email/dreams-houses-email.module");
+const notif_push_module_1 = require("../module_notification_push/notif_push.module");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
 exports.UserModule = UserModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, image_entity_1.Image, otp_entity_1.Otp]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, image_entity_1.Image, otp_entity_1.Otp, notif_push_module_1.NotifPushModule]),
             (0, common_1.forwardRef)(() => auth_module_1.AuthModule),
             sms_module_1.SmsModule,
             dreams_houses_email_module_1.EmailModule,

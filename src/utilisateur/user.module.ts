@@ -13,10 +13,11 @@ import { OtpCleanerService } from './nettoyeur.service';
 import { AuthModule } from 'src/auth/auth.module'; // ✅
 import { SmsModule } from './sms.module';
 import { EmailModule } from 'src/email/dreams-houses-email.module';
+import { NotifPushModule } from 'src/module_notification_push/notif_push.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Image, Otp]),
+    TypeOrmModule.forFeature([User, Image, Otp,NotifPushModule ]),
     forwardRef(() => AuthModule),
     SmsModule,
     EmailModule,

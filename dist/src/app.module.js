@@ -38,6 +38,7 @@ const publication_module_1 = require("./1-Module_reseaux_sociale/publication/pub
 const transaction_module_1 = require("./transaction_user_es/transaction.module");
 const documents_identite_module_1 = require("./documents_identite/documents_identite.module");
 const partage_module_1 = require("./1-Module_reseaux_sociale/partage/partage.module");
+const notif_push_module_1 = require("./module_notification_push/notif_push.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -51,17 +52,11 @@ exports.AppModule = AppModule = __decorate([
                 host: process.env.DATABASE_HOST || 'localhost',
                 port: Number(process.env.DATABASE_PORT) || 5432,
                 username: process.env.DATABASE_USER || 'postgres',
-                password: process.env.DATABASE_PASSWORD || 'NGUESSAN',
+                password: process.env.DATABASE_PASSWORD || 'postgres',
                 database: process.env.DATABASE_NAME || 'hostolink_bd',
                 entities: [__dirname + '/**/*.entity{.ts,.js}'],
                 synchronize: false,
-                autoLoadEntities: false,
-                ssl: true,
-                extra: {
-                    ssl: {
-                        rejectUnauthorized: false,
-                    },
-                },
+                autoLoadEntities: true,
             }),
             auth_module_1.AuthModule,
             user_module_1.UserModule,
@@ -91,7 +86,8 @@ exports.AppModule = AppModule = __decorate([
             publication_module_1.PublicationModule,
             partage_module_1.PartageModule,
             commentaire_module_1.CommentaireModule,
-            transaction_module_1.TransactionModule
+            transaction_module_1.TransactionModule,
+            notif_push_module_1.NotifPushModule
         ],
     })
 ], AppModule);

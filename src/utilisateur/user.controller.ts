@@ -198,74 +198,103 @@ async definePassword(@Body() registerUserDto: RegisterUserDto) {
   }
   
 
-// ✅ Récupérer tous les emails
-@Get('all-emails')
-@UseGuards(JwtAuthGuard)
-async getAllEmails(@Req() req: AuthenticatedRequest) {
-  return await this.userService.getAllEmails();
-}
+  // ✅ Récupérer tous les emails
+    @Get('all-emails')
+    @UseGuards(JwtAuthGuard)
+    async getAllEmails(@Req() req: AuthenticatedRequest) {
+      return await this.userService.getAllEmails();
+    }
 
-// ✅ Récupérer tous les téléphones
-@Get('all-telephones')
-@UseGuards(JwtAuthGuard)
-async getAllTelephones(@Req() req: AuthenticatedRequest) {
-  return await this.userService.getAllTelephones();
-}
+    // ✅ Récupérer tous les téléphones
+    @Get('all-telephones')
+    @UseGuards(JwtAuthGuard)
+    async getAllTelephones(@Req() req: AuthenticatedRequest) {
+      return await this.userService.getAllTelephones();
+    }
 
-// ✅ Vérifier si un email ou numéro existe
-@Post('check-identifier')
-@UseGuards(JwtAuthGuard)
-async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifier: string }) {
-  if (!body.identifier?.trim()) {
-    throw new BadRequestException("Identifiant requis.");
-  }
+    // ✅ Vérifier si un email ou numéro existe
+    @Post('check-identifier')
+    @UseGuards(JwtAuthGuard)
+    async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifier: string }) {
+      if (!body.identifier?.trim()) {
+        throw new BadRequestException("Identifiant requis.");
+      }
 
-  const user = await this.userService.findUserByIdentifier(body.identifier.trim());
-  if (user) {
-    return { success: true, message: "Identifiant trouvé", data: user };
-  } else {
-    return { success: false, message: "Identifiant non trouvé" };
-  }
+      const user = await this.userService.findUserByIdentifier(body.identifier.trim());
+      if (user) {
+        return { success: true, message: "Identifiant trouvé", data: user };
+      } else {
+        return { success: false, message: "Identifiant non trouvé" };
+      }
+    }
 
-  // ✅ Création d'un utilisateur avec code d'invitation (si fourni)
-// @Post('check-user')
-//   async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
-//     return this.userService.registerUser(
-//       body.identifier.trim(),
-//       body.code_invitation_utilise?.trim() // ← C’EST ICI QUE ÇA PEUT ÊTRE VIDE
-//     );
-// }
+    //notifications
+    @UseGuards(JwtAuthGuard)
+    @Post('update-fcm-token')
+    async updateFcmToken(@Req() req, @Body('fcm_token') fcm_token: string) {
+      const userId = req.user.id_user;
+      return this.userService.updateFcmToken(userId, fcm_token);
+    }
 
-// @Post('verify-otp-bonus')
-//   async verifyOtpAndReward(@Body() body: { identifier: string; otpCode: string }) {
-//   if (!body.identifier?.trim() || !body.otpCode?.trim()) {
-//     throw new BadRequestException("Identifiant et code OTP requis");
-// }
+  
+    @Post('creer-compte-complet')
+    async createFullUser(@Body() body: {
+      email?: string;
+      telephone?: string;
+      mdp: string;
+      nom?: string;
+      prenom?: string;
+      pays?: string;
+      position?: string;
+      fcm_token?: string;
+      code_invitation_utilise?: string;
+    }) {
+      let parsedPosition: { longitude: number; latitude: number } | undefined = undefined;
+      if (body.position) {
+        try {
+          parsedPosition = typeof body.position === 'string' ? JSON.parse(body.position) : undefined;
+        } catch (e) {
+          throw new BadRequestException('Position doit être un objet JSON valide avec longitude et latitude.');
+        }
+      }
 
-//   try {
-//     const result = await this.userService.verifyOtpAndRewardParrain(
-//       body.identifier.trim(),
-//       body.otpCode.trim()
-//     );
-//     return result;
-//   } catch (error) {
-//     console.error("❌ Erreur verify-otp-bonus:", error);
-//     throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
-//   }
-// }
+      // Vérifier que l'email est fourni
+      if (!body.email || !body.email.trim()) {
+        throw new BadRequestException('L\'email est requis pour créer un compte.');
+      }
+
+      const identifier = body.email.trim();
+
+      // Création de l'utilisateur
+      const user = await this.userService.createFullUser({
+        ...body,
+        email: identifier,
+        position: parsedPosition,
+      });
+
+      // Générer et envoyer l'OTP uniquement par email
+      const { otp } = await this.userService.generateOtp(identifier, MoyenEnvoiEnum.EMAIL);
+
+      return {
+        success: true,
+        message: `Compte créé avec succès. Un OTP a été envoyé à votre adresse email.`,
+        id_user: user?.id_user,
+        otp, 
+      };
+    }
 
 
-}
+    // ENDPOINT DE RECUP DU DERNIER OTP DE L'UTILISATEUR PAR SMS
+    @Post('get-otp')
+    async getOtp(@Body() body: { identifier: string }) {
+      if (!body.identifier?.trim()) {
+        throw new BadRequestException("Identifiant requis.");
+      }
+      return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
+    }
 
-  //notifications
-  @UseGuards(JwtAuthGuard)
-  @Post('update-fcm-token')
-  async updateFcmToken(@Req() req, @Body('fcm_token') fcm_token: string) {
-    const userId = req.user.id_user;
-    return this.userService.updateFcmToken(userId, fcm_token);
-  }
 
-  // inscription direct de l'utilisateur 
+// inscription direct de l'utilisateur 
     // @Post('creer-compte-complet')
     // async createFullUser(@Body() body: {
     //     // 
@@ -308,65 +337,30 @@ async checkIdentifier(@Req() req: AuthenticatedRequest, @Body() body: { identifi
 
     // ...existing code...
 
-@Post('creer-compte-complet')
-async createFullUser(@Body() body: {
-  email?: string;
-  telephone?: string;
-  mdp: string;
-  nom?: string;
-  prenom?: string;
-  pays?: string;
-  position?: string;
-  fcm_token?: string;
-  code_invitation_utilise?: string;
-}) {
-  let parsedPosition: { longitude: number; latitude: number } | undefined = undefined;
-  if (body.position) {
-    try {
-      parsedPosition = typeof body.position === 'string' ? JSON.parse(body.position) : undefined;
-    } catch (e) {
-      throw new BadRequestException('Position doit être un objet JSON valide avec longitude et latitude.');
-    }
-  }
+  // ✅ Création d'un utilisateur avec code d'invitation (si fourni)
+// @Post('check-user')
+//   async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
+//     return this.userService.registerUser(
+//       body.identifier.trim(),
+//       body.code_invitation_utilise?.trim() // ← C’EST ICI QUE ÇA PEUT ÊTRE VIDE
+//     );
+// }
 
-  // Vérifier que l'email est fourni
-  if (!body.email || !body.email.trim()) {
-    throw new BadRequestException('L\'email est requis pour créer un compte.');
-  }
+// @Post('verify-otp-bonus')
+//   async verifyOtpAndReward(@Body() body: { identifier: string; otpCode: string }) {
+//   if (!body.identifier?.trim() || !body.otpCode?.trim()) {
+//     throw new BadRequestException("Identifiant et code OTP requis");
+// }
 
-  const identifier = body.email.trim();
-
-  // Création de l'utilisateur
-  const user = await this.userService.createFullUser({
-    ...body,
-    email: identifier,
-    position: parsedPosition,
-  });
-
-  // Générer et envoyer l'OTP uniquement par email
-  const { otp } = await this.userService.generateOtp(identifier, MoyenEnvoiEnum.EMAIL);
-
-  return {
-    success: true,
-    message: `Compte créé avec succès. Un OTP a été envoyé à votre adresse email.`,
-    id_user: user?.id_user,
-    otp, // Pour debug/test, à retirer en production
-  };
-}
-
-
-// ENDPOINT DE RECUP DU DERNIER OTP DE L'UTILISATEUR PAR SMS
-
-// ...existing code...
-
-@Post('get-otp')
-async getOtp(@Body() body: { identifier: string }) {
-  if (!body.identifier?.trim()) {
-    throw new BadRequestException("Identifiant requis.");
-  }
-  return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
-}
-
-// ...existing code...
-
+//   try {
+//     const result = await this.userService.verifyOtpAndRewardParrain(
+//       body.identifier.trim(),
+//       body.otpCode.trim()
+//     );
+//     return result;
+//   } catch (error) {
+//     console.error("❌ Erreur verify-otp-bonus:", error);
+//     throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
+//   }
+// }
 }
