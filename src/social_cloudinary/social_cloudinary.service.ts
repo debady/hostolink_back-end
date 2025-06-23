@@ -1,7 +1,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-import toStream from 'buffer-to-stream'; // ✅ CORRECT
+import toStream from 'buffer-to-stream'; 
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -26,7 +26,7 @@ export class SocialCloudinaryServicess {
         },
       );
 
-      toStream(file.buffer).pipe(stream); // ✅ Corrigé
+      toStream(file.buffer).pipe(stream); 
     });
   }
 }
