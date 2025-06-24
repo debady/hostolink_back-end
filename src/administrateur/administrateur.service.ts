@@ -333,7 +333,7 @@ async crediterUtilisateur(id_user: string, montant: number, idAdmin: number) {
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
 
-    const MAX_AUTORISE = 100000000;
+    const MAX_AUTORISE = 500000;
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
 
@@ -441,7 +441,7 @@ async crediterEtablissement(idEtab: number, montant: number, idAdmin: number) {
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
 
-    const MAX_AUTORISE = 100000000;
+    const MAX_AUTORISE = 500000;
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
 
@@ -551,7 +551,7 @@ async retirerUtilisateur(id_user: string, montant: number, idAdmin: number) {
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
 
-    const MAX_AUTORISE = 100000000;
+    const MAX_AUTORISE = 500000;
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
 
@@ -658,7 +658,7 @@ async retirerEtablissement(idEtab: number, montant: number, idAdmin: number) {
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
 
-    const MAX_AUTORISE = 100000000;
+    const MAX_AUTORISE = 500000;
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
 
@@ -813,7 +813,7 @@ async retirerEtablissement(idEtab: number, montant: number, idAdmin: number) {
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
 
-    const MAX_AUTORISE = 100000000;
+    const MAX_AUTORISE = 500000;
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
 
@@ -910,7 +910,7 @@ async rechargerEtablissement(identifiant: string, montant: number, idAdmin: numb
     );
     if (!admin) throw new NotFoundException("Administrateur non trouvé");
 
-    const MAX_AUTORISE = 100000000;
+    const MAX_AUTORISE = 500000;
     const cumulActuel = parseInt(admin.cumule_des_transactions);
     const soldeActuel = parseInt(admin.solde_de_rechargement);
 
@@ -1088,7 +1088,7 @@ async verifierEtMettreAJourAdminTransaction(idAdmin: number, montant: number) {
   const admin = await this.adminRepository.findOneBy({ id_admin_gestionnaire: idAdmin });
   if (!admin) throw new NotFoundException("Administrateur non trouvé");
 
-  const MAX_AUTORISE = 100000000;
+  const MAX_AUTORISE = 500000;
 
   const nouveauCumul = admin.cumule_des_transactions + montant;
   if (nouveauCumul > MAX_AUTORISE) {
