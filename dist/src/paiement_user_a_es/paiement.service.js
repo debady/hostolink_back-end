@@ -111,20 +111,19 @@ let PaiementService = class PaiementService {
         }
         catch (error) {
             try {
-                if (compteUtilisateur && compteEtablissement && idQrcode) {
-                    await this.dataSource.query(`INSERT INTO transaction_interne
-            (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_qrcode_dynamique, id_etablissement_recepteur, motif_echec)
-           VALUES ($1, $2, $3, $4, $5, 'XOF', 'echouee', 'paiement_qrcode', $6, $7, 'la transaction à échouée')`, [
-                        compteUtilisateur.id_compte,
-                        compteEtablissement.id_compte,
-                        montant,
-                        0,
-                        0,
-                        idQrcode,
-                        compteEtablissement.id_user_etablissement_sante,
-                        error.message,
-                    ]);
-                }
+                await this.dataSource.query(`INSERT INTO transaction_interne
+          (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_qrcode_dynamique, id_etablissement_recepteur, motif_echec)
+         VALUES ($1, $2, $3, $4, $5, $6, 'echouee', 'paiement_qrcode', $7, $8, $9)`, [
+                    compteUtilisateur?.id_compte ?? null,
+                    compteEtablissement?.id_compte ?? null,
+                    montant ?? null,
+                    0,
+                    0,
+                    'XOF',
+                    idQrcode ?? null,
+                    compteEtablissement?.id_user_etablissement_sante ?? null,
+                    error.message,
+                ]);
             }
             catch (saveError) {
                 console.error('Erreur lors de l\'enregistrement de la transaction échouée:', saveError);
@@ -201,20 +200,23 @@ let PaiementService = class PaiementService {
             };
         }
         catch (error) {
+            console.log('debut catch');
             try {
-                if (compteUtilisateur && compteEtablissement && etabId) {
-                    await this.dataSource.query(`INSERT INTO transaction_interne
-            (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_etablissement_recepteur, motif_echec)
-           VALUES ($1, $2, $3, $4, $5, 'XOF', 'echouée', 'paiement_contact', $6, 'la transaction à échouée')`, [
-                        compteUtilisateur.id_compte,
-                        compteEtablissement.id_compte,
-                        montant,
-                        0,
-                        0,
-                        etabId,
-                        error.message,
-                    ]);
-                }
+                await this.dataSource.query(`INSERT INTO transaction_interne
+          (id_compte_expediteur, id_compte_recepteur, montant_envoyer, montant_recu, frais_preleve, devise_transaction, statut, type_transaction, id_etablissement_recepteur, motif_echec)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [
+                    compteUtilisateur?.id_compte ?? null,
+                    compteEtablissement?.id_compte ?? null,
+                    montant ?? null,
+                    0,
+                    0,
+                    'XOF',
+                    'echouee',
+                    'transaction par identifiant',
+                    compteEtablissement?.id_user_etablissement_sante ?? null,
+                    error.message,
+                ]);
+                console.log('Transaction échouée enregistrée');
             }
             catch (saveError) {
                 console.error('Erreur lors de l\'enregistrement de la transaction échouée:', saveError);

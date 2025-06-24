@@ -175,7 +175,7 @@ export declare class AdministrateurController {
     }>;
     crediterEtablissement(id: number, montant: number, req: any): Promise<{
         message: string;
-        nouveauSolde: any;
+        nouveauSolde: null;
         montant_crédité: number;
     }>;
     getAllEtablissements(): Promise<{
@@ -187,7 +187,7 @@ export declare class AdministrateurController {
         montant: number;
     }): Promise<{
         message: string;
-        nouveauSolde: any;
+        nouveauSolde: number | null;
         montant_crédité: number;
     }>;
     rechargerEtablissement(req: any, body: {
@@ -195,7 +195,7 @@ export declare class AdministrateurController {
         montant: number;
     }): Promise<{
         message: string;
-        nouveauSolde: any;
+        nouveauSolde: number | null;
         montant_crédité: number;
     }>;
     getAllRechargements(): Promise<any>;

@@ -152,8 +152,18 @@ export declare class AdministrateurService {
     }>;
     crediterEtablissement(idEtab: number, montant: number, idAdmin: number): Promise<{
         message: string;
-        nouveauSolde: any;
+        nouveauSolde: null;
         montant_crédité: number;
+    }>;
+    retirerUtilisateur(id_user: string, montant: number, idAdmin: number): Promise<{
+        message: string;
+        utilisateur: string;
+        montant_retiré: number;
+    }>;
+    retirerEtablissement(idEtab: number, montant: number, idAdmin: number): Promise<{
+        message: string;
+        nouveauSolde: number;
+        montant_retiré: number;
     }>;
     findAllEtablissements(): Promise<{
         total: number;
@@ -161,12 +171,12 @@ export declare class AdministrateurService {
     }>;
     rechargerUser(identifiant: string, montant: number, idAdmin: number): Promise<{
         message: string;
-        nouveauSolde: any;
+        nouveauSolde: number | null;
         montant_crédité: number;
     }>;
     rechargerEtablissement(identifiant: string, montant: number, idAdmin: number): Promise<{
         message: string;
-        nouveauSolde: any;
+        nouveauSolde: number | null;
         montant_crédité: number;
     }>;
     getAllRechargements(): Promise<any>;
@@ -186,14 +196,4 @@ export declare class AdministrateurService {
     }>;
     rechercherUtilisateurParIdentifiant(identifiant: string, type: string): Promise<any>;
     verifierEtMettreAJourAdminTransaction(idAdmin: number, montant: number): Promise<void>;
-    retirerUtilisateur(id_user: string, montant: number, idAdmin: number): Promise<{
-        message: string;
-        utilisateur: string;
-        montant_retiré: number;
-    }>;
-    retirerEtablissement(idEtab: number, montant: number, idAdmin: number): Promise<{
-        message: string;
-        nouveauSolde: number;
-        montant_retiré: number;
-    }>;
 }

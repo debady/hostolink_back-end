@@ -210,6 +210,12 @@ export class AdministrateurController {
     return this.administrateurService.findAllEtablissements();
   }
 
+
+
+
+
+
+
   // Recharge utilisateur par identifiant
   @UseGuards(JwtAdminGuard)
   @Post('recharger-user')
@@ -270,7 +276,7 @@ export class AdministrateurController {
       return { id_user: qr.id_user };
     }
     
-  // ------------- RETAIT DES ES ET USERS
+  // ------------- RETRAIT DES ES ET USERS
 
   @UseGuards(JwtAdminGuard)
   @Post('retirer-user')
@@ -308,3 +314,4 @@ export class AdministrateurController {
 
 
 }
+
