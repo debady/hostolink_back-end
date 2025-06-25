@@ -437,7 +437,7 @@ let UserService = class UserService {
             where: { user: { id_user: user.id_user }, is_valid: true },
         });
         if (!otp) {
-            return { success: false, message: "Aucun OTP valide trouvé pour cet utilisateur" };
+            return { success: false, message: "Aucun OTP valide trouvé ! Veuillez Réessayer" };
         }
         return {
             success: true,
@@ -445,6 +445,9 @@ let UserService = class UserService {
             expires_at: otp.expires_at,
             message: "OTP récupéré avec succès"
         };
+    }
+    async findUserById(id_user) {
+        return this.userRepository.findOne({ where: { id_user } });
     }
 };
 exports.UserService = UserService;

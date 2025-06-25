@@ -22,10 +22,12 @@ const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const update_profile_dto_1 = require("./dto/update-profile.dto");
 const otp_entity_1 = require("./entities/otp.entity");
 const auth_service_1 = require("../auth/auth.service");
+const notif_push_service_1 = require("../module_notification_push/notif_push.service");
 let UserController = class UserController {
-    constructor(userService, authService) {
+    constructor(userService, authService, notificationService) {
         this.userService = userService;
         this.authService = authService;
+        this.notificationService = notificationService;
     }
     async registerUser(checkUserDto) {
         try {
@@ -168,10 +170,6 @@ let UserController = class UserController {
             return { success: false, message: "Identifiant non trouvé" };
         }
     }
-    async updateFcmToken(req, fcm_token) {
-        const userId = req.user.id_user;
-        return this.userService.updateFcmToken(userId, fcm_token);
-    }
     async createFullUser(body) {
         let parsedPosition = undefined;
         if (body.position) {
@@ -203,7 +201,42 @@ let UserController = class UserController {
         if (!body.identifier?.trim()) {
             throw new common_1.BadRequestException("Identifiant requis.");
         }
-        return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
+        if (!body.token?.trim()) {
+            throw new common_1.BadRequestException("Token notification requis.");
+        }
+        const result = await this.userService.getLastOtpByIdentifier(body.identifier.trim());
+        let title = '';
+        let message = '';
+        if (result.success) {
+            title = 'Code OTP';
+            message = `Votre code OTP est : ${result.otp}`;
+        }
+        else {
+            title = 'Erreur OTP';
+            message = result.message;
+        }
+        try {
+            await this.notificationService.sendToToken(body.token.trim(), title, message);
+        }
+        catch (error) {
+            console.error('Erreur envoi notification:', error.message);
+        }
+        return result;
+    }
+    async updateFcmToken(req, fcm_token) {
+        const userId = req.user.id_user;
+        return this.userService.updateFcmToken(userId, fcm_token);
+    }
+    async updateFcmTokenPublic(body) {
+        const { id_user, fcm_token } = body;
+        if (!id_user || !fcm_token) {
+            throw new common_1.BadRequestException("id_user et fcm_token sont requis");
+        }
+        const user = await this.userService.findUserById(id_user);
+        if (!user) {
+            throw new common_1.NotFoundException("Utilisateur introuvable");
+        }
+        return this.userService.updateFcmToken(id_user, fcm_token);
     }
 };
 exports.UserController = UserController;
@@ -287,15 +320,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "checkIdentifier", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Post)('update-fcm-token'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Body)('fcm_token')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "updateFcmToken", null);
-__decorate([
     (0, common_1.Post)('creer-compte-complet'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -309,9 +333,26 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getOtp", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('update-fcm-token'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)('fcm_token')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateFcmToken", null);
+__decorate([
+    (0, common_1.Post)('public/update-fcm-token-temp'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateFcmTokenPublic", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('api'),
     __metadata("design:paramtypes", [user_service_1.UserService,
-        auth_service_1.AuthService])
+        auth_service_1.AuthService,
+        notif_push_service_1.NotificationService])
 ], UserController);
 //# sourceMappingURL=user.controller.js.map

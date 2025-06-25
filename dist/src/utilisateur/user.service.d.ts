@@ -83,4 +83,5 @@ export declare class UserService {
         success: boolean;
         message: string;
     }>;
+    findUserById(id_user: string): Promise<User | null>;
 }

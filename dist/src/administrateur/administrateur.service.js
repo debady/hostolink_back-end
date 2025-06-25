@@ -290,7 +290,7 @@ let AdministrateurService = class AdministrateurService {
             [admin] = await this.dataSource.query(`SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`, [idAdmin]);
             if (!admin)
                 throw new common_1.NotFoundException("Administrateur non trouvé");
-            const MAX_AUTORISE = 100000000;
+            const MAX_AUTORISE = 500000;
             const cumulActuel = parseInt(admin.cumule_des_transactions);
             const soldeActuel = parseInt(admin.solde_de_rechargement);
             const nouveauCumul = cumulActuel + montant;
@@ -367,7 +367,7 @@ let AdministrateurService = class AdministrateurService {
             [admin] = await this.dataSource.query(`SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`, [idAdmin]);
             if (!admin)
                 throw new common_1.NotFoundException("Administrateur non trouvé");
-            const MAX_AUTORISE = 100000000;
+            const MAX_AUTORISE = 500000;
             const cumulActuel = parseInt(admin.cumule_des_transactions);
             const soldeActuel = parseInt(admin.solde_de_rechargement);
             const nouveauCumul = cumulActuel + montant;
@@ -447,7 +447,7 @@ let AdministrateurService = class AdministrateurService {
             [admin] = await this.dataSource.query(`SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`, [idAdmin]);
             if (!admin)
                 throw new common_1.NotFoundException("Administrateur non trouvé");
-            const MAX_AUTORISE = 100000000;
+            const MAX_AUTORISE = 500000;
             const cumulActuel = parseInt(admin.cumule_des_transactions);
             const soldeActuel = parseInt(admin.solde_de_rechargement);
             const nouveauCumul = cumulActuel + montant;
@@ -527,7 +527,7 @@ let AdministrateurService = class AdministrateurService {
             [admin] = await this.dataSource.query(`SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`, [idAdmin]);
             if (!admin)
                 throw new common_1.NotFoundException("Administrateur non trouvé");
-            const MAX_AUTORISE = 100000000;
+            const MAX_AUTORISE = 500000;
             const cumulActuel = parseInt(admin.cumule_des_transactions);
             const soldeActuel = parseInt(admin.solde_de_rechargement);
             const nouveauCumul = cumulActuel + montant;
@@ -630,7 +630,7 @@ let AdministrateurService = class AdministrateurService {
             [admin] = await this.dataSource.query(`SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`, [idAdmin]);
             if (!admin)
                 throw new common_1.NotFoundException("Administrateur non trouvé");
-            const MAX_AUTORISE = 100000000;
+            const MAX_AUTORISE = 500000;
             const cumulActuel = parseInt(admin.cumule_des_transactions);
             const soldeActuel = parseInt(admin.solde_de_rechargement);
             const nouveauCumul = cumulActuel + montant;
@@ -697,7 +697,7 @@ let AdministrateurService = class AdministrateurService {
             [admin] = await this.dataSource.query(`SELECT * FROM administrateurs WHERE id_admin_gestionnaire = $1 LIMIT 1`, [idAdmin]);
             if (!admin)
                 throw new common_1.NotFoundException("Administrateur non trouvé");
-            const MAX_AUTORISE = 100000000;
+            const MAX_AUTORISE = 500000;
             const cumulActuel = parseInt(admin.cumule_des_transactions);
             const soldeActuel = parseInt(admin.solde_de_rechargement);
             const nouveauCumul = cumulActuel + montant;
@@ -832,7 +832,7 @@ let AdministrateurService = class AdministrateurService {
         const admin = await this.adminRepository.findOneBy({ id_admin_gestionnaire: idAdmin });
         if (!admin)
             throw new common_1.NotFoundException("Administrateur non trouvé");
-        const MAX_AUTORISE = 100000000;
+        const MAX_AUTORISE = 500000;
         const nouveauCumul = admin.cumule_des_transactions + montant;
         if (nouveauCumul > MAX_AUTORISE) {
             throw new common_1.BadRequestException("❌ Plafond de 50 000 000 FCFA atteint. Vous ne pouvez plus effectuer de transaction.");

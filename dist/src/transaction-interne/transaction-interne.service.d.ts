@@ -6,12 +6,14 @@ import { PayWithQrDto } from './payer-avec/payer-avec-qr.dto';
 import { RollbackTransactionDto } from './rollback-dto/rollback-transaction.dto';
 import { PayWithPhoneDto } from './payer-avec/payer-avec-telephone.dto';
 import { PayWithEmailDto } from './payer-avec/payer-avec-email.dto';
+import { NotificationService } from 'src/module_notification_push/notif_push.service';
 export declare class TransactionInterneService {
     private readonly transactionRepository;
     private readonly transactionFraisRepository;
     private readonly dataSource;
     private readonly moduleRef;
-    constructor(transactionRepository: Repository<Transaction>, transactionFraisRepository: Repository<TransactionFrais>, dataSource: DataSource, moduleRef: ModuleRef);
+    private readonly notificationService;
+    constructor(transactionRepository: Repository<Transaction>, transactionFraisRepository: Repository<TransactionFrais>, dataSource: DataSource, moduleRef: ModuleRef, notificationService: NotificationService);
     private calculerFrais;
     getMyTransactions(userId: string): Promise<any[]>;
     getTransactionById(id: number): Promise<any>;

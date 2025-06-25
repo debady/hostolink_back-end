@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { MoyenEnvoiEnum } from './entities/otp.entity';
 import { AuthService } from 'src/auth/auth.service';
+import { NotificationService } from 'src/module_notification_push/notif_push.service';
 interface AuthenticatedRequest extends Request {
     user: {
         id_user: string;
@@ -13,7 +14,8 @@ interface AuthenticatedRequest extends Request {
 export declare class UserController {
     private readonly userService;
     private readonly authService;
-    constructor(userService: UserService, authService: AuthService);
+    private readonly notificationService;
+    constructor(userService: UserService, authService: AuthService, notificationService: NotificationService);
     registerUser(checkUserDto: CheckUserDto): Promise<{
         success: boolean;
         id_user: string | undefined;
@@ -77,10 +79,6 @@ export declare class UserController {
         message: string;
         data?: undefined;
     }>;
-    updateFcmToken(req: any, fcm_token: string): Promise<{
-        success: boolean;
-        message: string;
-    }>;
     createFullUser(body: {
         email?: string;
         telephone?: string;
@@ -99,9 +97,21 @@ export declare class UserController {
     }>;
     getOtp(body: {
         identifier: string;
+        token: string;
     }): Promise<{
         otp?: string;
         expires_at?: Date;
+        success: boolean;
+        message: string;
+    }>;
+    updateFcmToken(req: any, fcm_token: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    updateFcmTokenPublic(body: {
+        id_user: string;
+        fcm_token: string;
+    }): Promise<{
         success: boolean;
         message: string;
     }>;

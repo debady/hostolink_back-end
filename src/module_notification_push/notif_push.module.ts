@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { NotifPushService } from './notif_push.service';
-import { NotifPushController } from './notif_push.controller';
+import { NotificationController } from './notif_push.controller';
+import { NotificationService } from './notif_push.service';
 
 @Module({
-  providers: [NotifPushService],
-  controllers: [NotifPushController],
-  exports: [NotifPushService], // Pour l’injecter ailleurs
+  providers: [NotificationService],
+  exports: [NotificationService],
+  controllers: [NotificationController],
 })
-export class NotifPushModule {}
+export class NotificationModule {}

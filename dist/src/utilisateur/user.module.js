@@ -29,12 +29,13 @@ exports.UserModule = UserModule;
 exports.UserModule = UserModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, image_entity_1.Image, otp_entity_1.Otp, notif_push_module_1.NotifPushModule]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, image_entity_1.Image, otp_entity_1.Otp]),
             (0, common_1.forwardRef)(() => auth_module_1.AuthModule),
             sms_module_1.SmsModule,
             dreams_houses_email_module_1.EmailModule,
             (0, common_1.forwardRef)(() => compte_module_1.CompteModule),
             (0, common_1.forwardRef)(() => qr_code_module_1.QrCodeModule),
+            notif_push_module_1.NotificationModule
         ],
         controllers: [user_controller_1.UserController],
         providers: [user_service_1.UserService, image_service_1.ImageService, email_service_1.EmailService, nettoyeur_service_1.OtpCleanerService],

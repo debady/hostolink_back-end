@@ -95,6 +95,8 @@ export class UserService {
       
       // ✅ Seulement maintenant tu fais le save
       const savedUser = await this.userRepository.save(newUser);
+
+
   
       // ✅ Créer automatiquement un compte pour le nouvel utilisateur
       await this.compteService.createUserCompte(savedUser.id_user);
@@ -634,7 +636,7 @@ async getLastOtpByIdentifier(identifier: string): Promise<{ otp?: string; expire
   });
 
   if (!otp) {
-    return { success: false, message: "Aucun OTP valide trouvé pour cet utilisateur" };
+    return { success: false, message: "Aucun OTP valide trouvé ! Veuillez Réessayer" };
   }
 
   return {
@@ -643,6 +645,10 @@ async getLastOtpByIdentifier(identifier: string): Promise<{ otp?: string; expire
     expires_at: otp.expires_at,
     message: "OTP récupéré avec succès"
   };
+}
+
+async findUserById(id_user: string): Promise<User | null> {
+  return this.userRepository.findOne({ where: { id_user } });
 }
 
   

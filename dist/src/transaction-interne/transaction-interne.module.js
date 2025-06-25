@@ -16,6 +16,7 @@ const compte_module_1 = require("../compte/compte.module");
 const qr_code_module_1 = require("../qr-code/qr-code.module");
 const user_module_1 = require("../utilisateur/user.module");
 const transaction_frais_entity_1 = require("../transaction-frais/entite/transaction-frais.entity");
+const notif_push_module_1 = require("../module_notification_push/notif_push.module");
 let TransactionInterneModule = class TransactionInterneModule {
 };
 exports.TransactionInterneModule = TransactionInterneModule;
@@ -25,7 +26,8 @@ exports.TransactionInterneModule = TransactionInterneModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([transaction_interne_entity_1.Transaction, transaction_frais_entity_1.TransactionFrais]),
             (0, common_1.forwardRef)(() => compte_module_1.CompteModule),
             (0, common_1.forwardRef)(() => qr_code_module_1.QrCodeModule),
-            (0, common_1.forwardRef)(() => user_module_1.UserModule)
+            (0, common_1.forwardRef)(() => user_module_1.UserModule),
+            notif_push_module_1.NotificationModule
         ],
         controllers: [transaction_interne_controller_1.TransactionInterneController],
         providers: [transaction_interne_service_1.TransactionInterneService],

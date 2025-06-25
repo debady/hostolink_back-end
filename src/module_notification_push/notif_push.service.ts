@@ -1,25 +1,37 @@
+import { Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import { Injectable } from '@nestjs/common';
-import * as path from 'path';
+import { join } from 'path';
+
+// Charge le fichier JSON avec un chemin robuste
+const serviceAccount = require(join(process.cwd(), 'firebase', 'firebase-service-account.json'));
 
 @Injectable()
-export class NotifPushService {
+export class NotificationService {
+  private readonly logger = new Logger(NotificationService.name);
+
   constructor() {
     if (!admin.apps.length) {
-      const serviceAccountPath = path.join(
-        process.cwd(),
-        'hostopay-notif-firebase-adminsdk-fbsvc-cf9e79b521.json'
-      );
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccountPath),
+        credential: admin.credential.cert(serviceAccount),
       });
+      this.logger.log('✅ Firebase Admin SDK initialisé');
     }
   }
 
-  async sendPushNotification(token: string, title: string, body: string) {
-    return admin.messaging().send({
+  async sendToToken(token: string, title: string, body: string): Promise<string> {
+    const message: admin.messaging.Message = {
       token,
       notification: { title, body },
-    });
+      android: { priority: 'high' },
+    };
+
+    try {
+      const response = await admin.messaging().send(message);
+      this.logger.log(`✅ Notification envoyée au token: ${token} — messageId: ${response}`);
+      return response;
+    } catch (error) {
+      this.logger.error(`❌ Erreur d’envoi de la notification: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 }

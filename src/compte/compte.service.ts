@@ -52,7 +52,12 @@ export class CompteService {
    * @returns Le compte de l'utilisateur ou null si aucun compte n'existe
    */
   async getUserCompte(id_user: string): Promise<Compte | null> {
-    return this.compteRepository.findOne({ where: { id_user } });
+    // return this.compteRepository.findOne({ where: { id_user } });
+    return this.compteRepository.findOne({
+    where: { id_user },
+    relations: ['user'], // 👈 Charge le user lié au compte
+  });
+
   }
 
   /**
@@ -85,51 +90,14 @@ export class CompteService {
     }
   
     compte.solde_bonus += montant;
-    compte.solde_compte += montant; // Optionnel : visible comme crédit réel
+    compte.solde_compte += montant; 
     compte.date_modification = new Date();
   
     await this.compteRepository.save(compte);
   }
+
+
+
   
-  /* 
-   * CODE POUR LES ÉTABLISSEMENTS DE SANTÉ (À IMPLÉMENTER PLUS TARD)
-   * Décommentez ce code quand le module d'établissement de santé sera développé
-   */
-  /*
-  async createEtablissementCompte(id_user_etablissement_sante: number): Promise<Compte> {
-    // Vérifier si un compte existe déjà pour cet établissement
-    const existingCompte = await this.compteRepository.findOne({ 
-      where: { id_user_etablissement_sante } 
-    });
-    
-    if (existingCompte) {
-      // Un compte existe déjà, donc on le retourne simplement
-      //console.log(`Un compte existe déjà pour l'établissement ${id_user_etablissement_sante}`);
-      return existingCompte;
-    }
-    
-    // Génère un numéro de compte de format ETAB-XXXX-XXXX-XXXX
-    const numeroCompte = `ETAB-${this.generateAccountNumber()}`;
-    
-    const newCompte = this.compteRepository.create({
-      id_user_etablissement_sante,
-      type_user: TypeUserEnum.ETABLISSEMENT,  // Utiliser l'énumération au lieu d'une chaîne de caractères
-      numero_compte: numeroCompte,
-      solde_compte: 0,
-      solde_bonus: 0,
-      cumule_mensuel: 0,
-      plafond: 500000, // Plafond plus élevé pour les établissements
-      devise: 'XOF',
-      statut: 'actif',
-      date_creation_compte: new Date(),
-      date_modification: new Date(),
-    });
-
-    return this.compteRepository.save(newCompte);
-  }
-
-  async getEtablissementCompte(id_user_etablissement_sante: number): Promise<Compte | null> {
-    return this.compteRepository.findOne({ where: { id_user_etablissement_sante } });
-  }
-  */
+  
 }

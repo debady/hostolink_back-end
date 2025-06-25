@@ -87,7 +87,7 @@ exports.AppModule = AppModule = __decorate([
             partage_module_1.PartageModule,
             commentaire_module_1.CommentaireModule,
             transaction_module_1.TransactionModule,
-            notif_push_module_1.NotifPushModule
+            notif_push_module_1.NotificationModule
         ],
     })
 ], AppModule);

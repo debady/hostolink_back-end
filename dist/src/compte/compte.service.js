@@ -44,7 +44,10 @@ let CompteService = class CompteService {
         return this.compteRepository.save(newCompte);
     }
     async getUserCompte(id_user) {
-        return this.compteRepository.findOne({ where: { id_user } });
+        return this.compteRepository.findOne({
+            where: { id_user },
+            relations: ['user'],
+        });
     }
     generateAccountNumber() {
         const uuid = (0, uuid_1.v4)().replace(/-/g, '').substring(0, 12);

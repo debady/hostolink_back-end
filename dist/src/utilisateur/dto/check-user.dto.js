@@ -31,4 +31,9 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CheckUserDto.prototype, "code_invitation_utilise", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CheckUserDto.prototype, "fcm_token", void 0);
 //# sourceMappingURL=check-user.dto.js.map

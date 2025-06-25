@@ -15,4 +15,7 @@ export class CheckUserDto {
   @IsString()
   code_invitation_utilise?: string;
 
+  @IsOptional()
+  @IsString()
+  fcm_token?: string;
 }

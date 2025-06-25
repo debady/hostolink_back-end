@@ -12,13 +12,15 @@ import { CompteModule } from '../compte/compte.module';
 import { QrCodeModule } from '../qr-code/qr-code.module';
 import { UserModule } from '../utilisateur/user.module';
 import { TransactionFrais } from 'src/transaction-frais/entite/transaction-frais.entity';
+import { NotificationModule } from 'src/module_notification_push/notif_push.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Transaction, TransactionFrais]),
     forwardRef(() => CompteModule),
     forwardRef(() => QrCodeModule),
-    forwardRef(() => UserModule)
+    forwardRef(() => UserModule),
+    NotificationModule
   ],
   controllers: [TransactionInterneController],
   providers: [TransactionInterneService], 

@@ -20,12 +20,14 @@ const core_1 = require("@nestjs/core");
 const transaction_interne_entity_1 = require("./entitie/transaction-interne.entity");
 const transaction_frais_entity_1 = require("../transaction-frais/entite/transaction-frais.entity");
 const user_entity_1 = require("../utilisateur/entities/user.entity");
+const notif_push_service_1 = require("../module_notification_push/notif_push.service");
 let TransactionInterneService = class TransactionInterneService {
-    constructor(transactionRepository, transactionFraisRepository, dataSource, moduleRef) {
+    constructor(transactionRepository, transactionFraisRepository, dataSource, moduleRef, notificationService) {
         this.transactionRepository = transactionRepository;
         this.transactionFraisRepository = transactionFraisRepository;
         this.dataSource = dataSource;
         this.moduleRef = moduleRef;
+        this.notificationService = notificationService;
     }
     calculerFrais(montant) {
         const tauxFrais = 0.02;
@@ -168,6 +170,12 @@ let TransactionInterneService = class TransactionInterneService {
             await queryRunner.manager.save(newTransactionFrais);
             await this.executeTransaction(queryRunner, compteExpéditeur.id_compte, compteRecepteur.id_compte, montant_envoyer, montantRecu, savedTransaction.id_transaction);
             await queryRunner.commitTransaction();
+            if (userId && compteExpéditeur?.user?.fcm_token) {
+                await this.notificationService.sendToToken(compteExpéditeur.user.fcm_token, 'Transaction envoyée ✅', `Vous avez envoyé ${montant_envoyer} ${compteExpéditeur.devise}`);
+            }
+            if (id_utilisateur_recepteur && compteRecepteur?.user?.fcm_token) {
+                await this.notificationService.sendToToken(compteRecepteur.user.fcm_token, 'Vous avez reçu un paiement 💸', `Vous avez reçu ${montantRecu} ${compteRecepteur.devise}`);
+            }
             return {
                 success: true,
                 message: 'Transaction effectuée avec succès',
@@ -749,6 +757,7 @@ exports.TransactionInterneService = TransactionInterneService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.DataSource,
-        core_1.ModuleRef])
+        core_1.ModuleRef,
+        notif_push_service_1.NotificationService])
 ], TransactionInterneService);
 //# sourceMappingURL=transaction-interne.service.js.map

@@ -12,6 +12,7 @@ import { Request } from 'express';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { MoyenEnvoiEnum } from './entities/otp.entity';
 import { AuthService } from 'src/auth/auth.service';
+import { NotificationService } from 'src/module_notification_push/notif_push.service';
 
 interface AuthenticatedRequest extends Request {
   user: { id_user: string };
@@ -22,6 +23,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   // ✅ Création d'un utilisateur (sans mot de passe)
@@ -229,13 +231,7 @@ async getAllTelephones(@Req() req: AuthenticatedRequest) {
   }
     }
 
-    //notifications
-    @UseGuards(JwtAuthGuard)
-    @Post('update-fcm-token')
-    async updateFcmToken(@Req() req, @Body('fcm_token') fcm_token: string) {
-      const userId = req.user.id_user;
-      return this.userService.updateFcmToken(userId, fcm_token);
-    }
+
 
   
     @Post('creer-compte-complet')
@@ -286,13 +282,74 @@ async getAllTelephones(@Req() req: AuthenticatedRequest) {
 
 
     // ENDPOINT DE RECUP DU DERNIER OTP DE L'UTILISATEUR PAR SMS
+    // @Post('get-otp')
+    // async getOtp(@Body() body: { identifier: string }) {
+    //   if (!body.identifier?.trim()) {
+    //     throw new BadRequestException("Identifiant requis.");
+    //   }
+    //   return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
+    // }
+
     @Post('get-otp')
-    async getOtp(@Body() body: { identifier: string }) {
-      if (!body.identifier?.trim()) {
-        throw new BadRequestException("Identifiant requis.");
+      async getOtp(
+        @Body() body: { identifier: string; token: string } // on attend token FCM ici
+      ) {
+        if (!body.identifier?.trim()) {
+          throw new BadRequestException("Identifiant requis.");
+        }
+        if (!body.token?.trim()) {
+          throw new BadRequestException("Token notification requis.");
+        }
+
+        const result = await this.userService.getLastOtpByIdentifier(body.identifier.trim());
+
+        // Préparer le message de notification
+        let title = '';
+        let message = '';
+        if (result.success) {
+          title = 'Code OTP';
+          message = `Votre code OTP est : ${result.otp}`;
+        } else {
+          title = 'Erreur OTP';
+          message = result.message;
+        }
+
+        // Envoyer la notif push
+        try {
+          await this.notificationService.sendToToken(body.token.trim(), title, message);
+        } catch (error) {
+          // Optionnel : logger ou gérer l’erreur notification sans bloquer la réponse
+          console.error('Erreur envoi notification:', error.message);
+        }
+
+        return result;
       }
-      return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
+
+
+          //notifications
+    @UseGuards(JwtAuthGuard)
+    @Post('update-fcm-token')
+    async updateFcmToken(@Req() req, @Body('fcm_token') fcm_token: string) {
+      const userId = req.user.id_user;
+      return this.userService.updateFcmToken(userId, fcm_token);
     }
+
+
+    @Post('public/update-fcm-token-temp')
+    async updateFcmTokenPublic(@Body() body: { id_user: string; fcm_token: string }) {
+      const { id_user, fcm_token } = body;
+      if (!id_user || !fcm_token) {
+        throw new BadRequestException("id_user et fcm_token sont requis");
+      }
+
+      const user = await this.userService.findUserById(id_user);
+      if (!user) {
+        throw new NotFoundException("Utilisateur introuvable");
+      }
+
+      return this.userService.updateFcmToken(id_user, fcm_token);
+    }
+    
 
 
 // inscription direct de l'utilisateur 
@@ -336,36 +393,34 @@ async getAllTelephones(@Req() req: AuthenticatedRequest) {
     //   });
     // }
 
-    // ...existing code...
+     // ✅ Création d'un utilisateur avec code d'invitation (si fourni)
+    // @Post('check-user')
+    //   async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
+    //     return this.userService.registerUser(
+    //       body.identifier.trim(),
+    //       body.code_invitation_utilise?.trim() // ← C’EST ICI QUE ÇA PEUT ÊTRE VIDE
+    //     );
+    // }
 
-  
+    // @Post('verify-otp-bonus')
+    //   async verifyOtpAndReward(@Body() body: { identifier: string; otpCode: string }) {
+    //   if (!body.identifier?.trim() || !body.otpCode?.trim()) {
+    //     throw new BadRequestException("Identifiant et code OTP requis");
+    // }
+
+    //   try {
+    //     const result = await this.userService.verifyOtpAndRewardParrain(
+    //       body.identifier.trim(),
+    //       body.otpCode.trim()
+    //     );
+    //     return result;
+    //   } catch (error) {
+    //     console.error("❌ Erreur verify-otp-bonus:", error);
+    //     throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
+    //   }
+    // }
+    // }
+
 
 
 }
-  // ✅ Création d'un utilisateur avec code d'invitation (si fourni)
-// @Post('check-user')
-//   async checkUser(@Body() body: { identifier: string; code_invitation_utilise?: string }) {
-//     return this.userService.registerUser(
-//       body.identifier.trim(),
-//       body.code_invitation_utilise?.trim() // ← C’EST ICI QUE ÇA PEUT ÊTRE VIDE
-//     );
-// }
-
-// @Post('verify-otp-bonus')
-//   async verifyOtpAndReward(@Body() body: { identifier: string; otpCode: string }) {
-//   if (!body.identifier?.trim() || !body.otpCode?.trim()) {
-//     throw new BadRequestException("Identifiant et code OTP requis");
-// }
-
-//   try {
-//     const result = await this.userService.verifyOtpAndRewardParrain(
-//       body.identifier.trim(),
-//       body.otpCode.trim()
-//     );
-//     return result;
-//   } catch (error) {
-//     console.error("❌ Erreur verify-otp-bonus:", error);
-//     throw new InternalServerErrorException(error.message || "Erreur lors de la vérification OTP + bonus");
-//   }
-// }
-// }

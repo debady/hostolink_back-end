@@ -1,12 +1,17 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { NotifPushService } from './notif_push.service';
+import { NotificationService } from './notif_push.service';
 
-@Controller('notif-push')
-export class NotifPushController {
-  constructor(private readonly notifPushService: NotifPushService) {}
+@Controller('notification')
+export class NotificationController {
+  constructor(private readonly notificationService: NotificationService) {}
 
   @Post('send')
-  async send(@Body() body: { token: string; title: string; message: string }) {
-    return this.notifPushService.sendPushNotification(body.token, body.title, body.message);
+  async sendManualNotification(
+    @Body('token') token: string,
+    @Body('title') title: string,
+    @Body('body') body: string
+  ) {
+    const messageId = await this.notificationService.sendToToken(token, title, body);
+    return { success: true, messageId };
   }
 }

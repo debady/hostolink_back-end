@@ -14,9 +14,11 @@ import { RollbackTransactionDto } from './rollback-dto/rollback-transaction.dto'
 import { PayWithPhoneDto } from './payer-avec/payer-avec-telephone.dto';
 import { PayWithEmailDto } from './payer-avec/payer-avec-email.dto';
 import { User } from 'src/utilisateur/entities/user.entity'; 
+import { NotificationService } from 'src/module_notification_push/notif_push.service';
 
 // Interface pour le compte
 interface Compte {
+  user: any;
   id_compte: number;
   solde_compte: number;
   devise: string;
@@ -39,7 +41,11 @@ export class TransactionInterneService {
     @InjectRepository(TransactionFrais)
     private readonly transactionFraisRepository: Repository<TransactionFrais>,
     private readonly dataSource: DataSource,
-    private readonly moduleRef: ModuleRef
+    private readonly moduleRef: ModuleRef,
+
+    // injection des notifs des transactions
+
+    private readonly notificationService: NotificationService,
   ) {}
   
  private calculerFrais(montant: number): number {
@@ -191,11 +197,7 @@ private validateCriticalFields(transactionData: CreateTransactionDto) {
       compteRecepteur = await this.getCompteByUserId(qrCodeInfo.id_user);
       id_utilisateur_recepteur = qrCodeInfo.id_user;
     } else if (qrCodeInfo.id_user_etablissement_sante) {
-      // Destinataire est un établissement
-      /* COMMENTÉ: Module des établissements de santé non encore développé
-      compteRecepteur = await this.getCompteByEtablissementId(qrCodeInfo.id_user_etablissement_sante);
-      id_etablissement_recepteur = qrCodeInfo.id_user_etablissement_sante;
-      */
+
       throw new BadRequestException('Les paiements aux établissements de santé ne sont pas encore disponibles');
     } else {
       throw new NotFoundException('Destinataire invalide dans le QR code');
@@ -274,7 +276,24 @@ private validateCriticalFields(transactionData: CreateTransactionDto) {
       // Commit de la transaction
       await queryRunner.commitTransaction();
 
-      
+      // 🔔 Notification à l'expéditeur
+      if (userId && compteExpéditeur?.user?.fcm_token) {
+        await this.notificationService.sendToToken(
+          compteExpéditeur.user.fcm_token,
+          'Transaction envoyée ✅',
+          `Vous avez envoyé ${montant_envoyer} ${compteExpéditeur.devise}`
+        );
+      }
+
+      // 🔔 Notification au bénéficiaire
+      if (id_utilisateur_recepteur && compteRecepteur?.user?.fcm_token) {
+        await this.notificationService.sendToToken(
+          compteRecepteur.user.fcm_token,
+          'Vous avez reçu un paiement 💸',
+          `Vous avez reçu ${montantRecu} ${compteRecepteur.devise}`
+        );
+      }
+
 
       return {
         success: true,
@@ -297,15 +316,6 @@ private validateCriticalFields(transactionData: CreateTransactionDto) {
       await queryRunner.rollbackTransaction();
     }
     
-    // if (error instanceof NotFoundException || error instanceof BadRequestException) {
-    //   throw error;
-    // }
-    
-    // throw new InternalServerErrorException(`Erreur lors de la transaction: ${error.message}`);
-
-
-
-     // Enregistrer la transaction échouée
     try {
       const failedTransactionData: CreateTransactionDto = {
         id_compte_expediteur: compteExpéditeur?.id_compte,
@@ -1126,7 +1136,7 @@ async getUserInfoFromQrCode(token: string) {
     userInfo = await this.dataSource.manager.findOne(User, {
       where: { id_user: qrCodeInfo.id_user },
       relations: ['images'], // 🧠 On charge les images liées
-      select: ['id_user', 'nom', 'prenom', 'telephone', 'email', 'actif'] // 🔥 ajoute 'actif' pour vérifier
+      select: ['id_user', 'nom', 'prenom', 'telephone', 'email', 'actif'] 
     });
   }
 

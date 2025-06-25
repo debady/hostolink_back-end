@@ -55,4 +55,5 @@ export class Compte {
   @OneToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'id_user' })
   user: User;
+
 }
