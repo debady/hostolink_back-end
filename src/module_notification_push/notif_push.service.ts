@@ -2,8 +2,26 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { join } from 'path';
 
-// Charge le fichier JSON avec un chemin robuste
-const serviceAccount = require(join(process.cwd(), 'firebase', 'firebase-service-account.json'));
+// // Charge le fichier JSON avec un chemin robuste
+// const serviceAccount = require(join(process.cwd(), 'firebase', 'firebase-service-account.json'));
+
+
+let serviceAccount: any;
+
+if (process.env.FIREBASE_CONFIG_BASE64) {
+  // Cas Render (production)
+  serviceAccount = JSON.parse(
+    Buffer.from(process.env.FIREBASE_CONFIG_BASE64, 'base64').toString('utf8')
+  );
+} else {
+  // Cas développement local
+serviceAccount = require(join(process.cwd(), 'firebase', 'firebase-service-account.json'));
+}
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 
 @Injectable()
 export class NotificationService {
