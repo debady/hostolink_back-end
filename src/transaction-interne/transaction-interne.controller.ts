@@ -124,6 +124,16 @@ export class TransactionInterneController {
 
 
 
+
+
+  @Post('info_qrcode')
+  @UseGuards(JwtAuthGuard)
+  async getUserInfoFromQrCode(@Body('token') token: string) {
+    return this.TransactionInterneService.getUserInfoFromQrCode(token);
+  }
+
+
+
   // endpoints pour recuprer les statistiques des transactions d'un utilisateur
 
   // @Get('stats/utilisateur/:id_user')
@@ -135,16 +145,6 @@ export class TransactionInterneController {
   //     data: await this.TransactionInterneService.getUserStats(id_user)
   //   };
   // }
-
-
-
-@Post('info_qrcode')
-@UseGuards(JwtAuthGuard)
-async getUserInfoFromQrCode(@Body('token') token: string) {
-  return this.TransactionInterneService.getUserInfoFromQrCode(token);
-}
-
-
 
 }
 

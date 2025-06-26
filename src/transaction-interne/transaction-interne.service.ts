@@ -260,9 +260,6 @@ private validateCriticalFields(transactionData: CreateTransactionDto) {
       const newTransactionFrais = this.transactionFraisRepository.create(transactionFraisData);
       await queryRunner.manager.save(newTransactionFrais);
 
-
-
-
       // Exécuter la transaction (débiter/créditer les comptes)
       await this.executeTransaction(
         queryRunner,
@@ -351,9 +348,6 @@ private validateCriticalFields(transactionData: CreateTransactionDto) {
     }
 
     throw new InternalServerErrorException(`Erreur lors de la transaction: ${error.message}`);
-
-
-
 
 
   } finally {
