@@ -1,0 +1,11 @@
+SUPABSE V2 
+    NGUESSAN#1111
+    hostolink_bd_v2
+
+BUILD LE HA£SH
+	
+NGUESSAN@DESKTOP-38E6PIP MINGW64 ~/Desktop/SohapiGroup/hostolink-pack/y-hostolink_back-end-dev_sohapigroup (master)
+$ base64 -w 0 firebase/firebase-service-account.json > firebase_encoded.txt
+
+
+NG

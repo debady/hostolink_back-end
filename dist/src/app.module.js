@@ -39,6 +39,7 @@ const transaction_module_1 = require("./transaction_user_es/transaction.module")
 const documents_identite_module_1 = require("./documents_identite/documents_identite.module");
 const partage_module_1 = require("./1-Module_reseaux_sociale/partage/partage.module");
 const notif_push_module_1 = require("./module_notification_push/notif_push.module");
+const wave_checkout_module_1 = require("./wave-checkout/wave-checkout.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -93,7 +94,9 @@ exports.AppModule = AppModule = __decorate([
             partage_module_1.PartageModule,
             commentaire_module_1.CommentaireModule,
             transaction_module_1.TransactionModule,
-            notif_push_module_1.NotificationModule
+            notif_push_module_1.NotificationModule,
+            wave_checkout_module_1.WaveCheckoutModule,
+            wave_checkout_module_1.WaveCheckoutModule,
         ],
     })
 ], AppModule);

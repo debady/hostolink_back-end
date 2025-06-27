@@ -40,6 +40,7 @@ import { TransactionModule } from './transaction_user_es/transaction.module';
 import { DocumentsIdentiteModule } from './documents_identite/documents_identite.module';
 import { PartageModule } from './1-Module_reseaux_sociale/partage/partage.module';
 import { NotificationModule } from './module_notification_push/notif_push.module';
+import { WaveCheckoutModule } from './wave-checkout/wave-checkout.module';
 
 @Module({
   imports: [
@@ -60,7 +61,10 @@ import { NotificationModule } from './module_notification_push/notif_push.module
     //   entities: [__dirname + '/**/*.entity{.ts,.js}'],
     //   synchronize: false,
     //   autoLoadEntities: true,
+         
+
     // }),
+    //  console.log(.env.WAVE_API_TOKEN),
 
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -111,7 +115,12 @@ import { NotificationModule } from './module_notification_push/notif_push.module
     PartageModule,
     CommentaireModule,
     TransactionModule,
-    NotificationModule
+    NotificationModule,
+    WaveCheckoutModule,
+    // TRANSACTIONS EXTERNE | WAVE
+    WaveCheckoutModule,
+
+
   ],
 })
 export class AppModule {}
