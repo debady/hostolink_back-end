@@ -50,4 +50,7 @@ export class WaveCheckoutSession {
 
   @Column({ name: 'webhook_received', type: 'boolean', default: false })
   webhookReceived: boolean;
+
+  @Column({ name: 'wave_launch_url', type: 'text', nullable: true })
+  waveLaunchUrl?: string;
 }

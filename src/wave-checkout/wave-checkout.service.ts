@@ -74,14 +74,17 @@ export class WaveCheckoutService {
       );
 
       const data = response.data;
+      console.log('🌊 Réponse Wave:', data);
+
       const session = this.waveSessionRepo.create({
         idUser: dto.idUser,
         sessionId: data.id,
+        waveLaunchUrl: data.wave_launch_url,
         clientReference: dto.clientReference,
         amount: dto.amount,
         currency: dto.currency || 'XOF',
         successUrl: dto.successUrl,
-        errorUrl: dto.errorUrl,
+        errorUrl: dto.errorUrl, 
         status: 'pending',
       });
 
@@ -177,7 +180,7 @@ export class WaveCheckoutService {
       // const transactionFrais = queryRunner.manager.create(TransactionsFrais, {
       //   montant_frais: 0,
       //   type_transaction: 'externe',
-      //   mode_paiement: 'mobile_money',
+      //   mode_paiement: 'wave_money',
       //   date_creation: new Date(),
       // });
 
@@ -198,7 +201,7 @@ const transactionFrais = queryRunner.manager.create(TransactionsFrais, {
   id_transaction: tempId, // Définir explicitement pour éviter NULL
   montant_frais: 0,
   type_transaction: 'externe',
-  mode_paiement: 'mobile_money',
+  mode_paiement: 'wave_money',
   date_creation: new Date(),
 });
 

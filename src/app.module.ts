@@ -64,7 +64,6 @@ import { WaveCheckoutModule } from './wave-checkout/wave-checkout.module';
          
 
     // }),
-    //  console.log(.env.WAVE_API_TOKEN),
 
     TypeOrmModule.forRoot({
       type: 'postgres',
