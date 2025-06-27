@@ -1,9 +1,5 @@
-// src/compte/dto/create-compte.dto.ts
-/**
- * DTOs pour les comptes des utilisateurs et établissements de santé
- */
 
-// DTO pour créer un compte (utilisé en interne)
+
 export class CreateCompteDto {
   solde_compte?: number;
   solde_bonus?: number;
@@ -16,7 +12,6 @@ export class CreateCompteDto {
   id_user_etablissement_sante?: number;
 }
 
-// DTO pour la mise à jour du mode de paiement préférentiel
 export class UpdateModePaiementDto {
   mode_paiement_preferentiel: string;
 }

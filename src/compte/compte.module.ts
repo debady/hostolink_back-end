@@ -8,8 +8,6 @@ import { UserModule } from 'src/utilisateur/user.module';
   imports: [
     TypeOrmModule.forFeature([Compte]),
     forwardRef(() => UserModule),
-    // Décommentez la ligne suivante lorsque le module d'établissement de santé sera développé
-    // forwardRef(() => EtablissementSanteModule)
   ],
   controllers: [CompteController],
   providers: [CompteService],

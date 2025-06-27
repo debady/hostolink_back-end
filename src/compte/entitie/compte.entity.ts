@@ -22,7 +22,7 @@ export class Compte {
   @Column({ type: 'integer', default: 0 })
   cumule_mensuel: number;
 
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'integer', default: 2000000 })
   plafond: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })

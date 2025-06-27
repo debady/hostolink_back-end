@@ -81,7 +81,6 @@ export class CompteService {
   }
   
 
-
   async créditerBonusParrain(id_parrain: string, montant: number = 500): Promise<void> {
     const compte = await this.compteRepository.findOne({ where: { id_user: id_parrain } });
   
@@ -96,8 +95,4 @@ export class CompteService {
     await this.compteRepository.save(compte);
   }
 
-
-
-  
-  
 }

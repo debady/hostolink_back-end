@@ -37,7 +37,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Compte.prototype, "cumule_mensuel", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'integer', default: 0 }),
+    (0, typeorm_1.Column)({ type: 'integer', default: 2000000 }),
     __metadata("design:type", Number)
 ], Compte.prototype, "plafond", void 0);
 __decorate([
