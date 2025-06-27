@@ -27,7 +27,6 @@ export class WaveCheckoutController {
         message: 'Session créée avec succès',
         data: {
           sessionId: session.sessionId,
-          // checkoutUrl: `https://checkout.wave.com/checkout/${session.sessionId}`, 
           checkoutUrl: session.waveLaunchUrl,
           amount: session.amount,
           currency: session.currency,
@@ -42,47 +41,89 @@ export class WaveCheckoutController {
     }
   }
 
-  // ✅ Webhook appelé par Wave après paiement réussi - NOUVELLE LOGIQUE COMPLÈTE
-  @Post('webhook')
-  async handleWebhook(
-    @Req() req: Request, 
-    @Headers('x-wave-signature') signature?: string
-  ) {
-    try {
-      const body = req.body;
+  // // ✅ Webhook appelé par Wave après paiement réussi - NOUVELLE LOGIQUE COMPLÈTE
+  // @Post('webhook')
+  // async handleWebhook(
+  //   @Req() req: Request, 
+  //   @Headers('x-wave-signature') signature?: string
+  // ) {
+  //   try {
+  //     const body = req.body;
 
-      // 📝 Log pour debugging
-      console.log('📨 Webhook reçu de Wave:', JSON.stringify(body, null, 2));
+  //     // 📝 Log pour debugging
+  //     console.log('📨 Webhook reçu de Wave:', JSON.stringify(body, null, 2));
 
-      // 🔒 TODO: Vérifier la signature Wave pour la sécurité
-      // if (signature) {
-      //   const isValid = this.verifyWaveSignature(body, signature);
-      //   if (!isValid) {
-      //     throw new HttpException('Signature invalide', HttpStatus.UNAUTHORIZED);
-      //   }
-      // }
+  //     // 🔒 TODO: Vérifier la signature Wave pour la sécurité
+  //     // if (signature) {
+  //     //   const isValid = this.verifyWaveSignature(body, signature);
+  //     //   if (!isValid) {
+  //     //     throw new HttpException('Signature invalide', HttpStatus.UNAUTHORIZED);
+  //     //   }
+  //     // }
 
-      // 🚀 Traiter le webhook avec la nouvelle logique complète
-      await this.waveService.handleWebhook(body);
+  //     // 🚀 Traiter le webhook avec la nouvelle logique complète
+  //     await this.waveService.handleWebhook(body);
 
-      return { 
-        success: true,
-        message: 'Webhook traité avec succès',
-        received: true 
-      };
+  //     return { 
+  //       success: true,
+  //       message: 'Webhook traité avec succès',
+  //       received: true 
+  //     };
 
-    } catch (error) {
-      console.error('❌ Erreur webhook Wave:', error);
+  //   } catch (error) {
+  //     console.error('❌ Erreur webhook Wave:', error);
       
-      // 📤 Retourner un statut 200 pour éviter que Wave ne relance
-      // mais logger l'erreur pour investigation
-      return {
-        success: false,
-        error: error.message,
-        received: true // Wave considère comme traité même si erreur
-      };
+  //     // 📤 Retourner un statut 200 pour éviter que Wave ne relance
+  //     // mais logger l'erreur pour investigation
+  //     return {
+  //       success: false,
+  //       error: error.message,
+  //       received: true // Wave considère comme traité même si erreur
+  //     };
+  //   }
+  // }
+
+  @Post('webhook')
+async handleWebhook(
+  @Req() req: Request, 
+  @Headers('authorization') authorization?: string
+) {
+  try {
+    const body = req.body;
+
+    // 📝 Log pour debugging
+    console.log('📨 Webhook reçu de Wave:', JSON.stringify(body, null, 2));
+
+    // 🔒 Vérifier la signature Wave (SHARED_SECRET)
+    const webhookSecret = process.env.WAVE_WEBHOOK_SECRET;
+    if (webhookSecret && authorization) {
+      const expectedAuth = `Bearer ${webhookSecret}`;
+      if (authorization !== expectedAuth) {
+        console.error('❌ Signature webhook invalide');
+        throw new HttpException('Signature invalide', HttpStatus.UNAUTHORIZED);
+      }
+      console.log('✅ Signature webhook valide');
     }
+
+    // 🚀 Traiter le webhook avec la nouvelle logique complète
+    await this.waveService.handleWebhook(body);
+
+    return { 
+      success: true,
+      message: 'Webhook traité avec succès',
+      received: true 
+    };
+
+  } catch (error) {
+    console.error('❌ Erreur webhook Wave:', error);
+    
+    return {
+      success: false,
+      error: error.message,
+      received: true
+    };
   }
+}
 
   // ✅ Vérifier le statut d'une session (pour le frontend)
   @Get('session/:id')
