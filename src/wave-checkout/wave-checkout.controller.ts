@@ -179,46 +179,36 @@ export class WaveCheckoutController {
 @Post('webhook')
 async handleWebhook(
   @Req() req: Request, 
-  @Headers('x-wave-signature') signature?: string  // ✅ Ajout du 'x-'
+  @Headers('authorization') authorization?: string  // ✅ Changer de x-wave-signature à authorization
 ) {
   try {
     const secret = process.env.WAVE_WEBHOOK_SECRET;
-    // Au début du webhook, ajoutez ces logs :
-console.log('🔍 WAVE_WEBHOOK_SECRET chargé:', !!process.env.WAVE_WEBHOOK_SECRET);
-console.log('🔍 WAVE_API_TOKEN chargé:', !!process.env.WAVE_API_TOKEN);
-    console.log('🔍 Headers reçus:', req.headers); // ✅ Log pour debug
-    console.log('🔍 Signature reçue:', signature);
+
+    console.log('🔍 Headers reçus:', req.headers);
+    console.log('🔍 Authorization reçue:', authorization);
     console.log('🔍 Secret configuré:', secret ? 'Oui' : 'Non');
 
-    if (!signature || !secret) {
-      console.error('❌ Signature ou secret manquant');
-      throw new HttpException('Signature manquante', HttpStatus.UNAUTHORIZED);
+    if (!authorization || !secret) {
+      console.error('❌ Authorization ou secret manquant');
+      throw new HttpException('Authorization manquante', HttpStatus.UNAUTHORIZED);
     }
 
-    // ✅ Vérification de signature simple pour Wave
-    const payload = req.body as Buffer;
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('hex');
-
-    // Wave peut envoyer la signature avec un préfixe
-    const receivedSignature = signature.replace('sha256=', '');
-
-    if (receivedSignature !== expectedSignature) {
-      console.error('❌ Signature invalide');
-      console.error('Attendue:', expectedSignature);
-      console.error('Reçue:', receivedSignature);
-      throw new HttpException('Signature invalide', HttpStatus.UNAUTHORIZED);
+    // ✅ Wave envoie "Bearer {webhook_secret}"
+    const expectedAuth = `Bearer ${secret}`;
+    if (authorization !== expectedAuth) {
+      console.error('❌ Authorization invalide');
+      console.error('Attendue:', expectedAuth);
+      console.error('Reçue:', authorization);
+      throw new HttpException('Authorization invalide', HttpStatus.UNAUTHORIZED);
     }
 
-    console.log('✅ Signature webhook valide');
+    console.log('✅ Authorization webhook valide');
 
-    // ✅ Parser le body et traiter l'événement
-    const body = JSON.parse(payload.toString());
+    // Parser le body et traiter l'événement
+    const body = JSON.parse(req.body.toString());
     console.log('📨 Webhook reçu de Wave:', JSON.stringify(body, null, 2));
 
-    // ✅ ACTIVER le traitement du webhook
+    // ✅ Traiter le webhook
     await this.waveService.handleWebhook(body);
 
     return { 
@@ -232,7 +222,7 @@ console.log('🔍 WAVE_API_TOKEN chargé:', !!process.env.WAVE_API_TOKEN);
     return {
       success: false,
       error: error.message,
-      received: true // ✅ Toujours 200 pour éviter les retries Wave
+      received: true
     };
   }
 }
