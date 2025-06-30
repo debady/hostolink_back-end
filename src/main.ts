@@ -41,6 +41,8 @@ async function bootstrap() {
     }
 
     const PORT = process.env.PORT || 3000;
+    app.use('/wave-checkout/webhook', json());
+
     await app.listen(PORT, '0.0.0.0');
 
     console.log(`🚀 Le serveur tourne sur : http://localhost:${PORT}`);

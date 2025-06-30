@@ -61,8 +61,6 @@ import { WaveCheckoutModule } from './wave-checkout/wave-checkout.module';
     //   entities: [__dirname + '/**/*.entity{.ts,.js}'],
     //   synchronize: false,
     //   autoLoadEntities: true,
-         
-
     // }),
 
     TypeOrmModule.forRoot({

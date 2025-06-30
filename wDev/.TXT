@@ -4,3 +4,6 @@ il y'a toujours un probleme mainteant les rechargement ne sont plus enregistrer 
 -- Augmenter la taille de la colonne
 ALTER TABLE notification_transaction 
 ALTER COLUMN type_notification TYPE character varying(255);
+
+https://hosto-pay.com/payment/error/
+https://hosto-pay.com/payment/success/
