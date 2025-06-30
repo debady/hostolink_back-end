@@ -39,10 +39,14 @@ const common_1 = require("@nestjs/common");
 const express_1 = require("express");
 const path_1 = require("path");
 const dotenv = __importStar(require("dotenv"));
+const express = __importStar(require("express"));
 dotenv.config();
 async function bootstrap() {
     try {
-        const app = await core_1.NestFactory.create(app_module_1.AppModule, { cors: true });
+        const app = await core_1.NestFactory.create(app_module_1.AppModule, {
+            cors: true
+        });
+        app.use('/wave-checkout/webhook', express.raw({ type: 'application/json' }));
         app.useGlobalPipes(new common_1.ValidationPipe({
             whitelist: true,
             forbidNonWhitelisted: true,
@@ -53,7 +57,7 @@ async function bootstrap() {
         app.enableCors({
             origin: process.env.CORS_ORIGIN || '*',
             methods: ['GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'DELETE'],
-            allowedHeaders: ['Content-Type', 'Authorization'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'x-wave-signature', 'wave-signature'],
             credentials: process.env.CORS_CREDENTIALS === 'true',
         });
         if (process.env.SERVE_STATIC === 'true') {
@@ -63,9 +67,13 @@ async function bootstrap() {
         await app.listen(PORT, '0.0.0.0');
         console.log(`🚀 Le serveur tourne sur : http://localhost:${PORT}`);
         console.log('📦 Connexion à PostgreSQL :', process.env.DATABASE_NAME);
+        console.log('🌊 Webhook Wave configuré sur :', `http://localhost:${PORT}/wave-checkout/webhook`);
+        console.log('🔑 Variables Wave chargées:');
+        console.log('  - WAVE_API_TOKEN:', !!process.env.WAVE_API_TOKEN);
+        console.log('  - WAVE_WEBHOOK_SECRET:', !!process.env.WAVE_WEBHOOK_SECRET);
     }
     catch (error) {
-        console.error('❌ Erreur lors du démarrage de l’application :', error);
+        console.error('❌ Erreur lors du démarrage de l\'application :', error);
         process.exit(1);
     }
 }
