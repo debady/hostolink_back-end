@@ -17,13 +17,6 @@ import { NotificationTransaction } from './entities/notification_transaction.ent
 import { Compte } from 'src/compte/entitie/compte.entity';
 import { User } from 'src/utilisateur/entities/user.entity';
 
-
-
-
-
-
-
-
 @Injectable()
 export class WaveCheckoutService {
   private readonly waveApiUrl = 'https://api.wave.com/v1/checkout/sessions';
@@ -194,25 +187,25 @@ export class WaveCheckoutService {
       // });
 
       // ✅ NOUVEAU CODE CORRIGÉ
-// D'abord créer sans sauvegarder pour obtenir un ID temporaire
-const tempId = Math.floor(Math.random() * 1000000); // ID temporaire unique
+      // D'abord créer sans sauvegarder pour obtenir un ID temporaire
+      const tempId = Math.floor(Math.random() * 1000000); // ID temporaire unique
 
-const transactionFrais = queryRunner.manager.create(TransactionsFrais, {
-  id_transaction: tempId, // Définir explicitement pour éviter NULL
-  montant_frais: 0,
-  type_transaction: 'externe',
-  mode_paiement: 'wave_money',
-  date_creation: new Date(),
-});
+      const transactionFrais = queryRunner.manager.create(TransactionsFrais, {
+        id_transaction: tempId, // Définir explicitement pour éviter NULL
+        montant_frais: 0,
+        type_transaction: 'externe',
+        mode_paiement: 'wave_money',
+        date_creation: new Date(),
+      });
 
-// Sauvegarder pour obtenir l'id_frais généré
-const savedFrais = await queryRunner.manager.save(TransactionsFrais, transactionFrais);
-const idTransaction = savedFrais.id_frais;
+      // Sauvegarder pour obtenir l'id_frais généré
+      const savedFrais = await queryRunner.manager.save(TransactionsFrais, transactionFrais);
+      const idTransaction = savedFrais.id_frais;
 
-// Mettre à jour avec le vrai id_transaction (= id_frais)
-await queryRunner.manager.update(TransactionsFrais, savedFrais.id_frais, {
-  id_transaction: idTransaction
-});
+      // Mettre à jour avec le vrai id_transaction (= id_frais)
+      await queryRunner.manager.update(TransactionsFrais, savedFrais.id_frais, {
+        id_transaction: idTransaction
+      });
 
       this.logger.log(`Transaction frais créée: id_transaction=${idTransaction}`);
 

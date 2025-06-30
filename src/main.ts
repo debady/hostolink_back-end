@@ -43,7 +43,10 @@ async function bootstrap() {
     }
 
     const PORT = process.env.PORT || 3000;
-    app.use('/wave-checkout/webhook', express.raw({ type: 'application/json' }));
+    app.use(
+    '/wave-checkout/webhook',
+    express.raw({ type: 'application/json' }), // corps brut pour cette route
+  );
 
 
     await app.listen(PORT, '0.0.0.0');
