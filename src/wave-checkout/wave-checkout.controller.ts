@@ -12,6 +12,8 @@ import {
 import { WaveCheckoutService } from './wave-checkout.service';
 import { CreateWaveSessionDto } from './dto/create-wave-session.dto';
 import { Request } from 'express';
+import * as crypto from 'crypto';
+import { Response } from 'express';
 
 @Controller('wave-checkout')
 export class WaveCheckoutController {
@@ -83,48 +85,97 @@ export class WaveCheckoutController {
   //   }
   // }
 
-  @Post('webhook')
+//   @Post('webhook')
+// async handleWebhook(
+//   @Req() req: Request, 
+//   @Headers('authorization') authorization?: string
+// ) {
+//   try {
+//     const body = req.body;
+
+//     // 📝 Log pour debugging
+//     console.log('📨 Webhook reçu de Wave:', JSON.stringify(body, null, 2));
+
+//     // 🔒 Vérifier la signature Wave (SHARED_SECRET)
+//     const webhookSecret = process.env.WAVE_WEBHOOK_SECRET;
+//     if (webhookSecret && authorization) {
+//       const expectedAuth = `Bearer ${webhookSecret}`;
+//       if (authorization !== expectedAuth) {
+//         console.error('❌ Signature webhook invalide');
+//         throw new HttpException('Signature invalide', HttpStatus.UNAUTHORIZED);
+//       }
+//       console.log('✅ Signature webhook valide');
+//     }
+
+//     // 🚀 Traiter le webhook avec la nouvelle logique complète
+//     await this.waveService.handleWebhook(body);
+
+//     return { 
+//       success: true,
+//       message: 'Webhook traité avec succès',
+//       received: true 
+//     };
+
+//   } catch (error) {
+//     console.error('❌ Erreur webhook Wave:', error);
+    
+//     return {
+//       success: false,
+//       error: error.message,
+//       received: true
+//     };
+//   }
+// }
+
+
+@Post('webhook')
 async handleWebhook(
-  @Req() req: Request, 
-  @Headers('authorization') authorization?: string
+  @Req() req: Request,
+  @Headers('x-wave-signature') signature?: string
 ) {
   try {
-    const body = req.body;
+    const secret = process.env.WAVE_WEBHOOK_SECRET;
 
-    // 📝 Log pour debugging
-    console.log('📨 Webhook reçu de Wave:', JSON.stringify(body, null, 2));
-
-    // 🔒 Vérifier la signature Wave (SHARED_SECRET)
-    const webhookSecret = process.env.WAVE_WEBHOOK_SECRET;
-    if (webhookSecret && authorization) {
-      const expectedAuth = `Bearer ${webhookSecret}`;
-      if (authorization !== expectedAuth) {
-        console.error('❌ Signature webhook invalide');
-        throw new HttpException('Signature invalide', HttpStatus.UNAUTHORIZED);
-      }
-      console.log('✅ Signature webhook valide');
+    if (!signature || !secret) {
+      console.error('❌ Signature ou secret manquant');
+      throw new HttpException('Signature manquante', HttpStatus.UNAUTHORIZED);
     }
 
-    // 🚀 Traiter le webhook avec la nouvelle logique complète
-    await this.waveService.handleWebhook(body);
+    // ✅ Calculer le HMAC du raw body
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(req.body); // Buffer brut ici
+    const digest = hmac.digest('hex');
 
-    return { 
+    if (digest !== signature) {
+      console.error('❌ Signature webhook invalide');
+      throw new HttpException('Signature invalide', HttpStatus.UNAUTHORIZED);
+    }
+
+    console.log('✅ Signature webhook valide');
+
+    const parsedBody = JSON.parse(req.body.toString());
+
+    // 📨 Log pour debugging
+    console.log('📨 Webhook reçu de Wave:', JSON.stringify(parsedBody, null, 2));
+
+    // 🚀 Appeler le service avec le vrai payload
+    await this.waveService.handleWebhook(parsedBody);
+
+    return {
       success: true,
       message: 'Webhook traité avec succès',
-      received: true 
+      received: true
     };
 
   } catch (error) {
     console.error('❌ Erreur webhook Wave:', error);
-    
     return {
       success: false,
       error: error.message,
-      received: true
+      received: true // Toujours 200 même en erreur logique
     };
   }
 }
-
   // ✅ Vérifier le statut d'une session (pour le frontend)
   @Get('session/:id')
   async getSession(@Param('id') sessionId: string) {

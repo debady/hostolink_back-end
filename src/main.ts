@@ -6,6 +6,8 @@ import { json, urlencoded } from 'express';
 import { join } from 'path';
 import * as dotenv from 'dotenv';
 
+import * as express from 'express'; 
+
 // ✅ Charge les variables d'environnement
 dotenv.config();
 
@@ -41,7 +43,8 @@ async function bootstrap() {
     }
 
     const PORT = process.env.PORT || 3000;
-    app.use('/wave-checkout/webhook', json());
+    app.use('/wave-checkout/webhook', express.raw({ type: 'application/json' }));
+
 
     await app.listen(PORT, '0.0.0.0');
 
