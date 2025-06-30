@@ -292,15 +292,26 @@ async handleWebhook(webhookPayload: any): Promise<void> {
   try {
     this.logger.log(`Traitement du webhook Wave: ${JSON.stringify(webhookPayload)}`);
 
-    // ✅ CORRECTION: Wave envoie directement l'objet session, pas un event wrapper
-    // Vérifier que le paiement est completed et successful
-    if (webhookPayload.checkout_status !== 'completed' || webhookPayload.payment_status !== 'successful') {
-      this.logger.warn(`Paiement non finalisé: checkout_status=${webhookPayload.checkout_status}, payment_status=${webhookPayload.payment_status}`);
+    // ✅ CORRECTION: Vérifier le type d'événement
+    if (webhookPayload.type !== 'checkout.session.completed') {
+      this.logger.warn(`Type d'événement non supporté: ${webhookPayload.type}`);
       return;
     }
 
-    // ✅ CORRECTION: L'ID est directement dans le payload, pas dans data.id
-    const sessionId = webhookPayload.id;
+    // ✅ CORRECTION: Les données sont dans webhookPayload.data
+    const sessionData = webhookPayload.data;
+    if (!sessionData) {
+      throw new HttpException('Données de session manquantes dans le webhook', HttpStatus.BAD_REQUEST);
+    }
+
+    // ✅ CORRECTION: Vérifier les statuts dans data
+    if (sessionData.checkout_status !== 'complete' || sessionData.payment_status !== 'succeeded') {
+      this.logger.warn(`Paiement non finalisé: checkout_status=${sessionData.checkout_status}, payment_status=${sessionData.payment_status}`);
+      return;
+    }
+
+    // ✅ CORRECTION: L'ID de session est dans data.id
+    const sessionId = sessionData.id;
     if (!sessionId) {
       throw new HttpException('Session ID manquant dans le webhook', HttpStatus.BAD_REQUEST);
     }

@@ -282,48 +282,48 @@ async getAllTelephones(@Req() req: AuthenticatedRequest) {
 
 
     // ENDPOINT DE RECUP DU DERNIER OTP DE L'UTILISATEUR PAR SMS
-    // @Post('get-otp')
-    // async getOtp(@Body() body: { identifier: string }) {
-    //   if (!body.identifier?.trim()) {
-    //     throw new BadRequestException("Identifiant requis.");
-    //   }
-    //   return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
-    // }
-
     @Post('get-otp')
-      async getOtp(
-        @Body() body: { identifier: string; token: string } // on attend token FCM ici
-      ) {
-        if (!body.identifier?.trim()) {
-          throw new BadRequestException("Identifiant requis.");
-        }
-        if (!body.token?.trim()) {
-          throw new BadRequestException("Token notification requis.");
-        }
-
-        const result = await this.userService.getLastOtpByIdentifier(body.identifier.trim());
-
-        // Préparer le message de notification
-        let title = '';
-        let message = '';
-        if (result.success) {
-          title = 'Code OTP';
-          message = `Votre code OTP est : ${result.otp}`;
-        } else {
-          title = 'Erreur OTP';
-          message = result.message;
-        }
-
-        // Envoyer la notif push
-        try {
-          await this.notificationService.sendToToken(body.token.trim(), title, message);
-        } catch (error) {
-          // Optionnel : logger ou gérer l’erreur notification sans bloquer la réponse
-          console.error('Erreur envoi notification:', error.message);
-        }
-
-        return result;
+    async getOtp(@Body() body: { identifier: string }) {
+      if (!body.identifier?.trim()) {
+        throw new BadRequestException("Identifiant requis.");
       }
+      return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
+    }
+
+    // @Post('get-otp')
+    //   async getOtp(
+    //     @Body() body: { identifier: string; token: string } // on attend token FCM ici
+    //   ) {
+    //     if (!body.identifier?.trim()) {
+    //       throw new BadRequestException("Identifiant requis.");
+    //     }
+    //     if (!body.token?.trim()) {
+    //       throw new BadRequestException("Token notification requis.");
+    //     }
+
+    //     const result = await this.userService.getLastOtpByIdentifier(body.identifier.trim());
+
+    //     // Préparer le message de notification
+    //     let title = '';
+    //     let message = '';
+    //     if (result.success) {
+    //       title = 'Code OTP';
+    //       message = `Votre code OTP est : ${result.otp}`;
+    //     } else {
+    //       title = 'Erreur OTP';
+    //       message = result.message;
+    //     }
+
+    //     // Envoyer la notif push
+    //     try {
+    //       await this.notificationService.sendToToken(body.token.trim(), title, message);
+    //     } catch (error) {
+    //       // Optionnel : logger ou gérer l’erreur notification sans bloquer la réponse
+    //       console.error('Erreur envoi notification:', error.message);
+    //     }
+
+    //     return result;
+    //   }
 
 
           //notifications

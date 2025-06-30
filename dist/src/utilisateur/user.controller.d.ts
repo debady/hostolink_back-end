@@ -97,7 +97,6 @@ export declare class UserController {
     }>;
     getOtp(body: {
         identifier: string;
-        token: string;
     }): Promise<{
         otp?: string;
         expires_at?: Date;

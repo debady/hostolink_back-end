@@ -201,27 +201,7 @@ let UserController = class UserController {
         if (!body.identifier?.trim()) {
             throw new common_1.BadRequestException("Identifiant requis.");
         }
-        if (!body.token?.trim()) {
-            throw new common_1.BadRequestException("Token notification requis.");
-        }
-        const result = await this.userService.getLastOtpByIdentifier(body.identifier.trim());
-        let title = '';
-        let message = '';
-        if (result.success) {
-            title = 'Code OTP';
-            message = `Votre code OTP est : ${result.otp}`;
-        }
-        else {
-            title = 'Erreur OTP';
-            message = result.message;
-        }
-        try {
-            await this.notificationService.sendToToken(body.token.trim(), title, message);
-        }
-        catch (error) {
-            console.error('Erreur envoi notification:', error.message);
-        }
-        return result;
+        return await this.userService.getLastOtpByIdentifier(body.identifier.trim());
     }
     async updateFcmToken(req, fcm_token) {
         const userId = req.user.id_user;
