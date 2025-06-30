@@ -11,7 +11,7 @@ import { HistoriqueTransactions } from './entities/historique_transactions.wave.
 import { NotificationTransaction } from './entities/notification_transaction.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WaveCheckoutSession, User,Compte,TransactionsFrais,TransactionExterne,HistoriqueTransactions,NotificationTransaction])],
+  imports: [TypeOrmModule.forFeature([WaveCheckoutSession, User,Compte,TransactionsFrais,TransactionExterne,HistoriqueTransactions,NotificationTransaction,HistoriqueTransactions])],
 
   controllers: [WaveCheckoutController],
   providers: [WaveCheckoutService],
