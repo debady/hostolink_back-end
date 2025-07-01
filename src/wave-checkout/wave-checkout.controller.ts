@@ -14,6 +14,7 @@ import { CreateWaveSessionDto } from './dto/create-wave-session.dto';
 import { Request } from 'express';
 import * as crypto from 'crypto';
 import { Response } from 'express';
+import { Query } from '@nestjs/common';
 
 @Controller('wave-checkout')
 export class WaveCheckoutController {
@@ -158,17 +159,56 @@ async handleWebhook(
 
 
   // ✅ Endpoint de debug temporaire - à retirer en production
-@Post('webhook-debug')
-async debugWebhook(@Req() req: Request) {
-  console.log('🔍 Headers complets:', req.headers);
-  console.log('🔍 Body type:', typeof req.body);
-  console.log('🔍 Body content:', req.body);
-  
-  return { 
-    received: true,
-    headers: req.headers,
-    bodyType: typeof req.body
-  };
+  @Post('webhook-debug')
+  async debugWebhook(@Req() req: Request) {
+    console.log('🔍 Headers complets:', req.headers);
+    console.log('🔍 Body type:', typeof req.body);
+    console.log('🔍 Body content:', req.body);
+    
+    return { 
+      received: true,
+      headers: req.headers,
+      bodyType: typeof req.body
+    };
+  }
+
+
+  @Get('notifications/:userId')
+async getUserNotifications(@Param('userId') userId: string) {
+  try {
+    const notifications = await this.waveService.getUserNotifications(userId);
+    
+    return {
+      success: true,
+      message: 'Notifications récupérées avec succès',
+      data: notifications
+    };
+  } catch (error) {
+    throw new HttpException(
+      error.message || 'Erreur lors de la récupération des notifications',
+      error.status || HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
 }
+
+// ✅ Endpoint 2: Récupérer tous les dépôts d'un utilisateur  
+@Get('deposits/:userId')
+async getUserDeposits(@Param('userId') userId: string) {
+  try {
+    const deposits = await this.waveService.getUserDeposits(userId);
+    
+    return {
+      success: true,
+      message: 'Dépôts récupérés avec succès',
+      data: deposits
+    };
+  } catch (error) {
+    throw new HttpException(
+      error.message || 'Erreur lors de la récupération des dépôts',
+      error.status || HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
 }
 

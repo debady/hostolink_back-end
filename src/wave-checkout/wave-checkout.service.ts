@@ -247,71 +247,125 @@ async handleWebhook(webhookPayload: any): Promise<void> {
     await queryRunner.manager.save(HistoriqueTransactions, historique);
     this.logger.log(`Historique créé pour transaction ${idTransaction}`);
 
-    // ÉTAPE 7: Créer notification depot_wave
-    // const notification = queryRunner.manager.create(NotificationTransaction, {
-    //   id_transaction: idTransaction,
-    //   identif_transaction: `Hstlk-${Math.random().toString(36).substring(2, 7)}`,
-    //   type_notification: 'depot',
-    //   contenu: `Votre dépôt de ${waveSession.amount} ${waveSession.currency} via Wave a été crédité avec succès.`,
-    //   montant: waveSession.amount,
-    //   id_user: waveSession.idUser,
-    //   date_envoi: new Date(),
-    //   statut: 'envoyé',
-    //   is_lu: false,
-    // });
 
     const notification = queryRunner.manager.create(NotificationTransaction, {
-  id_transaction: idTransaction,
-  identif_transaction: `Hstlk-${Math.random().toString(36).substring(2, 7)}`,
-  type_notification: 'depot',
-  contenu: `Votre dépôt de ${waveSession.amount} ${waveSession.currency} via Wave a été crédité avec succès.`,
-  montant: waveSession.amount,
-  id_user: waveSession.idUser,
-  date_envoi: new Date(),
-  statut: 'envoyé',
-  is_lu: false,
-});
+    id_transaction: idTransaction,
+    identif_transaction: `Hstlk-${Math.random().toString(36).substring(2, 7)}`,
+    type_notification: 'depot',
+    contenu: `Votre dépôt de ${waveSession.amount} ${waveSession.currency} via Wave a été crédité avec succès.`,
+    montant: waveSession.amount,
+    id_user: waveSession.idUser,
+    date_envoi: new Date(),
+    statut: 'envoyé',
+    is_lu: false,
+  });
 
-await queryRunner.manager.save(NotificationTransaction, notification);
-this.logger.log(`Notification créée pour l'utilisateur ${waveSession.idUser}`);
+  await queryRunner.manager.save(NotificationTransaction, notification);
+  this.logger.log(`Notification créée pour l'utilisateur ${waveSession.idUser}`);
 
-// ✅ NOUVEAU : Envoyer la notification push
-try {
-  if (user.fcm_token) {
-    await this.notificationService.sendToToken(
-      user.fcm_token,
-      '💰 Dépôt réussi !',
-      `Votre compte a été crédité de ${waveSession.amount} ${waveSession.currency} via Wave.`
-    );
-    this.logger.log(`✅ Notification push envoyée à ${waveSession.idUser}`);
-  } else {
-    this.logger.warn(`⚠️ Pas de FCM token pour l'utilisateur ${waveSession.idUser}`);
+  // ✅ NOUVEAU : Envoyer la notification push
+  try {
+    if (user.fcm_token) {
+      await this.notificationService.sendToToken(
+        user.fcm_token,
+        '💰 Dépôt réussi !',
+        `Votre compte a été crédité de ${waveSession.amount} ${waveSession.currency} via Wave.`
+      );
+      this.logger.log(`✅ Notification push envoyée à ${waveSession.idUser}`);
+    } else {
+      this.logger.warn(`⚠️ Pas de FCM token pour l'utilisateur ${waveSession.idUser}`);
+    }
+  } catch (pushError) {
+    this.logger.error(`❌ Erreur notification push:`, pushError);
+    // Ne pas faire échouer la transaction pour une erreur de push
   }
-} catch (pushError) {
-  this.logger.error(`❌ Erreur notification push:`, pushError);
-  // Ne pas faire échouer la transaction pour une erreur de push
-}
 
-    // await queryRunner.manager.save(NotificationTransaction, notification);
-    // this.logger.log(`Notification créée pour l'utilisateur ${waveSession.idUser}`);
+      // await queryRunner.manager.save(NotificationTransaction, notification);
+      // this.logger.log(`Notification créée pour l'utilisateur ${waveSession.idUser}`);
 
-    // Valider la transaction
-    await queryRunner.commitTransaction();
-    this.logger.log(`✅ Webhook Wave traité avec succès pour la session ${sessionId}`);
+      // Valider la transaction
+      await queryRunner.commitTransaction();
+      this.logger.log(`✅ Webhook Wave traité avec succès pour la session ${sessionId}`);
 
-  } catch (error) {
-    await queryRunner.rollbackTransaction();
-    this.logger.error(`❌ Erreur lors du traitement du webhook Wave:`, error);
-    throw error;
-  } finally {
-    await queryRunner.release();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(`❌ Erreur lors du traitement du webhook Wave:`, error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
-}
 
 
   async findByClientReference(clientReference: string): Promise<WaveCheckoutSession | null> {
-  return await this.waveSessionRepo.findOne({
-    where: { clientReference }
-  });
+    return await this.waveSessionRepo.findOne({
+      where: { clientReference }
+    });
+  }
+
+
+
+/**
+ * Récupérer toutes les notifications d'un utilisateur
+ */
+async getUserNotifications(userId: string) {
+  try {
+    const notifications = await this.notificationRepo.find({
+      where: { id_user: userId },
+      order: { date_envoi: 'DESC' }, // Plus récentes en premier
+    });
+
+    return notifications.map(notif => ({
+      id: notif.id_notification_transaction,
+      id_transaction: notif.id_transaction,
+      identifiant: notif.identif_transaction,
+      type: notif.type_notification,
+      contenu: notif.contenu,
+      montant: notif.montant,
+      date_envoi: notif.date_envoi,
+      statut: notif.statut,
+      lu: notif.is_lu
+    }));
+  } catch (error) {
+    this.logger.error(`Erreur récupération notifications pour ${userId}:`, error);
+    throw new HttpException(
+      'Impossible de récupérer les notifications',
+      HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
+/**
+ * Récupérer tous les dépôts Wave d'un utilisateur
+ */
+async getUserDeposits(userId: string) {
+  try {
+    // Récupérer les dépôts via transaction_externe
+    const deposits = await this.transactionExterneRepo.find({
+      where: { 
+        id_utilisateur: userId,
+        type_transaction: 'depot',
+        moyen_paiement: 'wave'
+      },
+      order: { date_transaction: 'DESC' }, // Plus récents en premier
+    });
+
+    return deposits.map(depot => ({
+      id: depot.id_transaction_externe,
+      montant: depot.montant,
+      devise: depot.devise,
+      statut: depot.statut,
+      reference_externe: depot.reference_externe,
+      date_transaction: depot.date_transaction,
+      motif: depot.motif,
+      frais_transaction: depot.frais_transaction
+    }));
+  } catch (error) {
+    this.logger.error(`Erreur récupération dépôts pour ${userId}:`, error);
+    throw new HttpException(
+      'Impossible de récupérer les dépôts',
+      HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
 }
 }
