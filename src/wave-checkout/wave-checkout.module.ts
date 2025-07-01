@@ -9,9 +9,10 @@ import { TransactionsFrais } from './entities/frais_depot_wave.entity';
 import { TransactionExterne } from './entities/transaction_externe.entity';
 import { HistoriqueTransactions } from './entities/historique_transactions.wave.entity';
 import { NotificationTransaction } from './entities/notification_transaction.entity';
+import { NotificationModule } from 'src/module_notification_push/notif_push.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WaveCheckoutSession, User,Compte,TransactionsFrais,TransactionExterne,HistoriqueTransactions,NotificationTransaction,HistoriqueTransactions])],
+  imports: [TypeOrmModule.forFeature([WaveCheckoutSession, User,Compte,TransactionsFrais,TransactionExterne,HistoriqueTransactions,NotificationTransaction,HistoriqueTransactions]),NotificationModule  ],
 
   controllers: [WaveCheckoutController],
   providers: [WaveCheckoutService],
