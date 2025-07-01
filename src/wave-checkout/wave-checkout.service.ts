@@ -343,11 +343,8 @@ async getUserDeposits(userId: string) {
     // Récupérer les dépôts via transaction_externe
     const deposits = await this.transactionExterneRepo.find({
       where: { 
-        id_utilisateur: userId,
-        type_transaction: 'depot',
-        moyen_paiement: 'wave'
-      },
-      order: { date_transaction: 'DESC' }, // Plus récents en premier
+      id_utilisateur: userId
+      }
     });
 
     return deposits.map(depot => ({

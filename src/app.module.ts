@@ -50,7 +50,7 @@ import { WaveCheckoutModule } from './wave-checkout/wave-checkout.module';
     // ✅ CRON et tâches planifiées
     ScheduleModule.forRoot(),
 
-    // ✅ Connexion PostgreSQL
+    // // ✅ Connexion PostgreSQL
     // TypeOrmModule.forRoot({
     //   type: 'postgres',
     //   host: process.env.DATABASE_HOST || 'localhost',
