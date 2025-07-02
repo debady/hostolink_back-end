@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn
 import { Image } from '../../image/entities/image.entity';
 import { MessageThematique } from 'src/1-Module_reseaux_sociale/thematique_discussion/entities/message_thematique.entity';
 import { Otp } from './otp.entity';
-import { Invitation } from 'src/invitations/entities/invitation.entity';
+// import { Invitation } from 'src/invitations/entities/invitation.entity';
 import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
 import { DocumentsIdentiteEntity } from 'src/documents_identite/entities/documents_identite.entity';
 
@@ -67,8 +67,8 @@ export class User {
   code_invitation_utilise: string | null;
 
 
-  @OneToMany(() => Invitation, invitation => invitation.user)
-  invitations: Invitation[];
+  // @OneToMany(() => Invitation, invitation => invitation.user)
+  // invitations: Invitation[];
 
   @OneToMany(() => Conversation, conversation => conversation.user)
   conversations: Conversation[];

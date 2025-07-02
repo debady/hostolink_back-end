@@ -16,7 +16,6 @@ const user_module_1 = require("./utilisateur/user.module");
 const cloudinary_module_1 = require("./upload/cloudinary.module");
 const administrateur_module_1 = require("./administrateur/administrateur.module");
 const gestion_utilisateur_module_1 = require("./administrateur/Gest_utilisateurs/gestion_utilisateur.module");
-const invitation_module_1 = require("./invitations/invitation.module");
 const annonce_module_1 = require("./annonce/annonce.module");
 const liste_numero_etablissement_sante_module_1 = require("./liste_etablissement/liste_numero_etablissement_sante.module");
 const etablissement_sante_module_1 = require("./localisation_etablissement_sante/etablissement_sante.module");
@@ -72,7 +71,6 @@ exports.AppModule = AppModule = __decorate([
             cloudinary_module_1.CloudinaryModule,
             administrateur_module_1.AdministrateurModule,
             gestion_utilisateur_module_1.GestionUtilisateurModule,
-            invitation_module_1.InvitationModule,
             annonce_module_1.AnnonceModule,
             liste_numero_etablissement_sante_module_1.ListeNumeroEtablissementSanteModule,
             etablissement_sante_module_1.EtablissementSanteModule,

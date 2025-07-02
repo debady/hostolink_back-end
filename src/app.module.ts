@@ -9,7 +9,6 @@ import { UserModule } from './utilisateur/user.module';
 import { CloudinaryModule } from './upload/cloudinary.module';
 import { AdministrateurModule } from './administrateur/administrateur.module';
 import { GestionUtilisateurModule } from './administrateur/Gest_utilisateurs/gestion_utilisateur.module';
-import { InvitationModule } from './invitations/invitation.module';
 import { AnnonceModule } from './annonce/annonce.module';
 import { ListeNumeroEtablissementSanteModule } from './liste_etablissement/liste_numero_etablissement_sante.module';
 
@@ -89,7 +88,7 @@ import { WavePayoutModule } from './wave-payout/wave-payout.module';
     CloudinaryModule,
     AdministrateurModule,
     GestionUtilisateurModule,
-    InvitationModule,
+    // InvitationModule,
     AnnonceModule,
     ListeNumeroEtablissementSanteModule,
     EtablissementSanteModule,

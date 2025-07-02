@@ -14,7 +14,6 @@ const typeorm_1 = require("typeorm");
 const image_entity_1 = require("../../image/entities/image.entity");
 const message_thematique_entity_1 = require("../../1-Module_reseaux_sociale/thematique_discussion/entities/message_thematique.entity");
 const otp_entity_1 = require("./otp.entity");
-const invitation_entity_1 = require("../../invitations/entities/invitation.entity");
 const conversation_entity_1 = require("../../Discussion_agent_client/conversations/entities/conversation.entity");
 const documents_identite_entity_1 = require("../../documents_identite/entities/documents_identite.entity");
 let User = class User {
@@ -92,10 +91,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 100, nullable: true }),
     __metadata("design:type", Object)
 ], User.prototype, "code_invitation_utilise", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => invitation_entity_1.Invitation, invitation => invitation.user),
-    __metadata("design:type", Array)
-], User.prototype, "invitations", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => conversation_entity_1.Conversation, conversation => conversation.user),
     __metadata("design:type", Array)
