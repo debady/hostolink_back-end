@@ -56,6 +56,9 @@ export declare class UserEtablissementSanteService {
         specialites: string;
         email: string;
         mot_de_passe: string;
+        compte_verifie: boolean;
+        numero_wave: string;
+        wave_verified: boolean;
         otps: CodeVerifOtp[];
         raisons: RaisonSuppressionCompte[];
         experts: import("./entities/expert_sante.entity").ExpertSante[];

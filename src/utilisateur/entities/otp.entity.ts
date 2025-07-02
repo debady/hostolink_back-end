@@ -19,9 +19,6 @@ export class Otp {
   @Column({ type: 'uuid', nullable: true, default: null })
   id_user_etablissement_sante: string | null;
 
-
-
-
   @Column({ type: 'varchar', length: 4, nullable: false })
   otp_code: string;
 

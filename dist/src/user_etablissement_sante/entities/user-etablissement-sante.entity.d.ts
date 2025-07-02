@@ -15,6 +15,9 @@ export declare class UserEtablissementSante {
     specialites: string;
     email: string;
     mot_de_passe: string;
+    compte_verifie: boolean;
+    numero_wave: string;
+    wave_verified: boolean;
     otps: CodeVerifOtp[];
     raisons: RaisonSuppressionCompte[];
     experts: ExpertSante[];

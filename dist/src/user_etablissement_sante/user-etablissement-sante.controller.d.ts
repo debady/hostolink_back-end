@@ -46,6 +46,9 @@ export declare class UserEtablissementSanteController {
         specialites: string;
         email: string;
         mot_de_passe: string;
+        compte_verifie: boolean;
+        numero_wave: string;
+        wave_verified: boolean;
         otps: import("./entities/code-verif-otp.entity").CodeVerifOtp[];
         raisons: import("./entities/raison-suppression.entity").RaisonSuppressionCompte[];
         experts: import("./entities/expert_sante.entity").ExpertSante[];

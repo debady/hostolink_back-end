@@ -67,6 +67,18 @@ __decorate([
     __metadata("design:type", String)
 ], UserEtablissementSante.prototype, "mot_de_passe", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: true }),
+    __metadata("design:type", Boolean)
+], UserEtablissementSante.prototype, "compte_verifie", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 20, nullable: true }),
+    __metadata("design:type", String)
+], UserEtablissementSante.prototype, "numero_wave", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], UserEtablissementSante.prototype, "wave_verified", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => code_verif_otp_entity_1.CodeVerifOtp, (otp) => otp.userEtablissementSante),
     __metadata("design:type", Array)
 ], UserEtablissementSante.prototype, "otps", void 0);

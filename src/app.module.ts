@@ -41,6 +41,7 @@ import { DocumentsIdentiteModule } from './documents_identite/documents_identite
 import { PartageModule } from './1-Module_reseaux_sociale/partage/partage.module';
 import { NotificationModule } from './module_notification_push/notif_push.module';
 import { WaveCheckoutModule } from './wave-checkout/wave-checkout.module';
+import { WavePayoutModule } from './wave-payout/wave-payout.module';
 
 @Module({
   imports: [
@@ -116,6 +117,9 @@ import { WaveCheckoutModule } from './wave-checkout/wave-checkout.module';
     WaveCheckoutModule,
     // TRANSACTIONS EXTERNE | WAVE
     WaveCheckoutModule,
+
+    // 🆕 Module retrait Wave pour établissements de santé
+    WavePayoutModule,
 
 
   ],

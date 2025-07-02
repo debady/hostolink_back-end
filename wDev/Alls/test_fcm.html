@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test FCM</title>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-messaging.js"></script>
+  </head>
+  <body>
+    <h2>FCM Token</h2>
+    <pre id="token"></pre>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "TON_API_KEY",
+        authDomain: "ton-projet.firebaseapp.com",
+        projectId: "ton-projet",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:abcdef"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+
+      const messaging = firebase.messaging();
+
+      messaging
+        .getToken({ vapidKey: 'TA_CLE_PUBLIC_WEB_PUSH' })
+        .then((currentToken) => {
+          if (currentToken) {
+            document.getElementById("token").innerText = currentToken;
+          } else {
+            console.log('Aucun token disponible');
+          }
+        })
+        .catch((err) => {
+          console.error('Erreur lors de la récupération du token', err);
+        });
+    </script>
+  </body>
+</html>
