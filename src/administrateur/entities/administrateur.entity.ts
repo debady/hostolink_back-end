@@ -67,16 +67,16 @@ export class Administrateur {
   cumule_des_transactions: number;
 
 
-
-
-
-
   @OneToMany(() => QuestionsPredefinies, question => question.assistant)
   questions: QuestionsPredefinies[];
 
   @OneToMany(() => Conversation, conversation => conversation.assistant)
   conversations: Conversation[];
 
+ @OneToMany(() => Publication, publication => publication.admin)
+  publication: Publication[];
 
+  @OneToMany(() => Commentaire, commentaire => commentaire.admin)
+  commentaire: Commentaire[];
 
 }

@@ -1,6 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
 import { Partage } from 'src/partage/entities/partage.entity';
+import { UserEtablissementSante } from 'src/user_etablissement_sante/entities/user-etablissement-sante.entity';
+import { Administrateur } from 'src/administrateur/entities/administrateur.entity';
+import { ExpertSante } from 'src/user_etablissement_sante/entities/expert_sante.entity';
+import { User } from 'src/utilisateur/entities/user.entity';
 
 @Entity('publication')
 export class Publication { 
@@ -34,6 +38,23 @@ export class Publication {
 
   @Column({ type: 'integer', nullable: true })
   id_expert: number;
+
+  // Relations auteurs
+  @ManyToOne(() => User, utilisateur => utilisateur.publication, { eager: true, nullable: true })
+  @JoinColumn({ name: 'id_user' })
+  utilisateur: User;
+
+  @ManyToOne(() => UserEtablissementSante, etab => etab.publication, { eager: true, nullable: true })
+  @JoinColumn({ name: 'id_user_etablissement_sante' })
+  etablissement: UserEtablissementSante;
+
+  @ManyToOne(() => Administrateur, admin => admin.publication, { eager: true, nullable: true })
+  @JoinColumn({ name: 'id_admin_gestionnaire' })
+  admin: Administrateur;
+
+  @ManyToOne(() => ExpertSante, expert => expert.publication, { eager: true, nullable: true })
+  @JoinColumn({ name: 'id_expert' })
+  expert: ExpertSante;
 
   // Relations
   @OneToMany(() => Commentaire, commentaire => commentaire.publication, { cascade: true })

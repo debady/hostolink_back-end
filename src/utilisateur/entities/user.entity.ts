@@ -4,6 +4,8 @@ import { MessageThematique } from 'src/thematique_discussion/entities/message_th
 import { Otp } from './otp.entity';
 import { Invitation } from 'src/invitations/entities/invitation.entity';
 import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
+import { Publication } from 'src/publication/entities/publication.entity';
+import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
 
 
 
@@ -75,7 +77,11 @@ export class User {
   @OneToMany(() => Conversation, conversation => conversation.user)
   conversations: Conversation[];
 
+   @OneToMany(() => Publication, publication => publication.utilisateur)
+  publication: Publication[];
 
+@OneToMany(() => Commentaire, commentaire => commentaire.utilisateur)
+  commentaire: Publication[];
  
 
 }

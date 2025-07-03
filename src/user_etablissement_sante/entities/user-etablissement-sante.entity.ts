@@ -9,6 +9,8 @@ import { CodeVerifOtp } from './code-verif-otp.entity';
 import { RaisonSuppressionCompte } from './raison-suppression.entity';
 import { ExpertSante } from './expert_sante.entity';
 import { Conversation } from 'src/Discussion_agent_client/conversations/entities/conversation.entity';
+import { Publication } from 'src/publication/entities/publication.entity';
+import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
 
 
 @Entity('user_etablissement_sante')
@@ -64,5 +66,9 @@ export class UserEtablissementSante {
   conversations: Conversation[];
 
 
-  
+  @OneToMany(() => Publication, publication => publication.etablissement)
+  publication: Publication[];
+
+  @OneToMany(() => Commentaire, commentaire => commentaire.etablissement)
+  commentaire: Publication[];
 }

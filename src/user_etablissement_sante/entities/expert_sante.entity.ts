@@ -32,6 +32,8 @@
 
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { UserEtablissementSante } from './user-etablissement-sante.entity';
+import { Publication } from 'src/publication/entities/publication.entity';
+import { Commentaire } from 'src/commentaire/entities/commentaire.entity';
 
 
 @Entity()
@@ -61,5 +63,11 @@ export class ExpertSante {
   @Column({ nullable: true })
   url_profile: string;
 
+
+  @OneToMany(() => Publication, publication => publication.expert)
+  publication: Publication[];
+
+  @OneToMany(() => Commentaire, commentaire => commentaire.expert)
+    commentaire: Publication[];
 
 }

@@ -110,6 +110,9 @@ export class EtablissementSanteService {
     return this.etablissementSanteRepository.save(etablissement);
   }
 
+
+
+  
   // suppression
   async deleteEtablissement(id: number): Promise<void> {
     const result = await this.etablissementSanteRepository.delete(id);
@@ -118,5 +121,7 @@ export class EtablissementSanteService {
       throw new NotFoundException(`Établissement avec l'ID ${id} introuvable.`);
     }
   }
+
+
 
 }

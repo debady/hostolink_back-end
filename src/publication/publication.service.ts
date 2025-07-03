@@ -85,57 +85,152 @@ export class PublicationService {
     }
   }
 
+
   async findAll(): Promise<Publication[]> {
-    return this.publicationRepository.find({
-      relations: ['commentaires', 'partages'],
-      order: { date_publication: 'DESC' },
-    });
+  return this.publicationRepository.find({
+    relations: [
+      'commentaires',
+      'partages',
+      'utilisateur',      // Ajoute cette ligne
+      'etablissement',    // Ajoute cette ligne
+      'admin',            // Ajoute cette ligne
+      'expert',           // Ajoute cette ligne
+    ],
+    order: { date_publication: 'DESC' },
+  });
+}
+
+async findOne(id: number): Promise<Publication> {
+  const publication = await this.publicationRepository.findOne({
+    where: { id_publication: id },
+    relations: [
+      'commentaires',
+      'partages',
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+  });
+
+  if (!publication) {
+    throw new NotFoundException(`Publication avec l'ID ${id} non trouvée`);
   }
 
-  async findOne(id: number): Promise<Publication> {
-    const publication = await this.publicationRepository.findOne({
-      where: { id_publication: id },
-      relations: ['commentaires', 'partages'],
-    });
+  return publication;
+}
 
-    if (!publication) {
-      throw new NotFoundException(`Publication avec l'ID ${id} non trouvée`);
-    }
+async findByUser(id_user: string): Promise<Publication[]> {
+  return this.publicationRepository.find({
+    where: { id_user },
+    relations: [
+      'commentaires',
+      'partages',
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+    order: { date_publication: 'DESC' },
+  });
+}
 
-    return publication;
-  }
+async findByEtablissement(id_user_etablissement_sante: number): Promise<Publication[]> {
+  return this.publicationRepository.find({
+    where: { id_user_etablissement_sante },
+    relations: [
+      'commentaires',
+      'partages',
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+    order: { date_publication: 'DESC' },
+  });
+}
 
-  async findByUser(id_user: string): Promise<Publication[]> {
-    return this.publicationRepository.find({
-      where: { id_user },
-      relations: ['commentaires', 'partages'],
-      order: { date_publication: 'DESC' },
-    });
-  }
+async findByAdmin(id_admin_gestionnaire: number): Promise<Publication[]> {
+  return this.publicationRepository.find({
+    where: { id_admin_gestionnaire },
+    relations: [
+      'commentaires',
+      'partages',
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+    order: { date_publication: 'DESC' },
+  });
+}
 
-  async findByEtablissement(id_user_etablissement_sante: number): Promise<Publication[]> {
-    return this.publicationRepository.find({
-      where: { id_user_etablissement_sante },
-      relations: ['commentaires', 'partages'],
-      order: { date_publication: 'DESC' },
-    });
-  }
+async findByExpert(id_expert: number): Promise<Publication[]> {
+  return this.publicationRepository.find({
+    where: { id_expert },
+    relations: [
+      'commentaires',
+      'partages',
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+    order: { date_publication: 'DESC' },
+  });
+}
 
-  async findByAdmin(id_admin_gestionnaire: number): Promise<Publication[]> {
-    return this.publicationRepository.find({
-      where: { id_admin_gestionnaire },
-      relations: ['commentaires', 'partages'],
-      order: { date_publication: 'DESC' },
-    });
-  }
+  // async findAll(): Promise<Publication[]> {
+  //   return this.publicationRepository.find({
+  //     relations: ['commentaires', 'partages'],
+  //     order: { date_publication: 'DESC' },
+  //   });
+  // }
 
-  async findByExpert(id_expert: number): Promise<Publication[]> {
-    return this.publicationRepository.find({
-      where: { id_expert },
-      relations: ['commentaires', 'partages'],
-      order: { date_publication: 'DESC' },
-    });
-  }
+  // async findOne(id: number): Promise<Publication> {
+  //   const publication = await this.publicationRepository.findOne({
+  //     where: { id_publication: id },
+  //     relations: ['commentaires', 'partages'],
+  //   });
+
+  //   if (!publication) {
+  //     throw new NotFoundException(`Publication avec l'ID ${id} non trouvée`);
+  //   }
+
+  //   return publication;
+  // }
+
+  // async findByUser(id_user: string): Promise<Publication[]> {
+  //   return this.publicationRepository.find({
+  //     where: { id_user },
+  //     relations: ['commentaires', 'partages'],
+  //     order: { date_publication: 'DESC' },
+  //   });
+  // }
+
+  // async findByEtablissement(id_user_etablissement_sante: number): Promise<Publication[]> {
+  //   return this.publicationRepository.find({
+  //     where: { id_user_etablissement_sante },
+  //     relations: ['commentaires', 'partages'],
+  //     order: { date_publication: 'DESC' },
+  //   });
+  // }
+
+  // async findByAdmin(id_admin_gestionnaire: number): Promise<Publication[]> {
+  //   return this.publicationRepository.find({
+  //     where: { id_admin_gestionnaire },
+  //     relations: ['commentaires', 'partages'],
+  //     order: { date_publication: 'DESC' },
+  //   });
+  // }
+
+  // async findByExpert(id_expert: number): Promise<Publication[]> {
+  //   return this.publicationRepository.find({
+  //     where: { id_expert },
+  //     relations: ['commentaires', 'partages'],
+  //     order: { date_publication: 'DESC' },
+  //   });
+  // }
 
   async likePost(id: number): Promise<Publication> {
     const publication = await this.findOne(id);

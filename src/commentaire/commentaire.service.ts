@@ -62,52 +62,130 @@ export class CommentaireService {
     }
   }
 
+
   async findByPublicationId(id_publication: number): Promise<Commentaire[]> {
-    return this.commentaireRepository.find({
-      where: { publication: { id_publication } },
-      order: { date_commentaire: 'DESC' }
-    });
-  }
+  return this.commentaireRepository.find({
+    where: { publication: { id_publication } },
+    relations: [
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+    order: { date_commentaire: 'DESC' }
+  });
+}
 
-  async findByUserAndPublication(id_publication: number, id_user: string): Promise<Commentaire[]> {
-    return this.commentaireRepository.find({
-      where: { 
-        publication: { id_publication },
-        id_user 
-      },
-      order: { date_commentaire: 'DESC' }
-    });
-  }
+async findByUserAndPublication(id_publication: number, id_user: string): Promise<Commentaire[]> {
+  return this.commentaireRepository.find({
+    where: { 
+      publication: { id_publication },
+      id_user 
+    },
+    relations: [
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+    order: { date_commentaire: 'DESC' }
+  });
+}
 
-  async findByEtablissementAndPublication(id_publication: number, id_etablissement: number): Promise<Commentaire[]> {
-    return this.commentaireRepository.find({
-      where: { 
-        publication: { id_publication },
-        id_user_etablissement_sante: id_etablissement 
-      },
-      order: { date_commentaire: 'DESC' }
-    });
-  }
+async findByEtablissementAndPublication(id_publication: number, id_etablissement: number): Promise<Commentaire[]> {
+  return this.commentaireRepository.find({
+    where: { 
+      publication: { id_publication },
+      id_user_etablissement_sante: id_etablissement 
+    },
+    relations: [
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+    order: { date_commentaire: 'DESC' }
+  });
+}
 
-  async findByAdminAndPublication(id_publication: number, id_admin: number): Promise<Commentaire[]> {
-    return this.commentaireRepository.find({
-      where: { 
-        publication: { id_publication },
-        id_admin_gestionnaire: id_admin 
-      },
-      order: { date_commentaire: 'DESC' }
-    });
-  }
+async findByAdminAndPublication(id_publication: number, id_admin: number): Promise<Commentaire[]> {
+  return this.commentaireRepository.find({
+    where: { 
+      publication: { id_publication },
+      id_admin_gestionnaire: id_admin 
+    },
+    relations: [
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+    order: { date_commentaire: 'DESC' }
+  });
+}
 
-  async findByExpertAndPublication(id_publication: number, id_expert: number): Promise<Commentaire[]> {
-    return this.commentaireRepository.find({
-      where: { 
-        publication: { id_publication },
-        id_expert 
-      },
-      order: { date_commentaire: 'DESC' }
-    });
-  }
+async findByExpertAndPublication(id_publication: number, id_expert: number): Promise<Commentaire[]> {
+  return this.commentaireRepository.find({
+    where: { 
+      publication: { id_publication },
+      id_expert 
+    },
+    relations: [
+      'utilisateur',
+      'etablissement',
+      'admin',
+      'expert',
+    ],
+    order: { date_commentaire: 'DESC' }
+  });
+}
+
+  // async findByPublicationId(id_publication: number): Promise<Commentaire[]> {
+  //   return this.commentaireRepository.find({
+  //     where: { publication: { id_publication } },
+  //     order: { date_commentaire: 'DESC' }
+  //   });
+  // }
+
+  // async findByUserAndPublication(id_publication: number, id_user: string): Promise<Commentaire[]> {
+  //   return this.commentaireRepository.find({
+  //     where: { 
+  //       publication: { id_publication },
+  //       id_user 
+  //     },
+  //     order: { date_commentaire: 'DESC' }
+  //   });
+  // }
+
+  // async findByEtablissementAndPublication(id_publication: number, id_etablissement: number): Promise<Commentaire[]> {
+  //   return this.commentaireRepository.find({
+  //     where: { 
+  //       publication: { id_publication },
+  //       id_user_etablissement_sante: id_etablissement 
+  //     },
+  //     order: { date_commentaire: 'DESC' }
+  //   });
+  // }
+
+  // async findByAdminAndPublication(id_publication: number, id_admin: number): Promise<Commentaire[]> {
+  //   return this.commentaireRepository.find({
+  //     where: { 
+  //       publication: { id_publication },
+  //       id_admin_gestionnaire: id_admin 
+  //     },
+  //     order: { date_commentaire: 'DESC' }
+  //   });
+  // }
+
+  // async findByExpertAndPublication(id_publication: number, id_expert: number): Promise<Commentaire[]> {
+  //   return this.commentaireRepository.find({
+  //     where: { 
+  //       publication: { id_publication },
+  //       id_expert 
+  //     },
+  //     order: { date_commentaire: 'DESC' }
+  //   });
+  // }
 
 // recuperer le nombre de commentaire par publication
   async getCommentsCount(id_publication: number): Promise<{ commentaires_count: number }> {
