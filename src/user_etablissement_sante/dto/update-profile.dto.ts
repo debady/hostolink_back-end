@@ -32,4 +32,8 @@ export class UpdateProfileEtablissementDto {
   @IsOptional()
   @IsString()
   specialites?: string;
+
+  @IsOptional()
+  @IsString()
+  fcm_token?: string;
 }

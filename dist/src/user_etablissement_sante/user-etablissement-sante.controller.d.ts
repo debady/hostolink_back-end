@@ -26,6 +26,12 @@ export declare class UserEtablissementSanteController {
             categorie: string;
         };
     }>;
+    login(body: {
+        email: string;
+        fcm_token?: string;
+    }): Promise<{
+        message: string;
+    }>;
     logout(req: any): Promise<{
         message: string;
     }>;
@@ -53,6 +59,7 @@ export declare class UserEtablissementSanteController {
         raisons: import("./entities/raison-suppression.entity").RaisonSuppressionCompte[];
         experts: import("./entities/expert_sante.entity").ExpertSante[];
         conversations: import("../Discussion_agent_client/conversations/entities/conversation.entity").Conversation[];
+        fcm_token?: string;
     }>;
     updateProfile(req: any, dto: UpdateProfileEtablissementDto): Promise<import("./entities/user-etablissement-sante.entity").UserEtablissementSante>;
     regenerateOtp(identifiant: string): Promise<{
@@ -84,5 +91,10 @@ export declare class UserEtablissementSanteController {
         success: boolean;
         message: string;
         data?: undefined;
+    }>;
+    updateFcmToken(req: any, body: {
+        fcm_token: string;
+    }): Promise<{
+        message: string;
     }>;
 }

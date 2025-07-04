@@ -86,11 +86,19 @@ let UserEtablissementSanteService = class UserEtablissementSanteService {
         if (exist_numb)
             throw new common_1.BadRequestException('Téléphone déjà utilisé');
         const hash = await bcrypt.hash(data.mot_de_passe, 10);
-        const newUser = this.userRepo.create({
-            ...data,
+        const userData = {
+            nom: data.nom,
+            telephone: data.telephone,
+            categorie: data.categorie,
+            adresse: data.adresse,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            specialites: data.specialites,
+            email: data.email,
             mot_de_passe: hash,
-        });
-        const savedUser = await this.userRepo.save(newUser);
+            fcm_token: data.fcm_token || undefined,
+        };
+        const savedUser = await this.userRepo.save(userData);
         await this.generateOtp(savedUser);
         return {
             message: 'Inscription réussie. Un code OTP a été envoyé.',
@@ -367,6 +375,25 @@ let UserEtablissementSanteService = class UserEtablissementSanteService {
         return user_etablissement_sante
             .filter(user_etablissement => user_etablissement.telephone)
             .map(user_etablissement => user_etablissement.telephone);
+    }
+    async updateFcmToken(id, fcmToken) {
+        const user = await this.userRepo.findOneBy({ id_user_etablissement_sante: id });
+        if (!user)
+            throw new common_1.NotFoundException("Établissement introuvable");
+        user.fcm_token = fcmToken;
+        await this.userRepo.save(user);
+        return { message: 'FCM token mis à jour avec succès' };
+    }
+    async login(email, fcmToken) {
+        const user = await this.userRepo.findOne({ where: { email } });
+        if (!user)
+            throw new common_1.BadRequestException('Établissement non trouvé');
+        if (fcmToken) {
+            user.fcm_token = fcmToken;
+            await this.userRepo.save(user);
+        }
+        await this.generateOtp(user);
+        return { message: 'Code OTP envoyé pour connexion' };
     }
 };
 exports.UserEtablissementSanteService = UserEtablissementSanteService;

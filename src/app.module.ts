@@ -61,6 +61,13 @@ import { WavePayoutModule } from './wave-payout/wave-payout.module';
     //   entities: [__dirname + '/**/*.entity{.ts,.js}'],
     //   synchronize: false,
     //   autoLoadEntities: true,
+
+    // //   ssl: true,
+    // // //   extra: {
+    // // //     ssl: {
+    // // //       rejectUnauthorized: false,
+    // // //     },
+    // // //   },
     // }),
 
     TypeOrmModule.forRoot({

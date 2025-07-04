@@ -7,4 +7,5 @@ export declare class UpdateProfileEtablissementDto {
     latitude?: number;
     longitude?: number;
     specialites?: string;
+    fcm_token?: string;
 }

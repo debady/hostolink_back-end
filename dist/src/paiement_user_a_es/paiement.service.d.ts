@@ -1,7 +1,9 @@
+import { NotificationService } from 'src/module_notification_push/notif_push.service';
 import { DataSource } from 'typeorm';
 export declare class PaiementService {
     private readonly dataSource;
-    constructor(dataSource: DataSource);
+    private readonly notificationService;
+    constructor(dataSource: DataSource, notificationService: NotificationService);
     lireInfosParQr(token: string): Promise<{
         id_qrcode: any;
         short_id: any;

@@ -22,4 +22,5 @@ export declare class UserEtablissementSante {
     raisons: RaisonSuppressionCompte[];
     experts: ExpertSante[];
     conversations: Conversation[];
+    fcm_token?: string;
 }

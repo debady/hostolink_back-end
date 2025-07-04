@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsEmail, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsEmail, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateUserEtablissementDto {
   @IsString()
@@ -36,4 +36,8 @@ export class CreateUserEtablissementDto {
   @IsString()
   @IsNotEmpty()
   mot_de_passe: string;
+
+  @IsOptional()
+  @IsString()
+  fcm_token?: string;
 }

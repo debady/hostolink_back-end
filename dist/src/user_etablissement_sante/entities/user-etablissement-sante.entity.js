@@ -94,6 +94,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => conversation_entity_1.Conversation, conversation => conversation.etablissementSante),
     __metadata("design:type", Array)
 ], UserEtablissementSante.prototype, "conversations", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    __metadata("design:type", String)
+], UserEtablissementSante.prototype, "fcm_token", void 0);
 exports.UserEtablissementSante = UserEtablissementSante = __decorate([
     (0, typeorm_1.Entity)('user_etablissement_sante')
 ], UserEtablissementSante);

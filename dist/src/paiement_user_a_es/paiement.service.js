@@ -11,10 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaiementService = void 0;
 const common_1 = require("@nestjs/common");
+const notif_push_service_1 = require("../module_notification_push/notif_push.service");
 const typeorm_1 = require("typeorm");
 let PaiementService = class PaiementService {
-    constructor(dataSource) {
+    constructor(dataSource, notificationService) {
         this.dataSource = dataSource;
+        this.notificationService = notificationService;
     }
     async lireInfosParQr(token) {
         if (!token) {
@@ -97,6 +99,19 @@ let PaiementService = class PaiementService {
          (id_transaction, montant_frais, type_transaction, mode_paiement)
          VALUES ($1, $2, 'interne', 'wallet')`, [idTransaction, frais]);
                 await manager.query(`UPDATE qr_code_paiement_dynamique SET statut = 'expiré' WHERE id_qrcode = $1`, [idQrcode]);
+                const [etablissementNotif] = await manager.query(`SELECT fcm_token FROM user_etablissement_sante WHERE id_user_etablissement_sante = $1`, [compteEtablissement.id_user_etablissement_sante]);
+                if (etablissementNotif?.fcm_token) {
+                    await this.notificationService.sendToToken(etablissementNotif.fcm_token, '💰 Paiement reçu', `Vous avez reçu ${montantFinal} XOF via QR Code`);
+                }
+                await manager.query(`INSERT INTO notification_transaction (id_transaction, identif_transaction, type_notification, contenu, montant, id_user_etablissement_sante, statut, is_lu)
+         VALUES ($1, $2, $3, $4, $5, $6, 'envoyé', false)`, [
+                    idTransaction,
+                    `Hstlk-${Math.random().toString(36).substring(2, 7)}`,
+                    'paiement_qr_recu',
+                    `Paiement QR Code de ${montantFinal} XOF reçu`,
+                    montantFinal,
+                    compteEtablissement.id_user_etablissement_sante
+                ]);
             });
             const [compteUserMaj] = await this.dataSource.query(`SELECT solde_compte FROM compte WHERE id_compte = $1`, [compteUtilisateur.id_compte]);
             const [etablissement] = await this.dataSource.query(`SELECT nom FROM user_etablissement_sante WHERE id_user_etablissement_sante = $1 LIMIT 1`, [compteEtablissement.id_user_etablissement_sante]);
@@ -177,6 +192,19 @@ let PaiementService = class PaiementService {
                 await manager.query(`INSERT INTO transactions_frais 
          (id_transaction, montant_frais, type_transaction, mode_paiement)
          VALUES ($1, $2, 'interne', 'wallet')`, [idTransaction, frais]);
+                const [etablissementNotif] = await manager.query(`SELECT fcm_token FROM user_etablissement_sante WHERE id_user_etablissement_sante = $1`, [etabId]);
+                if (etablissementNotif?.fcm_token) {
+                    await this.notificationService.sendToToken(etablissementNotif.fcm_token, '💰 Paiement reçu', `Vous avez reçu ${montantFinal} XOF`);
+                }
+                await manager.query(`INSERT INTO notification_transaction (id_transaction, identif_transaction, type_notification, contenu, montant, id_user_etablissement_sante, statut, is_lu)
+         VALUES ($1, $2, $3, $4, $5, $6, 'envoyé', false)`, [
+                    idTransaction,
+                    `Hstlk-${Math.random().toString(36).substring(2, 7)}`,
+                    'paiement_identifiant_recu',
+                    `Paiement de ${montantFinal} XOF reçu`,
+                    montantFinal,
+                    etabId
+                ]);
             });
             const [soldeActuel] = await this.dataSource.query(`SELECT solde_compte FROM compte WHERE id_compte = $1`, [compteUtilisateur.id_compte]);
             const beneficiaire = {
@@ -228,6 +256,7 @@ let PaiementService = class PaiementService {
 exports.PaiementService = PaiementService;
 exports.PaiementService = PaiementService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeorm_1.DataSource])
+    __metadata("design:paramtypes", [typeorm_1.DataSource,
+        notif_push_service_1.NotificationService])
 ], PaiementService);
 //# sourceMappingURL=paiement.service.js.map

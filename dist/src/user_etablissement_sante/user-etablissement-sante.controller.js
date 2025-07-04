@@ -33,6 +33,9 @@ let UserEtablissementSanteController = class UserEtablissementSanteController {
     verify(body) {
         return this.service.verifyOtp(body.email, body.code);
     }
+    async login(body) {
+        return this.service.login(body.email, body.fcm_token);
+    }
     async logout(req) {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token)
@@ -90,6 +93,10 @@ let UserEtablissementSanteController = class UserEtablissementSanteController {
             return { success: false, message: "Identifiant non trouvé" };
         }
     }
+    async updateFcmToken(req, body) {
+        const id = req.user.id_user_etablissement_sante;
+        return this.service.updateFcmToken(id, body.fcm_token);
+    }
 };
 exports.UserEtablissementSanteController = UserEtablissementSanteController;
 __decorate([
@@ -106,6 +113,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], UserEtablissementSanteController.prototype, "verify", null);
+__decorate([
+    (0, common_1.Post)('login'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserEtablissementSanteController.prototype, "login", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_etablissement_guard_1.JwtEtablissementAuthGuard),
     (0, common_1.Post)('logout'),
@@ -198,6 +212,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], UserEtablissementSanteController.prototype, "checkIdentifier", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_etablissement_guard_1.JwtEtablissementAuthGuard),
+    (0, common_1.Patch)('update-fcm-token'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserEtablissementSanteController.prototype, "updateFcmToken", null);
 exports.UserEtablissementSanteController = UserEtablissementSanteController = __decorate([
     (0, common_1.Controller)('user-etablissement-sante'),
     __metadata("design:paramtypes", [user_etablissement_sante_service_1.UserEtablissementSanteService,

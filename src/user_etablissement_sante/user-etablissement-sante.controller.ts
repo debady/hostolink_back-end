@@ -31,6 +31,11 @@ export class UserEtablissementSanteController {
   verify(@Body() body: { email: string; code: string }) {
     return this.service.verifyOtp(body.email, body.code);
   }
+
+  @Post('login')
+  async login(@Body() body: { email: string; fcm_token?: string }) {
+    return this.service.login(body.email, body.fcm_token);
+  }
   
   @UseGuards(JwtEtablissementAuthGuard)
   @Post('logout')
@@ -137,5 +142,15 @@ export class UserEtablissementSanteController {
       return { success: false, message: "Identifiant non trouvé" };
     }
 
+  }
+
+  @UseGuards(JwtEtablissementAuthGuard)
+  @Patch('update-fcm-token')
+  async updateFcmToken(
+    @Req() req: any,
+    @Body() body: { fcm_token: string }
+  ) {
+    const id = req.user.id_user_etablissement_sante;
+    return this.service.updateFcmToken(id, body.fcm_token);
   }
 }

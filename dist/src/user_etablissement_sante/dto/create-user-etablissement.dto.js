@@ -59,4 +59,9 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateUserEtablissementDto.prototype, "mot_de_passe", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateUserEtablissementDto.prototype, "fcm_token", void 0);
 //# sourceMappingURL=create-user-etablissement.dto.js.map

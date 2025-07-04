@@ -63,6 +63,7 @@ export declare class UserEtablissementSanteService {
         raisons: RaisonSuppressionCompte[];
         experts: import("./entities/expert_sante.entity").ExpertSante[];
         conversations: import("../Discussion_agent_client/conversations/entities/conversation.entity").Conversation[];
+        fcm_token?: string;
     }>;
     private createOrReplaceQrDynamique;
     updateProfile(id: number, dto: UpdateProfileEtablissementDto): Promise<UserEtablissementSante>;
@@ -83,4 +84,10 @@ export declare class UserEtablissementSanteService {
     findEtablissementByIdentifier(identifier: string): Promise<UserEtablissementSante | null>;
     getAllEmailsForEs(): Promise<string[]>;
     getAllTelephonesForEs(): Promise<string[]>;
+    updateFcmToken(id: number, fcmToken: string): Promise<{
+        message: string;
+    }>;
+    login(email: string, fcmToken?: string): Promise<{
+        message: string;
+    }>;
 }

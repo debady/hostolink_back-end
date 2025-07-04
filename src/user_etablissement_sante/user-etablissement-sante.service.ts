@@ -12,10 +12,6 @@ import { RaisonSuppressionCompte } from './entities/raison-suppression.entity';
 import cloudinary from 'src/config/cloudinary';
 import toStream from 'buffer-to-stream';
 
-
-
-
-
 // Dans user-etablissement-sante.service.ts
 import { Image, ImageMotifEnum } from '../image/entities/image.entity'; 
 import { EmailService } from 'src/utilisateur/email.service';
@@ -65,26 +61,34 @@ isTokenRevoked(token: string): boolean {
 
   ) {}
 
-  async register(data: CreateUserEtablissementDto) {
-    const exist = await this.userRepo.findOne({ where: { email: data.email } });
-    const exist_numb = await this.userRepo.findOne({ where: { telephone: data.telephone } });
-    if (exist) throw new BadRequestException('Email déjà utilisé');
-    if (exist_numb) throw new BadRequestException('Téléphone déjà utilisé');
+async register(data: CreateUserEtablissementDto) {
+  const exist = await this.userRepo.findOne({ where: { email: data.email } });
+  const exist_numb = await this.userRepo.findOne({ where: { telephone: data.telephone } });
+  if (exist) throw new BadRequestException('Email déjà utilisé');
+  if (exist_numb) throw new BadRequestException('Téléphone déjà utilisé');
 
-    const hash = await bcrypt.hash(data.mot_de_passe, 10);
+  const hash = await bcrypt.hash(data.mot_de_passe, 10);
 
-    const newUser = this.userRepo.create({
-      ...data,
-      mot_de_passe: hash,
-    });
+  const userData = {
+    nom: data.nom,
+    telephone: data.telephone,
+    categorie: data.categorie,
+    adresse: data.adresse,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    specialites: data.specialites,
+    email: data.email,
+    mot_de_passe: hash,
+    fcm_token: data.fcm_token || undefined,
+  };
 
-    const savedUser = await this.userRepo.save(newUser);
+  const savedUser: UserEtablissementSante = await this.userRepo.save(userData);
 
-    await this.generateOtp(savedUser);
-    return {
-      message: 'Inscription réussie. Un code OTP a été envoyé.',
-    };
-  }
+  await this.generateOtp(savedUser);
+  return {
+    message: 'Inscription réussie. Un code OTP a été envoyé.',
+  };
+}
 
 async generateOtp(user: UserEtablissementSante) {
     const now = new Date();
@@ -479,6 +483,32 @@ async getProfile(id: number) {
     return user_etablissement_sante
       .filter(user_etablissement => user_etablissement.telephone)
       .map(user_etablissement => user_etablissement.telephone);
+  }
+
+  async updateFcmToken(id: number, fcmToken: string) {
+    const user = await this.userRepo.findOneBy({ id_user_etablissement_sante: id });
+    if (!user) throw new NotFoundException("Établissement introuvable");
+
+    user.fcm_token = fcmToken;
+    await this.userRepo.save(user);
+
+    return { message: 'FCM token mis à jour avec succès' };
+  }
+
+
+  async login(email: string, fcmToken?: string) {
+    const user = await this.userRepo.findOne({ where: { email } });
+    if (!user) throw new BadRequestException('Établissement non trouvé');
+
+    // Mettre à jour le FCM token si fourni
+    if (fcmToken) {
+      user.fcm_token = fcmToken;
+      await this.userRepo.save(user);
+    }
+
+    // Générer OTP pour connexion
+    await this.generateOtp(user);
+    return { message: 'Code OTP envoyé pour connexion' };
   }
 
 

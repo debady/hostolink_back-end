@@ -8,4 +8,5 @@ export declare class CreateUserEtablissementDto {
     specialites: string;
     email: string;
     mot_de_passe: string;
+    fcm_token?: string;
 }
