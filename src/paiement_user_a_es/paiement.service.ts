@@ -81,7 +81,7 @@ export class PaiementService {
   let idQrcode: number | null = null;
 
   try {
-    // console.log('Début try');
+    // //console.log('Début try');
 
     if (!shortId || !idCompteEtablissement || !montant || !idUser) {
       throw new BadRequestException('Données manquantes pour effectuer le paiement');
@@ -214,7 +214,7 @@ export class PaiementService {
 
 
   } catch (error) {
-    // console.log('Début catch');
+    // //console.log('Début catch');
     // Enregistrement systématique de la transaction échouée, même si tout est null
     try {
       await this.dataSource.query(
@@ -402,7 +402,7 @@ async payerParIdentifiant(identifiant: string, montant: number, idUser: string) 
       photo: photo?.url_image ?? null,
     };
   } catch (error) {
-    console.log('debut catch');
+    //console.log('debut catch');
      // Enregistrement systématique de la transaction échouée, même si tout est null
     try {
      await this.dataSource.query(
@@ -422,7 +422,7 @@ async payerParIdentifiant(identifiant: string, montant: number, idUser: string) 
         error.message,
         ]
       );
-      console.log('Transaction échouée enregistrée');
+      //console.log('Transaction échouée enregistrée');
     } catch (saveError) {
       console.error('Erreur lors de l\'enregistrement de la transaction échouée:', saveError);
     }

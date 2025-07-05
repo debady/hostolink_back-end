@@ -58,32 +58,32 @@ import { RefusAppelDto } from './dto/refuse-appel_video.dto';
   }
 
   async lancerAppel(dto: CreateAppelDto): Promise<AppelVideo> {
-  console.log('📥 Requête reçue pour lancer un appel avec ID utilisateur :', dto.id_user);
+  //console.log('📥 Requête reçue pour lancer un appel avec ID utilisateur :', dto.id_user);
 
   const user = await this.userRepo.findOne({ where: { id_user: dto.id_user } });
   if (!user) {
     console.error('❌ Utilisateur introuvable avec l’ID :', dto.id_user);
     throw new NotFoundException('Utilisateur introuvable');
   }
-  console.log('✅ Utilisateur trouvé :', user.nom || user.email || user.id_user);
+  //console.log('✅ Utilisateur trouvé :', user.nom || user.email || user.id_user);
 
   const dispos = await this.dispoRepo.find({
     where: { est_connecte: true },
     order: { derniere_connexion: 'DESC' },
   });
 
-  console.log('📋 Experts disponibles trouvés :', dispos.length);
+  //console.log('📋 Experts disponibles trouvés :', dispos.length);
 
   let expert: ExpertSante | null = null;
   let dispoValide: DisponibiliteExpert | null = null;
 
   for (const dispo of dispos) {
-    console.log('🔍 Vérification de disponibilité pour id_expert =', dispo.id_expert);
+    //console.log('🔍 Vérification de disponibilité pour id_expert =', dispo.id_expert);
 
     const e = await this.expertRepo.findOne({ where: { id_expert: dispo.id_expert } });
 
     if (e) {
-      console.log('✅ Expert trouvé :', e.nom, e.prenom, '(id:', e.id_expert, ')');
+      //console.log('✅ Expert trouvé :', e.nom, e.prenom, '(id:', e.id_expert, ')');
       expert = e;
       dispoValide = dispo;
       break;
@@ -100,8 +100,8 @@ import { RefusAppelDto } from './dto/refuse-appel_video.dto';
   const canal = `hostolink-${uuidv4()}`;
   const token = `token-${uuidv4()}`;
 
-  console.log('📡 Canal Agora généré :', canal);
-  console.log('🔐 Token Agora généré :', token);
+  //console.log('📡 Canal Agora généré :', canal);
+  //console.log('🔐 Token Agora généré :', token);
 
   const nouvelAppel = this.appelRepo.create({
     utilisateur: user,
@@ -115,7 +115,7 @@ import { RefusAppelDto } from './dto/refuse-appel_video.dto';
 
   const appelSauvegarde = await this.appelRepo.save(nouvelAppel);
 
-  console.log('✅ Appel vidéo enregistré avec succès. ID appel :', appelSauvegarde.id_appel);
+  //console.log('✅ Appel vidéo enregistré avec succès. ID appel :', appelSauvegarde.id_appel);
 
   return appelSauvegarde;
 }

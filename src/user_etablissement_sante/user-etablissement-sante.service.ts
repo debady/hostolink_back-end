@@ -122,7 +122,7 @@ async generateOtp(user: UserEtablissementSante) {
     await this.otpRepo.save(otp);
     await this.emailService.sendOtpEmail(user.email, otpCode);
 
-    //console.log(otp)
+    ////console.log(otp)
   }
 
   async verifyOtp(email: string, code: string) {
@@ -382,7 +382,7 @@ async getProfile(id: number) {
     });
     await this.raisonRepo.save(raison);
 
-    //console.log('🔍 ID utilisateur à supprimer :', id);
+    ////console.log('🔍 ID utilisateur à supprimer :', id);
 
     // Supprimer l’établissement
     await this.userRepo.delete(id);

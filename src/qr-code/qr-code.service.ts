@@ -195,7 +195,7 @@ export class QrCodeService {
       date_expiration: LessThan(cutoffDate)
     });
     
-    // //console.log(`${result.affected} QR codes dynamiques anciens supprimés`);
+    // ////console.log(`${result.affected} QR codes dynamiques anciens supprimés`);
     return result.affected || 0;
   }
 
@@ -312,12 +312,12 @@ export class QrCodeService {
 
   async validateQrCode(codeInput: string): Promise<any> {
     try {
-      // //console.log(`Tentative de validation du code: ${codeInput}`);
+      // ////console.log(`Tentative de validation du code: ${codeInput}`);
       let qrCode: QrCodeDynamique | QrCodeStatique | null = null;
       let payload: QrCodePayload;
       
       // Essayer d'abord de trouver par identifiant court
-      // //console.log(`Recherche du QR code par short_id: ${codeInput}`);
+      // ////console.log(`Recherche du QR code par short_id: ${codeInput}`);
       
       // Chercher spécifiquement dans les QR codes statiques
       const staticQrCode = await this.qrCodeStatiqueRepository.findOne({
@@ -325,58 +325,58 @@ export class QrCodeService {
       });
       
       if (staticQrCode) {
-        // //console.log(`QR code statique trouvé: ${JSON.stringify(staticQrCode)}`);
+        // ////console.log(`QR code statique trouvé: ${JSON.stringify(staticQrCode)}`);
         
         if (staticQrCode.statut !== 'actif') {
-          // //console.log(`QR code statique inactif: ${staticQrCode.statut}`);
+          // ////console.log(`QR code statique inactif: ${staticQrCode.statut}`);
           throw new BadRequestException('QR code inactif');
         }
         
-        // //console.log(`Vérification du token du QR code statique`);
+        // ////console.log(`Vérification du token du QR code statique`);
         try {
           payload = this.verifyToken(staticQrCode.token);
-          // //console.log(`Token valide, payload: ${JSON.stringify(payload)}`);
+          // ////console.log(`Token valide, payload: ${JSON.stringify(payload)}`);
           qrCode = staticQrCode;
         } catch (error) {
           // console.error(`Erreur lors de la vérification du token: ${error.message}`);
           throw new BadRequestException('Token invalide');
         }
       } else {
-        // //console.log(`Aucun QR code statique trouvé, recherche dans les QR codes dynamiques`);
+        // ////console.log(`Aucun QR code statique trouvé, recherche dans les QR codes dynamiques`);
         // Chercher dans les QR codes dynamiques
         const dynamicQrCode = await this.qrCodeDynamiqueRepository.findOne({
           where: { short_id: codeInput }
         });
         
         if (dynamicQrCode) {
-          // //console.log(`QR code dynamique trouvé: ${JSON.stringify(dynamicQrCode)}`);
+          // ////console.log(`QR code dynamique trouvé: ${JSON.stringify(dynamicQrCode)}`);
           
           if (dynamicQrCode.statut !== 'actif') {
-            // //console.log(`QR code dynamique inactif: ${dynamicQrCode.statut}`);
+            // ////console.log(`QR code dynamique inactif: ${dynamicQrCode.statut}`);
             throw new BadRequestException('QR code inactif');
           }
           
           // Vérifier l'expiration pour les QR codes dynamiques
           const now = new Date();
           if (now > dynamicQrCode.date_expiration) {
-            // //console.log(`QR code dynamique expiré: ${dynamicQrCode.date_expiration}`);
+            // ////console.log(`QR code dynamique expiré: ${dynamicQrCode.date_expiration}`);
             throw new BadRequestException('QR code expiré');
           }
           
           try {
             payload = this.verifyToken(dynamicQrCode.token);
-            // //console.log(`Token dynamique valide, payload: ${JSON.stringify(payload)}`);
+            // ////console.log(`Token dynamique valide, payload: ${JSON.stringify(payload)}`);
             qrCode = dynamicQrCode;
           } catch (error) {
             // console.error(`Erreur lors de la vérification du token dynamique: ${error.message}`);
             throw new BadRequestException('le Token est invalide');
           }
         } else {
-          // //console.log(`Aucun QR code trouvé par short_id, tentative de validation directe du token`);
+          // ////console.log(`Aucun QR code trouvé par short_id, tentative de validation directe du token`);
           // Essayer de vérifier comme token JWT
           try {
             payload = this.verifyToken(codeInput);
-            // //console.log(`Token direct valide, payload: ${JSON.stringify(payload)}`);
+            // ////console.log(`Token direct valide, payload: ${JSON.stringify(payload)}`);
             
             // Chercher le QR code correspondant au token
             const isDynamic = payload.qrType === QrCodeType.DYNAMIC;
@@ -385,12 +385,12 @@ export class QrCodeService {
               qrCode = await this.qrCodeDynamiqueRepository.findOne({
                 where: { token: codeInput }
               });
-              // //console.log(`QR code dynamique trouvé par token: ${qrCode ? 'oui' : 'non'}`);
+              // ////console.log(`QR code dynamique trouvé par token: ${qrCode ? 'oui' : 'non'}`);
             } else {
               qrCode = await this.qrCodeStatiqueRepository.findOne({
                 where: { token: codeInput }
               });
-              // //console.log(`QR code statique trouvé par token: ${qrCode ? 'oui' : 'non'}`);
+              // ////console.log(`QR code statique trouvé par token: ${qrCode ? 'oui' : 'non'}`);
             }
             
             if (!qrCode) {
@@ -398,7 +398,7 @@ export class QrCodeService {
             }
             
             if (qrCode.statut !== 'actif') {
-              // //console.log(`QR code trouvé mais inactif: ${qrCode.statut}`);
+              // ////console.log(`QR code trouvé mais inactif: ${qrCode.statut}`);
               throw new BadRequestException('QR code inactif');
             }
           } catch (error) {
@@ -409,7 +409,7 @@ export class QrCodeService {
       }
       
       // Récupérer les informations utilisateur
-      // //console.log(`Récupération des informations utilisateur pour le payload`);
+      // ////console.log(`Récupération des informations utilisateur pour le payload`);
       const id_user = payload.recipientType === RecipientType.USER ? payload.recipientId as string : undefined;
       let userInfo: { identifiant: string; nom: string; prenom: string; numero_compte: string } | null = null;
   
@@ -424,9 +424,9 @@ export class QrCodeService {
             prenom: user.prenom,
             numero_compte: compte.numero_compte
           };
-          // //console.log(`Informations utilisateur récupérées: ${JSON.stringify(userInfo)}`);
+          // ////console.log(`Informations utilisateur récupérées: ${JSON.stringify(userInfo)}`);
         } else {
-          // //console.log(`Utilisateur ou compte non trouvé: user=${!!user}, compte=${!!compte}`);
+          // ////console.log(`Utilisateur ou compte non trouvé: user=${!!user}, compte=${!!compte}`);
         }
       }
   
@@ -439,7 +439,7 @@ export class QrCodeService {
         utilisateur: userInfo
       };
       
-      // //console.log(`Validation réussie, retour des données`);
+      // ////console.log(`Validation réussie, retour des données`);
       return result;
     } catch (error) {
       console.error(`Erreur finale dans validateQrCode: ${error.message}`);

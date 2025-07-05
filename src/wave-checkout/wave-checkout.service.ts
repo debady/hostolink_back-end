@@ -69,7 +69,7 @@ export class WaveCheckoutService {
       );
 
       const data = response.data;
-      console.log('🌊 Réponse Wave:', data);
+      //console.log('🌊 Réponse Wave:', data);
 
       const session = this.waveSessionRepo.create({
         idUser: dto.idUser,

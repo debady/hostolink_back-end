@@ -52,9 +52,9 @@ async handleWebhook(
   try {
     const secret = process.env.WAVE_WEBHOOK_SECRET;
 
-    console.log('🔍 Headers reçus:', req.headers);
-    console.log('🔍 Authorization reçue:', authorization);
-    console.log('🔍 Secret configuré:', secret ? 'Oui' : 'Non');
+    //console.log('🔍 Headers reçus:', req.headers);
+    //console.log('🔍 Authorization reçue:', authorization);
+    //console.log('🔍 Secret configuré:', secret ? 'Oui' : 'Non');
 
     if (!authorization || !secret) {
       console.error('❌ Authorization ou secret manquant');
@@ -70,11 +70,11 @@ async handleWebhook(
       throw new HttpException('Authorization invalide', HttpStatus.UNAUTHORIZED);
     }
 
-    console.log('✅ Authorization webhook valide');
+    //console.log('✅ Authorization webhook valide');
 
     // Parser le body et traiter l'événement
     const body = JSON.parse(req.body.toString());
-    console.log('📨 Webhook reçu de Wave:', JSON.stringify(body, null, 2));
+    //console.log('📨 Webhook reçu de Wave:', JSON.stringify(body, null, 2));
 
     // ✅ Traiter le webhook
     await this.waveService.handleWebhook(body);
@@ -161,9 +161,9 @@ async handleWebhook(
   // ✅ Endpoint de debug temporaire - à retirer en production
   @Post('webhook-debug')
   async debugWebhook(@Req() req: Request) {
-    console.log('🔍 Headers complets:', req.headers);
-    console.log('🔍 Body type:', typeof req.body);
-    console.log('🔍 Body content:', req.body);
+    //console.log('🔍 Headers complets:', req.headers);
+    //console.log('🔍 Body type:', typeof req.body);
+    //console.log('🔍 Body content:', req.body);
     
     return { 
       received: true,

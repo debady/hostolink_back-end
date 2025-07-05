@@ -60,7 +60,7 @@ export class ImageController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard) 
   async deleteImage(@Param('id') id: string) {
-    //console.log("🟡 Suppression de l'image ID :", id);
+    ////console.log("🟡 Suppression de l'image ID :", id);
     return await this.imageService.deleteImage(id);
   }
 }

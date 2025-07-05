@@ -29,8 +29,8 @@ export class PaiementController {
     @Req() req: any,
     @Body() body: { shortId: string; idCompteEtablissement: number; montant: number },
   ) {
-    // console.log('🔥 Reçu dans le body :', body);
-    // console.log('🧪 Utilisateur authentifié =', req.user);
+    // //console.log('🔥 Reçu dans le body :', body);
+    // //console.log('🧪 Utilisateur authentifié =', req.user);
     // const idUser = req.user.id_user;
     const idUser = req.user.id_user ?? req.user.idUser ?? req.user.id; // sécurité max
 

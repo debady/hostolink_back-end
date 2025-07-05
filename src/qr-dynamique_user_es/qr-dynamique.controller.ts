@@ -30,7 +30,7 @@ export class QrDynamiqueController {
     return this.service.validerQrEtInvalider(token);
   }
 
-  // @UseGuards(JwtEtablissementAuthGuard)
+  // // @UseGuards(JwtEtablissementAuthGuard)
   // @Post('transactions')
   // async createTransaction(@Body() dto: CreateTransactionDto) {
   //   return this.service.createTransaction(dto);

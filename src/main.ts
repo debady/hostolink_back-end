@@ -53,12 +53,12 @@ async function bootstrap() {
 
     await app.listen(PORT, '0.0.0.0');
 
-    console.log(`🚀 Le serveur tourne sur : http://localhost:${PORT}`);
-    console.log('📦 Connexion à PostgreSQL :', process.env.DATABASE_NAME);
-    console.log('🌊 Webhook Wave configuré sur :', `http://localhost:${PORT}/wave-checkout/webhook`);
-    console.log('🔑 Variables Wave chargées:');
-    console.log('  - WAVE_API_TOKEN:', !!process.env.WAVE_API_TOKEN);
-    console.log('  - WAVE_WEBHOOK_SECRET:', !!process.env.WAVE_WEBHOOK_SECRET);
+    //console.log(`🚀 Le serveur tourne sur : http://localhost:${PORT}`);
+    //console.log('📦 Connexion à PostgreSQL :', process.env.DATABASE_NAME);
+    //console.log('🌊 Webhook Wave configuré sur :', `http://localhost:${PORT}/wave-checkout/webhook`);
+    //console.log('🔑 Variables Wave chargées:');
+    //console.log('  - WAVE_API_TOKEN:', !!process.env.WAVE_API_TOKEN);
+    //console.log('  - WAVE_WEBHOOK_SECRET:', !!process.env.WAVE_WEBHOOK_SECRET);
     
   } catch (error) {
     console.error('❌ Erreur lors du démarrage de l\'application :', error);

@@ -22,10 +22,10 @@ export class EmailController {
     let imageUrl = body.imageUrl;
     if (file) {
       imageUrl = await this.emailService.uploadImageFromBuffer(file.buffer);
-      //console.log('🖼️ URL image envoyée dans l’email :', imageUrl);
+      ////console.log('🖼️ URL image envoyée dans l’email :', imageUrl);
     }else{
 
-      //console.log('erreur d envoi');
+      ////console.log('erreur d envoi');
     }
     
     await this.emailService.sendCustomEmail({ ...body, imageUrl });

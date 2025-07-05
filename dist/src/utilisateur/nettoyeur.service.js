@@ -30,7 +30,6 @@ let OtpCleanerService = class OtpCleanerService {
             expires_at: (0, typeorm_2.LessThan)(now),
             is_valid: true,
         });
-        console.log(`🧹 OTP expirés supprimés : ${result.affected} éléments`);
     }
     async deleteUnverifiedUsers() {
         const now = new Date();

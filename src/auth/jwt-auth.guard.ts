@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   canActivate(context: ExecutionContext) {
-    //console.log('🔐 Activation du guard JWT');
+    ////console.log('🔐 Activation du guard JWT');
     return super.canActivate(context);
   }
 
@@ -19,7 +19,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw new UnauthorizedException('Accès non autorisé. Token invalide ou expiré.');
     }
 
-    //console.log(`✅ Utilisateur authentifié : ${user.id_user || user.id_admin_gestionnaire}`);
+    ////console.log(`✅ Utilisateur authentifié : ${user.id_user || user.id_admin_gestionnaire}`);
 
     return user;
   }
@@ -37,7 +37,7 @@ export class JwtAdminGuard extends AuthGuard('jwt-admin') {
       throw new UnauthorizedException('Accès refusé. Vous devez être un administrateur.');
     }
 
-    //console.log(`✅ Administrateur authentifié : ${user.id_admin_gestionnaire}`);
+    ////console.log(`✅ Administrateur authentifié : ${user.id_admin_gestionnaire}`);
 
     return result;
   }

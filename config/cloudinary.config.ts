@@ -10,7 +10,7 @@ export const configureCloudinary = (configService: ConfigService) => {
     api_secret: configService.get<string>('CLOUDINARY_API_SECRET'),
   });
   
-  //console.log('Cloudinary API Key in cloudinary.config.ts:', process.env.CLOUDINARY_API_KEY);
+  ////console.log('Cloudinary API Key in cloudinary.config.ts:', process.env.CLOUDINARY_API_KEY);
   return cloudinary;
 };
 // ✅ Ajout de la classe CloudinaryService pour gérer l'upload
@@ -43,7 +43,7 @@ export class CloudinaryService {
           return reject(new Error("Cloudinary n'a pas retourné d'URL"));
         }
 
-        //console.log('Image Uploaded to Cloudinary:', result.secure_url);
+        ////console.log('Image Uploaded to Cloudinary:', result.secure_url);
         resolve(result.secure_url); // ✅ Retourne l'URL de l'image
       }).end(file.buffer);
     });

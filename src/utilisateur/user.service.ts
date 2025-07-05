@@ -84,7 +84,7 @@ export class UserService {
       //   });
       
       //   if (invitation) {
-      //     //console.log("✅ Parrain trouvé :", invitation.id_user);
+      //     ////console.log("✅ Parrain trouvé :", invitation.id_user);
       //     newUser.id_parrain = invitation.id_user;
       
       //     // Optionnel : on incrémente les inscriptions
@@ -217,7 +217,7 @@ export class UserService {
         }
   
         await this.emailService.sendOtpEmail(user.email, otpCode);
-        //console.log(`📤 EMAIL envoyé à ${user.email} avec OTP ${otpCode}`);
+        ////console.log(`📤 EMAIL envoyé à ${user.email} avec OTP ${otpCode}`);
       }
   
       if (moyen_envoyer === MoyenEnvoiEnum.SMS) {
@@ -226,8 +226,8 @@ export class UserService {
         }
 
         // await this.smsService.sendOtpSms(user.telephone, otpCode);
-        // console.log(`📲 SMS envoyé à ${user.telephone} avec OTP ${otpCode}`);
-        console.log(`une erreur s'es produit lors 📲 SMS à envoyé ${user.telephone} avec OTP ${otpCode}`);
+        // //console.log(`📲 SMS envoyé à ${user.telephone} avec OTP ${otpCode}`);
+        //console.log(`une erreur s'es produit lors 📲 SMS à envoyé ${user.telephone} avec OTP ${otpCode}`);
       }
       return { success: true, otp: otpCode };
 
@@ -285,7 +285,7 @@ export class UserService {
         if (!user.compte_verifier) {
         user.compte_verifier = true;
         await this.userRepository.save(user);
-        //console.log(`✅ Le compte ${identifier} est maintenant vérifié.`);  
+        ////console.log(`✅ Le compte ${identifier} est maintenant vérifié.`);  
       }
 
     
@@ -301,7 +301,7 @@ export class UserService {
         otp.is_valid = false;
         await this.otpRepository.save(otp);
     
-        //console.log(`✅ Code OTP validé avec succès pour ${identifier}`);
+        ////console.log(`✅ Code OTP validé avec succès pour ${identifier}`);
         return { success: true, message: "Code OTP valide" };
     
       } catch (error) {
@@ -383,7 +383,7 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
     identifier = identifier.trim();
     pin = pin.trim();
 
-    //console.log(`🔐 Vérification du PIN pour ${identifier}`);
+    ////console.log(`🔐 Vérification du PIN pour ${identifier}`);
 
     const user = await this.userRepository.findOne({
       where: [{ email: identifier }, { telephone: identifier }],
@@ -397,7 +397,7 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
     const isValid = await bcrypt.compare(pin, user.mdp);
 
     if (isValid) {
-      //console.log(`✅ PIN correct pour ${identifier}`);
+      ////console.log(`✅ PIN correct pour ${identifier}`);
     } else {
       console.warn(`❌ PIN incorrect pour ${identifier}`);
     }
@@ -430,7 +430,7 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
 // async rewardParrainAfterOtp(user: User) {
 //   try {
 //     if (!user.id_parrain) {
-//       //console.log("❌ Aucun parrain associé à cet utilisateur.");
+//       ////console.log("❌ Aucun parrain associé à cet utilisateur.");
 //       return;
 //     }
 
@@ -447,7 +447,7 @@ async verifyConfirmationCode(identifier: string, code: string): Promise<boolean>
 
 //     await this.compteService.updateCompteBonus(compteParrain.id_compte, nouveauSolde);
 
-//     //console.log(`✅ Bonus de ${montantBonus} F crédité au parrain : ${user.id_parrain}`);
+//     ////console.log(`✅ Bonus de ${montantBonus} F crédité au parrain : ${user.id_parrain}`);
 //   } catch (error) {
 //     console.error("❌ Erreur rewardParrainAfterOtp:", error);
 //   }
@@ -499,7 +499,7 @@ async verifyOtpAndRewardParrain(identifier: string, otpCode: string): Promise<{ 
     //     const montantBonus = 500;
     //     const nouveauBonus = compteParrain.solde_bonus + montantBonus;
     //     await this.compteService.updateCompteBonus(compteParrain.id_compte, nouveauBonus);
-    //     //console.log(`✅ Parrain ${user.id_parrain} a reçu ${montantBonus} F de bonus`);
+    //     ////console.log(`✅ Parrain ${user.id_parrain} a reçu ${montantBonus} F de bonus`);
     //   }
     // }
 

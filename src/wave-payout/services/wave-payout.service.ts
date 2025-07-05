@@ -184,11 +184,11 @@ export class WavePayoutService {
         mobile: session.mobile
       };
 
-      console.log('🌊 Appel API Wave Payout:', payload);
+      //console.log('🌊 Appel API Wave Payout:', payload);
 
       // 🧪 Mode simulation si pas de permissions payouts_api
       if (isDevelopment) {
-        console.log('🧪 MODE SIMULATION - Payout simulé avec succès');
+        //console.log('🧪 MODE SIMULATION - Payout simulé avec succès');
         
         // Simuler une réponse Wave réussie
         const simulatedResponse = {
@@ -202,7 +202,7 @@ export class WavePayoutService {
           timestamp: new Date().toISOString()
         };
 
-        console.log('✅ Réponse simulée:', simulatedResponse);
+        //console.log('✅ Réponse simulée:', simulatedResponse);
         return simulatedResponse;
       }
 
@@ -217,7 +217,7 @@ export class WavePayoutService {
         })
       );
 
-      console.log('✅ Réponse Wave:', response.data);
+      //console.log('✅ Réponse Wave:', response.data);
       return response.data;
 
     } catch (error) {

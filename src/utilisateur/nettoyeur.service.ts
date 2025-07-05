@@ -14,7 +14,7 @@ export class OtpCleanerService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>, 
   ) {}
-    //   @Cron('*/2 * * * *') 
+    //   @Cron('*/5 * * * *') 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async deleteExpiredOtps() {
     const now = new Date();
@@ -23,7 +23,7 @@ export class OtpCleanerService {
       is_valid: true,
     });
 
-    console.log(`🧹 OTP expirés supprimés : ${result.affected} éléments`);
+    // //console.log(`🧹 OTP expirés supprimés : ${result.affected} éléments`);
   }
 
   @Cron('0 0 * * *') // Tous les jours à 00h00
@@ -39,7 +39,7 @@ export class OtpCleanerService {
       .andWhere('date_inscription < :threshold', { threshold })
       .execute();
 
-    //console.log(`🗑️ Utilisateurs non vérifiés supprimés : ${result.affected}`);
+    ////console.log(`🗑️ Utilisateurs non vérifiés supprimés : ${result.affected}`);
   }
   
 

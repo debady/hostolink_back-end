@@ -76,7 +76,7 @@ export class WaveEmailService {
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Email OTP Wave envoyé à ${email} | ID: ${info.messageId}`);
+      //console.log(`✅ Email OTP Wave envoyé à ${email} | ID: ${info.messageId}`);
     } catch (error) {
       console.error('❌ Erreur lors de l\'envoi de l\'email OTP Wave :', error);
       throw new InternalServerErrorException('Erreur lors de l\'envoi de l\'email de vérification');
@@ -139,7 +139,7 @@ export class WaveEmailService {
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Email confirmation Wave envoyé à ${email} | ID: ${info.messageId}`);
+      //console.log(`✅ Email confirmation Wave envoyé à ${email} | ID: ${info.messageId}`);
     } catch (error) {
       console.error('❌ Erreur lors de l\'envoi de l\'email de confirmation :', error);
       // On ne throw pas l'erreur car ce n'est pas critique

@@ -19,8 +19,8 @@ export class SmsService {
   async sendOtpSms(phoneNumber: string, otpCode: string): Promise<void> {
   const fromNumber = process.env.TWILIO_PHONE_NUMBER;
   
-  console.log(`🔍 Tentative SMS vers: ${phoneNumber}`);
-  console.log(`🔍 Depuis le numéro: ${fromNumber}`);
+  //console.log(`🔍 Tentative SMS vers: ${phoneNumber}`);
+  //console.log(`🔍 Depuis le numéro: ${fromNumber}`);
   
   try {
     const message = await this.client.messages.create({
@@ -31,7 +31,7 @@ export class SmsService {
 
     setTimeout(async () => {
   const finalMessage = await this.client.messages(message.sid).fetch();
-  console.log(`📊 Statut final: ${finalMessage.status}`);
+  //console.log(`📊 Statut final: ${finalMessage.status}`);
   if (finalMessage.errorCode) {
     console.error(`❌ Erreur Twilio: ${finalMessage.errorCode} - ${finalMessage.errorMessage}`);
   }
@@ -41,7 +41,7 @@ export class SmsService {
 
     
     
-    console.log(`✅ SMS envoyé! SID: ${message.sid}, Status: ${message.status}`);
+    //console.log(`✅ SMS envoyé! SID: ${message.sid}, Status: ${message.status}`);
   } catch (error) {
     console.error('❌ Détail erreur Twilio:', error.message);
     console.error('❌ Code erreur:', error.code);

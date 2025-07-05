@@ -68,25 +68,40 @@ let QrDynamiqueService = class QrDynamiqueService {
         setInterval(async () => {
             try {
                 const etablissements = await this.dataSource.query(`
-          SELECT id_user_etablissement_sante FROM user_etablissement_sante
-        `);
+        SELECT id_user_etablissement_sante FROM user_etablissement_sante
+      `);
                 for (const etab of etablissements) {
                     const id = etab.id_user_etablissement_sante;
-                    await this.qrRepo.delete({ id_user_etablissement_sante: id });
+                    let qr = await this.qrRepo.findOne({
+                        where: {
+                            id_user_etablissement_sante: id,
+                            statut: 'actif',
+                        },
+                    });
                     const token = this.generateToken();
                     const expiration = new Date(Date.now() + 60 * 1000);
                     const valeur = `HST_DYNAMIC_${id}_${token}`;
                     const short_id = this.generateShortId();
-                    const qr = this.qrRepo.create({
-                        qr_code_valeur: valeur,
-                        date_expiration: expiration,
-                        date_creation: new Date(),
-                        statut: 'actif',
-                        token,
-                        short_id,
-                        id_user_etablissement_sante: id,
-                    });
-                    await this.qrRepo.save(qr);
+                    if (qr) {
+                        qr.qr_code_valeur = valeur;
+                        qr.date_expiration = expiration;
+                        qr.date_creation = new Date();
+                        qr.token = token;
+                        qr.short_id = short_id;
+                        await this.qrRepo.save(qr);
+                    }
+                    else {
+                        qr = this.qrRepo.create({
+                            qr_code_valeur: valeur,
+                            date_expiration: expiration,
+                            date_creation: new Date(),
+                            statut: 'actif',
+                            token,
+                            short_id,
+                            id_user_etablissement_sante: id,
+                        });
+                        await this.qrRepo.save(qr);
+                    }
                 }
             }
             catch (err) {
@@ -96,7 +111,7 @@ let QrDynamiqueService = class QrDynamiqueService {
     }
     async getQrActifOuNouveau(idEtablissement) {
         const now = new Date();
-        const actif = await this.qrRepo.findOne({
+        let actif = await this.qrRepo.findOne({
             where: {
                 id_user_etablissement_sante: idEtablissement,
                 statut: 'actif',
@@ -106,16 +121,17 @@ let QrDynamiqueService = class QrDynamiqueService {
         if (actif) {
             return actif;
         }
-        await this.qrRepo.delete({ id_user_etablissement_sante: idEtablissement });
         const token = this.generateToken();
         const expiration = new Date(now.getTime() + 60 * 1000);
         const valeur = `HST_DYNAMIC_${idEtablissement}_${token}`;
+        const short_id = this.generateShortId();
         const qr = this.qrRepo.create({
             qr_code_valeur: valeur,
             date_expiration: expiration,
             date_creation: now,
             statut: 'actif',
             token,
+            short_id,
             id_user_etablissement_sante: idEtablissement,
         });
         const saved = await this.qrRepo.save(qr);
